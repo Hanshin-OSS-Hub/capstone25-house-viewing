@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.example.houseviewing.Member.MemberRepositoryTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-01-15T08:01:46.226Z" hostname="YooMacui-MacBookAir.local" time="0.226">
+  <properties/>
+  <testcase name="memberSaveTest()" classname="com.example.houseviewing.Member.MemberRepositoryTest" time="0.226"/>
+  <system-out><![CDATA[17:01:44.892 [Test worker] INFO org.springframework.test.context.support.AnnotationConfigContextLoaderUtils -- Could not detect default configuration classes for test class [com.example.houseviewing.Member.MemberRepositoryTest]: MemberRepositoryTest does not declare any static, non-private, non-final, nested classes annotated with @Configuration.
+17:01:44.926 [Test worker] INFO org.springframework.boot.test.context.SpringBootTestContextBootstrapper -- Found @SpringBootConfiguration com.example.houseviewing.HouseViewingApplication for test class com.example.houseviewing.Member.MemberRepositoryTest
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v4.0.1)
+
+2026-01-15T17:01:45.050+09:00  INFO 37843 --- [house-viewing] [    Test worker] c.e.h.Member.MemberRepositoryTest        : Starting MemberRepositoryTest using Java 17.0.17 with PID 37843 (started by yoomac in /Users/yoomac/Desktop/Project/house-viewing)
+2026-01-15T17:01:45.051+09:00  INFO 37843 --- [house-viewing] [    Test worker] c.e.h.Member.MemberRepositoryTest        : No active profile set, falling back to 1 default profile: "default"
+2026-01-15T17:01:45.240+09:00  INFO 37843 --- [house-viewing] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-01-15T17:01:45.253+09:00  INFO 37843 --- [house-viewing] [    Test worker] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 10 ms. Found 1 JPA repository interface.
+2026-01-15T17:01:45.368+09:00  INFO 37843 --- [house-viewing] [    Test worker] org.hibernate.orm.jpa                    : HHH008540: Processing PersistenceUnitInfo [name: default]
+2026-01-15T17:01:45.386+09:00  INFO 37843 --- [house-viewing] [    Test worker] org.hibernate.orm.core                   : HHH000001: Hibernate ORM core version 7.2.0.Final
+2026-01-15T17:01:45.511+09:00  INFO 37843 --- [house-viewing] [    Test worker] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-01-15T17:01:45.521+09:00  INFO 37843 --- [house-viewing] [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-01-15T17:01:45.634+09:00  INFO 37843 --- [house-viewing] [    Test worker] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@7057dbda
+2026-01-15T17:01:45.635+09:00  INFO 37843 --- [house-viewing] [    Test worker] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-01-15T17:01:45.665+09:00  INFO 37843 --- [house-viewing] [    Test worker] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [jdbc:mysql://localhost:3306/jpashop?serverTimezone=Asia/Seoul]
+	Database driver: MySQL Connector/J
+	Database dialect: MySQLDialect
+	Database version: 8.0.44
+	Default catalog/schema: jpashop/undefined
+	Autocommit mode: undefined/unknown
+	Isolation level: REPEATABLE_READ [default REPEATABLE_READ]
+	JDBC fetch size: none
+	Pool: DataSourceConnectionProvider
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-01-15T17:01:45.921+09:00  INFO 37843 --- [house-viewing] [    Test worker] org.hibernate.orm.core                   : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+Hibernate: drop table if exists member
+Hibernate: drop table if exists member_seq
+Hibernate: create table member (id bigint not null, name varchar(255), primary key (id)) engine=InnoDB
+Hibernate: create table member_seq (next_val bigint) engine=InnoDB
+Hibernate: insert into member_seq ( next_val ) values ( 1 )
+2026-01-15T17:01:45.974+09:00  INFO 37843 --- [house-viewing] [    Test worker] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-01-15T17:01:46.005+09:00  INFO 37843 --- [house-viewing] [    Test worker] o.s.d.j.r.query.QueryEnhancerFactories   : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-01-15T17:01:46.055+09:00  WARN 37843 --- [house-viewing] [    Test worker] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-01-15T17:01:46.182+09:00  INFO 37843 --- [house-viewing] [    Test worker] c.e.h.Member.MemberRepositoryTest        : Started MemberRepositoryTest in 1.209 seconds (process running for 1.589)
+Hibernate: select next_val as id_val from member_seq for update
+Hibernate: update member_seq set next_val= ? where next_val=?
+Hibernate: insert into member (name,id) values (?,?)
+Hibernate: select next_val as id_val from member_seq for update
+Hibernate: update member_seq set next_val= ? where next_val=?
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
