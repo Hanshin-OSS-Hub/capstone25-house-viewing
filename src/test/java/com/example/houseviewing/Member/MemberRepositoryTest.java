@@ -1,7 +1,5 @@
 package com.example.houseviewing.Member;
 
-import com.example.houseviewing.domain.Member;
-import com.example.houseviewing.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
