@@ -6,8 +6,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -21,7 +19,12 @@ public class UserService {
         userRepository.save(user);
     }
 
+    public String findUserId(String email, String name){
+        User byEmailAndName = userRepository.findByEmailAndName(email, name)
+                .orElseThrow(() -> new IllegalArgumentException("해당 정보로 가입된 회원이 없습니다."));
 
+        return byEmailAndName.getLoginId();
+    }
 
 
 }

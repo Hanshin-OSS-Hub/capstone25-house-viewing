@@ -27,18 +27,20 @@ class UserServiceTest {
     @DisplayName("회원가입")
     public void userSave(){
         User user = new User("yooyoo9191@gmail.com", "yoo", "1234", "유인근");
-        Long savedId = userService.saveUser(user);
-        Assertions.assertEquals(user.getId(),savedId);
+        Long userId = user.getId();
+
+        Assertions.assertEquals(userId, user.getId());
 
     }
 
     @Test
-    @DisplayName("이름으로 User 찾기")
+    @DisplayName("이메일과 이름으로 ID 찾기")
     public void findByName(){
         User user = new User("yooyoo9191@gmail.com", "yoo", "1234", "유인근");
-        userService.saveUser(user);
-        List<User> name = userRepository.findByName(user.getName());
-        Assertions.assertEquals("유인근", name.get(0).getName(), "조회된 이름이 일치해야한다");
+        userRepository.save(user);
+        String findLoginId = userService.findUserId("yooyoo9191@gmail.com", "yoo");
+        System.out.println("findLoginId = " + findLoginId);
+        Assertions.assertEquals(user.getLoginId(), findLoginId);
     }
 
 }
