@@ -21,14 +21,13 @@ class UserServiceTest {
     @Test
     @DisplayName("회원가입")
     public void userSave(){
-        User user = new User("yooyoo9191@gmail.com", "yoo", "1234", "유인근");
-        Long userId = user.getId();
+        User user = getUser();
         System.out.println("user.getId() = " + user.getId());
         System.out.println("user.getEmail() = " + user.getEmail());
         System.out.println("user.getName() = " + user.getName());
         System.out.println("user.getLoginId() = " + user.getLoginId());
         System.out.println("user.getPassword() = " + user.getPassword());
-        Assertions.assertEquals(userId, user.getId());
+        Assertions.assertNotNull(user.getId());
 
     }
 
@@ -49,7 +48,6 @@ class UserServiceTest {
         System.out.println("userPassword = " + userPassword);
         Assertions.assertEquals(user.getPassword(), userPassword);
     }
-
 
     private User getUser() {
         User user = new User("yooyoo9191@gmail.com", "yoo", "1234", "유인근");
