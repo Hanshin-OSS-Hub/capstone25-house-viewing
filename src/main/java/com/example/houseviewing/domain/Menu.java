@@ -1,5 +1,5 @@
 package com.example.houseviewing.domain;
 
 public enum Menu {
-    MAIN_PROJECT, SIDE_PROJECT, STUDY
+    MY_PAGE, MAIN_PROJECT, SIDE_PROJECT, STUDY
 }
