@@ -55,6 +55,15 @@ class UserServiceTest {
         org.assertj.core.api.Assertions.assertThat(password).isEqualTo("okok0635");
     }
 
+    @Test
+    @DisplayName("계정 탈퇴")
+    public void deleteUser(){
+        User user = getUser();
+        userService.deleteUser(user.getPassword());
+        Assertions.assertThrows(IllegalArgumentException.class,
+                () -> userService.findUserId(user.getEmail(), user.getName()));
+    }
+
     private User getUser() {
         User user = new User("yooyoo9191@gmail.com", "yoo", "1234", "유인근");
         userService.saveUser(user);

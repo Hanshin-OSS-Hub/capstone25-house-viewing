@@ -7,6 +7,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -39,6 +41,13 @@ public class UserService {
                 .orElseThrow(() -> new IllegalArgumentException("비밀번호를 다시 입력해주세요"));
         user.changePassword(newPassword);
         return user.getPassword();
+    }
+
+    @Transactional
+    public void deleteUser(String password){
+        User user = userRepository.findByPassword(password)
+                .orElseThrow(() -> new IllegalArgumentException("비밀번호가 틀렸습니다."));
+        userRepository.delete(user);
     }
 
 }
