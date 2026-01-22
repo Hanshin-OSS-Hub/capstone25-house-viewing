@@ -20,11 +20,16 @@ public class UserService {
     }
 
     public String findUserId(String email, String name){
-        User byEmailAndName = userRepository.findByEmailAndName(email, name)
+        User user = userRepository.findByEmailAndName(email, name)
                 .orElseThrow(() -> new IllegalArgumentException("해당 정보로 가입된 회원이 없습니다."));
 
-        return byEmailAndName.getLoginId();
+        return user.getLoginId();
     }
 
+    public String findUserPassword(String loginId, String email, String name){
+        User user = userRepository.findByLoginIdAndEmailAndName(loginId, email, name)
+                .orElseThrow(() -> new IllegalArgumentException("해당 정보로 가입된 회원이 없습니다."));
+        return user.getPassword();
+    }
 
 }
