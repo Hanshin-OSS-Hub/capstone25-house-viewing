@@ -17,6 +17,7 @@ public class BoardService {
     private final BoardRepository boardRepository;
     private final UserRepository userRepository;
 
+    @Transactional
     public void saveBoard(Board board){
         boardRepository.save(board);
     }

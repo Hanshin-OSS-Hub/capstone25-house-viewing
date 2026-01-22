@@ -15,6 +15,7 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    @Transactional
     public void saveUser(User user){
         userRepository.save(user);
     }
@@ -32,6 +33,7 @@ public class UserService {
         return user.getPassword();
     }
 
+    @Transactional
     public String updatePassword(String password, String newPassword){
         User user = userRepository.findByPassword(password)
                 .orElseThrow(() -> new IllegalArgumentException("비밀번호를 다시 입력해주세요"));
