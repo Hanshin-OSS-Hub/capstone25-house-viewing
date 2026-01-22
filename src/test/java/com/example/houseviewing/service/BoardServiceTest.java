@@ -1,4 +1,4 @@
-package com.example.houseviewing.service;ㅇ
+package com.example.houseviewing.service;
 
 import com.example.houseviewing.domain.Board;
 import com.example.houseviewing.domain.User;
