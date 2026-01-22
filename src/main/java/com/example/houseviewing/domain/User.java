@@ -27,4 +27,8 @@ public class User {
         this.loginId = loginId;
         this.password = password;
     }
+
+    public void changePassword(String newPassword){
+        this.password = newPassword;
+    }
 }

@@ -1,7 +1,6 @@
 package com.example.houseviewing.service;
 
 import com.example.houseviewing.domain.User;
-import com.example.houseviewing.repository.UserRepository;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,8 +14,6 @@ class UserServiceTest {
 
     @Autowired
     private UserService userService;
-    @Autowired
-    private UserRepository userRepository;
 
     @Test
     @DisplayName("회원가입")
@@ -49,9 +46,18 @@ class UserServiceTest {
         Assertions.assertEquals(user.getPassword(), userPassword);
     }
 
+    @Test
+    @DisplayName("비밀번호 변경하기")
+    public void userChangePassword(){
+        User user = getUser();
+        String password = userService.updatePassword(user.getPassword(), "okok0635");
+        System.out.println("password = " + password);
+        org.assertj.core.api.Assertions.assertThat(password).isEqualTo("okok0635");
+    }
+
     private User getUser() {
         User user = new User("yooyoo9191@gmail.com", "yoo", "1234", "유인근");
-        userRepository.save(user);
+        userService.saveUser(user);
         return user;
     }
 }
