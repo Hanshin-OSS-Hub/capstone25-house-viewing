@@ -13,15 +13,18 @@ public class User {
     @Column(name = "user_id")
     private Long id;
 
+    private String email;
+
+    private String name;
+
     private String loginId;
 
     private String password;
 
-    private String name;
-
-    public User(String loginId, String password, String name) {
+    public User(String email, String name, String loginId, String password) {
+        this.email = email;
+        this.name = name;
         this.loginId = loginId;
         this.password = password;
-        this.name = name;
     }
 }

@@ -6,16 +6,22 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository userRepository;
 
-    public Long saveUser(User user){
+    public void saveUser(User user){
         userRepository.save(user);
-        return user.getId();
     }
+
+
+
 
 }
