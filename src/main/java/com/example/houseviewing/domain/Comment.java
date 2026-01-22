@@ -2,7 +2,6 @@ package com.example.houseviewing.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-
 import java.time.LocalDateTime;
 
 @Entity
