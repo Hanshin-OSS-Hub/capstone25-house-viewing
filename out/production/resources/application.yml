@@ -8,6 +8,7 @@ spring:
     password: 1234
     driver-class-name: com.mysql.cj.jdbc.Driver
   # docekr exec -it mysql-house-viewing mysql -u root -p
+  # http://localhost:8080/swagger-ui/index.html
 
   jpa:
     hibernate:
