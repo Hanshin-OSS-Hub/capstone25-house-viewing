@@ -24,10 +24,13 @@ class UserServiceTest {
         User user = getUser();
         Long savedUser = userService.save(user);
         assertThat(user.getId()).isEqualTo(savedUser);
-        System.out.println("user.getCreated_at() = " + user.getCreated_at());
+        System.out.println("user.getId() = " + user.getId());
+        System.out.println("user.getName() = " + user.getName());
+        System.out.println("user.getEmail() = " + user.getEmail());
+        System.out.println("user.get = " + user.getPassword());
+        System.out.println("user.getCreatedAt() = " + user.getCreatedAt());
+        System.out.println("user.getUpdatedAt() = " + user.getUpdatedAt());
     }
-    
-    
 
     private static User getUser() {
         return new User("유인근", "yooyoo9191@gmail.com", "yooyoo9191", "okok0635!");
