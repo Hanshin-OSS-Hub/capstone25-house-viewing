@@ -1,15 +1,16 @@
 package com.house.houseviewing.service;
 
-import com.house.houseviewing.api.dto.UserRegisterRequest;
+import com.house.houseviewing.dto.UserRegisterRequest;
 import com.house.houseviewing.domain.User;
+import com.house.houseviewing.exception.DuplicateLoginIdException;
 import com.house.houseviewing.repository.UserRepository;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @Transactional
@@ -19,11 +20,11 @@ class UserServiceTest {
     @Autowired UserRepository userRepository;
 
     @Test
-    @DisplayName("유저 회원등록")
+    @DisplayName("회원가입")
     void 회원가입_성공(){
         //given
-        UserRegisterRequest request = new UserRegisterRequest("유인근", "yooyoo9191@gmail.com", "yooyoo9191", "okok0635!");
-        Long userId = userService.save(request);
+        UserRegisterRequest userDto = getUserDto();
+        Long userId = userService.save(userDto);
 
         //when
         User user = userRepository.findById(userId).get();
@@ -34,7 +35,26 @@ class UserServiceTest {
         assertThat("yooyoo9191@gmail.com").isEqualTo(user.getEmail());
         assertThat("yooyoo9191").isEqualTo(user.getLoginId());
         assertThat("okok0635!").isEqualTo(user.getPassword());
+    }
 
+
+    @Test
+    @DisplayName("ID 중복확인")
+    void 아이디_중복_예외발생(){
+        //given
+        UserRegisterRequest userDto = getUserDto();
+        Long savedId = userService.save(userDto);
+
+        //when
+
+        //then
+        Assertions.assertThatThrownBy(() -> userService.save(userDto))
+                .isInstanceOf(DuplicateLoginIdException.class);
+    }
+
+    private UserRegisterRequest getUserDto() {
+        UserRegisterRequest request = new UserRegisterRequest("유인근", "yooyoo9191@gmail.com", "yooyoo9191", "okok0635!");
+        return request;
     }
 
 }

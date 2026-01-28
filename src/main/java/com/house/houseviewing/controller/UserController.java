@@ -1,7 +1,7 @@
-package com.house.houseviewing.api;
+package com.house.houseviewing.controller;
 
-import com.house.houseviewing.api.dto.UserRegisterRequest;
-import com.house.houseviewing.api.dto.UserRegisterResponse;
+import com.house.houseviewing.dto.UserRegisterRequest;
+import com.house.houseviewing.dto.UserRegisterResponse;
 import com.house.houseviewing.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
-public class UserApiController {
+public class UserController {
 
     private final UserService userService;
 

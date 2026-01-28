@@ -10,7 +10,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(DuplicateLoginIdException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateLoginId(){
-        ErrorResponse errorResponse = new ErrorResponse("DUPLICATE_LOGIN_ID", "이미 사용 중인 아이디입니다.");
+        ErrorResponse errorResponse = new ErrorResponse(ErrorCode.DUPLICATE_LOGIN_ID);
         return ResponseEntity
                 .status(HttpStatus.CONFLICT)
                 .body(errorResponse);

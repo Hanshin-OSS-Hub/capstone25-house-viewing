@@ -1,6 +1,6 @@
 package com.house.houseviewing.service;
 
-import com.house.houseviewing.api.dto.UserRegisterRequest;
+import com.house.houseviewing.dto.UserRegisterRequest;
 import com.house.houseviewing.domain.User;
 import com.house.houseviewing.exception.DuplicateLoginIdException;
 import com.house.houseviewing.repository.UserRepository;
@@ -21,7 +21,6 @@ public class UserService {
         if(userRepository.existsAllByLoginId(request.getLoginId())){
             throw new DuplicateLoginIdException();
         }
-
         User user = new User(
                 request.getName(),
                 request.getEmail(),

@@ -1,4 +1,4 @@
-package com.house.houseviewing.api.dto;
+package com.house.houseviewing.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
