@@ -24,7 +24,7 @@ class UserServiceTest {
     void 회원가입_성공(){
         //given
         UserRegisterRequest userDto = getUserDto();
-        Long userId = userService.save(userDto);
+        Long userId = userService.register(userDto);
 
         //when
         User user = userRepository.findById(userId).get();
@@ -43,12 +43,12 @@ class UserServiceTest {
     void 아이디_중복_예외발생(){
         //given
         UserRegisterRequest userDto = getUserDto();
-        Long savedId = userService.save(userDto);
+        Long savedId = userService.register(userDto);
 
         //when
 
         //then
-        Assertions.assertThatThrownBy(() -> userService.save(userDto))
+        Assertions.assertThatThrownBy(() -> userService.register(userDto))
                 .isInstanceOf(DuplicateLoginIdException.class);
     }
 

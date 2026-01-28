@@ -16,7 +16,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional
-    public Long save(UserRegisterRequest request){
+    public Long register(UserRegisterRequest request){
 
         if(userRepository.existsAllByLoginId(request.getLoginId())){
             throw new DuplicateLoginIdException();

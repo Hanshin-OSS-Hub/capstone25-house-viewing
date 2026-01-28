@@ -19,7 +19,8 @@ public class UserController {
 
     @PostMapping
     public UserRegisterResponse join(@Valid @RequestBody UserRegisterRequest request){
-        Long userId = userService.save(request);
+        Long userId = userService.register(request);
         return new UserRegisterResponse(userId);
     }
+
 }
