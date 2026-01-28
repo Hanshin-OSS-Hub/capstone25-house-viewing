@@ -1,7 +1,6 @@
 package com.house.houseviewing.controller;
 
-import com.house.houseviewing.dto.UserRegisterRequest;
-import com.house.houseviewing.dto.UserRegisterResponse;
+import com.house.houseviewing.dto.*;
 import com.house.houseviewing.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +20,12 @@ public class UserController {
     public UserRegisterResponse join(@Valid @RequestBody UserRegisterRequest request){
         Long userId = userService.register(request);
         return new UserRegisterResponse(userId);
+    }
+
+    @PostMapping("/login")
+    public UserLoginResponse login(@Valid @RequestBody UserLoginRequest request){
+        Long userId = userService.login(request);
+        return new UserLoginResponse(userId);
     }
 
 }
