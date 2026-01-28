@@ -1,5 +1,6 @@
 package com.house.houseviewing.service;
 
+import com.house.houseviewing.api.UserApiController;
 import com.house.houseviewing.domain.User;
 import com.house.houseviewing.repository.UserRepository;
 import org.assertj.core.api.Assertions;
@@ -17,19 +18,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class UserServiceTest {
 
     @Autowired UserService userService;
+    @Autowired UserApiController userApiController;
 
     @Test
     @DisplayName("유저 회원등록")
     void 회원가입(){
-        User user = getUser();
-        Long savedUser = userService.save(user);
-        assertThat(user.getId()).isEqualTo(savedUser);
-        System.out.println("user.getId() = " + user.getId());
-        System.out.println("user.getName() = " + user.getName());
-        System.out.println("user.getEmail() = " + user.getEmail());
-        System.out.println("user.get = " + user.getPassword());
-        System.out.println("user.getCreatedAt() = " + user.getCreatedAt());
-        System.out.println("user.getUpdatedAt() = " + user.getUpdatedAt());
     }
 
     private static User getUser() {

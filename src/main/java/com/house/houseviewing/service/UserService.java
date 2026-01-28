@@ -1,5 +1,6 @@
 package com.house.houseviewing.service;
 
+import com.house.houseviewing.api.dto.UserRegisterRequest;
 import com.house.houseviewing.domain.User;
 import com.house.houseviewing.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,10 +14,15 @@ public class UserService {
 
     private final UserRepository userRepository;
 
-    public Long save(User user){
+    @Transactional
+    public Long save(UserRegisterRequest request){
+        User user = new User(
+                request.getName(),
+                request.getEmail(),
+                request.getLoginId(),
+                request.getPassword());
         userRepository.save(user);
         return user.getId();
     }
-
 
 }
