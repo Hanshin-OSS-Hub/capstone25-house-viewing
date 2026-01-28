@@ -1,18 +1,17 @@
 package com.capstone.houseviewingapp.login
 
-import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.capstone.houseviewingapp.R
-import com.capstone.houseviewingapp.databinding.ActivityLoginBinding
+import com.capstone.houseviewingapp.databinding.ActivitySignUpBinding
 
-class LoginActivity : AppCompatActivity() {
-    private lateinit var binding: ActivityLoginBinding
+class SignUpActivity : AppCompatActivity() {
+    private lateinit var binding : ActivitySignUpBinding
     override fun onCreate(savedInstanceState: Bundle?) {
-        binding = ActivityLoginBinding.inflate(layoutInflater)
+        binding = ActivitySignUpBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContentView(binding.root)
@@ -20,10 +19,6 @@ class LoginActivity : AppCompatActivity() {
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
-        }
-        binding.signupTextView.setOnClickListener {
-            intent = Intent(this, SignUpActivity::class.java)
-            startActivity(intent)
         }
     }
 }

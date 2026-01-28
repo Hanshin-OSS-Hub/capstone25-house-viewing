@@ -12,9 +12,17 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HouseViewingApp">
         <activity
+            android:name=".login.SignUpActivity"
+            android:exported="false" />
+        <activity
+            android:name=".login.FindPasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".login.FindIdActivity"
+            android:exported="false" />
+        <activity
             android:name=".MainActivity"
             android:exported="false" />
-
         <activity
             android:name=".login.LoginActivity"
             android:exported="true">
