@@ -1,18 +1,13 @@
 package com.house.houseviewing.service;
 
-import com.house.houseviewing.api.UserApiController;
 import com.house.houseviewing.api.dto.UserRegisterRequest;
 import com.house.houseviewing.domain.User;
 import com.house.houseviewing.repository.UserRepository;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
