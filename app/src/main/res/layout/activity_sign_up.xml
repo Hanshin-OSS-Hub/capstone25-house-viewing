@@ -428,7 +428,8 @@
                         android:layout_width="match_parent"
                         android:layout_height="44dp"
                         android:orientation="horizontal"
-                        android:gravity="center_vertical">
+                        android:gravity="center_vertical"
+                        android:layout_marginBottom="10dp">
 
                         <com.google.android.material.checkbox.MaterialCheckBox
                             android:id="@+id/infoCheckBox"
