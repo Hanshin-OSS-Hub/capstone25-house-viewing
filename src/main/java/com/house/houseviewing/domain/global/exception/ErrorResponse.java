@@ -1,6 +1,5 @@
-package com.house.houseviewing.exception;
+package com.house.houseviewing.domain.global.exception;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter

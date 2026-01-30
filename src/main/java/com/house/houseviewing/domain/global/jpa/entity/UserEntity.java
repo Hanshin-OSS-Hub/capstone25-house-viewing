@@ -1,4 +1,4 @@
-package com.house.houseviewing.domain;
+package com.house.houseviewing.domain.global.jpa.entity;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Entity
 @Getter
 @NoArgsConstructor
-public class User extends BaseTimeEntity {
+public class UserEntity extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
@@ -21,7 +21,7 @@ public class User extends BaseTimeEntity {
 
     private String password;
 
-    public User(String name, String email, String loginId, String password) {
+    public UserEntity(String name, String email, String loginId, String password) {
         this.name = name;
         this.email = email;
         this.loginId = loginId;

@@ -1,11 +1,12 @@
 package com.house.houseviewing.service;
 
-import com.house.houseviewing.dto.UserLoginRequest;
-import com.house.houseviewing.dto.UserRegisterRequest;
-import com.house.houseviewing.domain.User;
-import com.house.houseviewing.exception.DuplicateLoginIdException;
-import com.house.houseviewing.exception.LoginFailedException;
-import com.house.houseviewing.repository.UserRepository;
+import com.house.houseviewing.domain.user.service.UserService;
+import com.house.houseviewing.domain.user.model.login.UserLoginRQ;
+import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
+import com.house.houseviewing.domain.global.jpa.entity.UserEntity;
+import com.house.houseviewing.domain.global.exception.DuplicateLoginIdException;
+import com.house.houseviewing.domain.global.exception.LoginFailedException;
+import com.house.houseviewing.domain.global.jpa.repository.UserRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,27 +18,28 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
-class UserServiceTest {
+class UserEntityServiceTest {
 
-    @Autowired UserService userService;
+    @Autowired
+    UserService userService;
     @Autowired UserRepository userRepository;
 
     @Test
     @DisplayName("회원가입")
     void 회원가입_성공(){
         //given
-        UserRegisterRequest userDto = getUserDto();
+        UserRegisterRQ userDto = getUserDto();
         Long userId = userService.register(userDto);
 
         //when
-        User user = userRepository.findById(userId).get();
+        UserEntity userEntity = userRepository.findById(userId).get();
 
         //then
-        assertThat(user.getId()).isEqualTo(userId);
-        assertThat("유인근").isEqualTo(user.getName());
-        assertThat("yooyoo9191@gmail.com").isEqualTo(user.getEmail());
-        assertThat("yooyoo9191").isEqualTo(user.getLoginId());
-        assertThat("okok0635!").isEqualTo(user.getPassword());
+        assertThat(userEntity.getId()).isEqualTo(userId);
+        assertThat("유인근").isEqualTo(userEntity.getName());
+        assertThat("yooyoo9191@gmail.com").isEqualTo(userEntity.getEmail());
+        assertThat("yooyoo9191").isEqualTo(userEntity.getLoginId());
+        assertThat("okok0635!").isEqualTo(userEntity.getPassword());
     }
 
 
@@ -45,7 +47,7 @@ class UserServiceTest {
     @DisplayName("ID 중복확인")
     void 아이디_중복_예외발생(){
         //given
-        UserRegisterRequest userDto = getUserDto();
+        UserRegisterRQ userDto = getUserDto();
         Long savedId = userService.register(userDto);
 
         //when
@@ -59,11 +61,11 @@ class UserServiceTest {
     @DisplayName("로그인")
     void 로그인_성공(){
         // given
-        UserRegisterRequest userDto = getUserDto();
+        UserRegisterRQ userDto = getUserDto();
         Long savedId = userService.register(userDto);
 
         // when
-        UserLoginRequest user = new UserLoginRequest("yooyoo9191", "okok0635!");
+        UserLoginRQ user = new UserLoginRQ("yooyoo9191", "okok0635!");
         Long login = userService.login(user);
 
         // then
@@ -73,11 +75,11 @@ class UserServiceTest {
     @Test
     @DisplayName("로그인 실패")
     void 로그인_실패(){
-        UserRegisterRequest userDto = getUserDto();
+        UserRegisterRQ userDto = getUserDto();
         Long savedId = userService.register(userDto);
 
         // when
-        UserLoginRequest user = new UserLoginRequest("yooyoo9191", "okok0635");
+        UserLoginRQ user = new UserLoginRQ("yooyoo9191", "okok0635");
 
         // then
         assertThatThrownBy(() -> userService.login(user))
@@ -86,8 +88,8 @@ class UserServiceTest {
     }
 
 
-    private UserRegisterRequest getUserDto() {
-        UserRegisterRequest request = new UserRegisterRequest("유인근", "yooyoo9191@gmail.com", "yooyoo9191", "okok0635!");
+    private UserRegisterRQ getUserDto() {
+        UserRegisterRQ request = new UserRegisterRQ("유인근", "yooyoo9191@gmail.com", "yooyoo9191", "okok0635!");
         return request;
     }
 

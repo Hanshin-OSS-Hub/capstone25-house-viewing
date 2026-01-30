@@ -1,4 +1,4 @@
-package com.house.houseviewing.exception;
+package com.house.houseviewing.domain.global.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

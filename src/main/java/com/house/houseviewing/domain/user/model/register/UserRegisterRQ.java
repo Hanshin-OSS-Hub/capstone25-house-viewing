@@ -1,4 +1,4 @@
-package com.house.houseviewing.dto;
+package com.house.houseviewing.domain.user.model.register;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -8,7 +8,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class UserRegisterRequest {
+public class UserRegisterRQ {
 
     @NotBlank(message = "이름은 필수입니다.")
     private String name;

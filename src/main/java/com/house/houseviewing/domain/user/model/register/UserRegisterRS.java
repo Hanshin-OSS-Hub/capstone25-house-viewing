@@ -1,11 +1,11 @@
-package com.house.houseviewing.dto;
+package com.house.houseviewing.domain.user.model.register;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class UserRegisterResponse {
+public class UserRegisterRS {
 
     private Long userId;
 
