@@ -1,6 +1,8 @@
 package com.house.houseviewing.service;
 
 import com.house.houseviewing.domain.global.exception.AppException;
+import com.house.houseviewing.domain.global.exception.ExceptionCode;
+import com.house.houseviewing.domain.user.model.login.UserLoginRQ;
 import com.house.houseviewing.domain.user.service.UserService;
 import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
 import com.house.houseviewing.domain.global.jpa.entity.UserEntity;
@@ -54,36 +56,40 @@ class UserEntityServiceTest {
                 .isInstanceOf(AppException.class);
     }
 
-//    @Test
-//    @DisplayName("로그인")
-//    void 로그인_성공(){
-//        // given
-//        UserRegisterRQ userDto = getUserDto();
-//        Long savedId = userService.register(userDto);
-//
-//        // when
-//        UserLoginRQ user = new UserLoginRQ("yooyoo9191", "okok0635!");
-//        Long login = userService.login(user);
-//
-//        // then
-//        assertThat(login).isEqualTo(savedId);
-//    }
-//
-//    @Test
-//    @DisplayName("로그인 실패")
-//    void 로그인_실패(){
-//        UserRegisterRQ userDto = getUserDto();
-//        Long savedId = userService.register(userDto);
-//
-//        // when
-//        UserLoginRQ user = new UserLoginRQ("yooyoo9191", "okok0635");
-//
-//        // then
-//        assertThatThrownBy(() -> userService.login(user))
-//                .isInstanceOf(AppException.class);
-//
-//    }
+    @Test
+    @DisplayName("로그인")
+    void 로그인_성공(){
+        // given
+        UserRegisterRQ userDto = getUserDto();
+        Long savedId = userService.register(userDto);
 
+        // when
+        UserLoginRQ user = new UserLoginRQ("yooyoo9191", "okok0635!");
+        Long login = userService.login(user);
+
+        // then
+        assertThat(login).isEqualTo(savedId);
+    }
+
+    @Test
+    @DisplayName("로그인 실패")
+    void 로그인_실패(){
+        UserRegisterRQ userDto = getUserDto();
+        Long savedId = userService.register(userDto);
+
+        // when
+        UserLoginRQ user = new UserLoginRQ("yooyoo9191", "okok0635");
+
+        // then
+        Assertions.assertThatThrownBy(() -> userService.login(user))
+                .isInstanceOf(AppException.class)
+                .satisfies(e -> {
+                    AppException ex = (AppException) e;
+                    assertThat(ex.getExceptionCode())
+                            .isEqualTo(ExceptionCode.LOGIN_FAILED);
+                });
+
+    }
 
     private UserRegisterRQ getUserDto() {
         UserRegisterRQ request = new UserRegisterRQ("유인근", "yooyoo9191@gmail.com", "yooyoo9191", "okok0635!");
