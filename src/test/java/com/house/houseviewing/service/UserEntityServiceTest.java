@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -29,8 +28,8 @@ class UserEntityServiceTest {
     @DisplayName("회원가입")
     void 회원가입_성공(){
         //given
-        UserRegisterRQ userDto = getUserDto();
-        Long userId = userService.register(userDto);
+        UserRegisterRQ request = new UserRegisterRQ("유인근", "yooyoo9191@gmail.com", "yooyoo9191", "okok0635!");
+        Long userId = userService.register(request);
 
         //when
         UserEntity userEntity = userRepository.findById(userId).get();
@@ -48,7 +47,7 @@ class UserEntityServiceTest {
     @DisplayName("ID 중복확인")
     void 아이디_중복_예외발생(){
         //given
-        UserRegisterRQ userDto = getUserDto();
+        UserRegisterRQ userDto = new UserRegisterRQ("유인근", "yooyoo9191@gmail.com", "yooyoo9191", "okok0635!");
         Long savedId = userService.register(userDto);
 
         //when
@@ -62,22 +61,20 @@ class UserEntityServiceTest {
     @DisplayName("로그인")
     void 로그인_성공(){
         // given
-        UserRegisterRQ userDto = getUserDto();
-        Long savedId = userService.register(userDto);
+        UserEntity user1 = user();
 
         // when
         UserLoginRQ user = new UserLoginRQ("yooyoo9191", "okok0635!");
         Long login = userService.login(user);
 
         // then
-        assertThat(login).isEqualTo(savedId);
+        assertThat(login).isEqualTo(user1.getId());
     }
 
     @Test
     @DisplayName("로그인 실패")
     void 로그인_실패(){
-        UserRegisterRQ userDto = getUserDto();
-        Long savedId = userService.register(userDto);
+        UserEntity user1 = user();
 
         // when
         UserLoginRQ user = new UserLoginRQ("yooyoo9191", "okok0635");
@@ -96,19 +93,26 @@ class UserEntityServiceTest {
     @DisplayName("아이디 찾기")
     void 아이디_찾기(){
 
-        UserRegisterRQ userDto = getUserDto();
-        Long id = userService.register(userDto);
-        UserEntity user = userRepository.findById(id).get();
+        UserEntity user1 = user();
 
         UserFindIdRQ request = new UserFindIdRQ("yooyoo9191@gmail.com", "유인근");
         String loginId = userService.findId(request);
 
-        assertThat(user.getLoginId()).isEqualTo(loginId);
+        assertThat(user1.getLoginId()).isEqualTo(loginId);
     }
 
-    private UserRegisterRQ getUserDto() {
+    @Test
+    @DisplayName("비밀번호 찾기(사용자 검증)")
+    void 비밀번호_찾기_사용자_검증(){
+
+        UserEntity user1 = user();
+    }
+
+    private UserEntity user() {
         UserRegisterRQ request = new UserRegisterRQ("유인근", "yooyoo9191@gmail.com", "yooyoo9191", "okok0635!");
-        return request;
+        Long id = userService.register(request);
+        UserEntity user = userRepository.findById(id).get();
+        return user;
     }
 
 }
