@@ -21,8 +21,20 @@ class LoginActivity : AppCompatActivity() {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
             insets
         }
+
+       // NOTE : 회원가입 화면으로 이동
         binding.signupTextView.setOnClickListener {
             intent = Intent(this, SignUpActivity::class.java)
+            startActivity(intent)
+        }
+        // NOTE : 아이디 찾기 화면으로 이동
+        binding.findIDTextView.setOnClickListener {
+            intent = Intent(this, FindIdActivity::class.java)
+            startActivity(intent)
+        }
+        // NOTE : 비밀번호 찾기 화면으로 이동
+        binding.findPWTextView.setOnClickListener {
+            intent = Intent(this, FindPasswordActivity::class.java)
             startActivity(intent)
         }
     }

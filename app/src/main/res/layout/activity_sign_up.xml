@@ -419,7 +419,7 @@
                             android:includeFontPadding="false"
                             android:paddingBottom="1dp"
                             android:textStyle="bold"
-                            android:layout_marginEnd="40dp"
+                            android:layout_marginEnd="35dp"
                             />
 
                     </LinearLayout>
@@ -481,7 +481,7 @@
                             android:textColor="@color/textgray"
                             android:textSize="14sp"
                             android:textStyle="bold"
-                            android:layout_marginEnd="40dp"/>
+                            android:layout_marginEnd="35dp"/>
 
                     </LinearLayout>
 
