@@ -333,7 +333,7 @@
                             android:id="@+id/allCheckBox"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:buttonTint="@color/icongray"
+                            app:buttonTint="@color/selector_checkbox"
                             android:layout_marginStart="10dp"
                             />
 
@@ -369,7 +369,7 @@
                             android:id="@+id/termOfServieceCheckBox"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:buttonTint="@color/icongray"
+                            app:buttonTint="@color/selector_checkbox"
                             android:layout_marginStart="10dp"
                             android:scaleX="0.8"
                             android:scaleY="0.8"
@@ -435,7 +435,7 @@
                             android:id="@+id/infoCheckBox"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:buttonTint="@color/icongray"
+                            app:buttonTint="@color/selector_checkbox"
                             android:layout_marginStart="10dp"
                             android:scaleX="0.8"
                             android:scaleY="0.8"
@@ -502,16 +502,11 @@
                 android:layout_marginTop="15dp"
                 android:backgroundTint="@color/blue"
                 android:text="집좀보자 시작하기"
-                android:paddingStart="10dp"
                 android:textStyle="bold"
                 android:textSize="18sp"
                 app:cornerRadius="8dp"
                 android:fontFamily="@font/pretendard_bold"
                 android:layout_marginHorizontal="24dp"
-                app:icon="@drawable/baseline_arrow_forward_white"
-                app:iconGravity="textEnd"
-                app:iconSize="20dp"
-                app:iconPadding="5dp"
                 android:gravity="center"
                 />
 
