@@ -18,6 +18,7 @@ public class UserEntity extends BaseTimeEntity {
 
     private String email;
 
+    @Column(unique = true)
     private String loginId;
 
     private String password;
