@@ -2,6 +2,7 @@ package com.house.houseviewing.service;
 
 import com.house.houseviewing.domain.global.exception.AppException;
 import com.house.houseviewing.domain.global.exception.ExceptionCode;
+import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
 import com.house.houseviewing.domain.user.model.login.UserLoginRQ;
 import com.house.houseviewing.domain.user.service.UserService;
 import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -88,6 +90,20 @@ class UserEntityServiceTest {
                     assertThat(ex.getExceptionCode())
                             .isEqualTo(ExceptionCode.LOGIN_FAILED);
                 });
+    }
+
+    @Test
+    @DisplayName("아이디 찾기")
+    void 아이디_찾기(){
+
+        UserRegisterRQ userDto = getUserDto();
+        Long id = userService.register(userDto);
+        UserEntity user = userRepository.findById(id).get();
+
+        UserFindIdRQ request = new UserFindIdRQ("yooyoo9191@gmail.com", "유인근");
+        String loginId = userService.findId(request);
+
+        assertThat(user.getLoginId()).isEqualTo(loginId);
     }
 
     private UserRegisterRQ getUserDto() {
