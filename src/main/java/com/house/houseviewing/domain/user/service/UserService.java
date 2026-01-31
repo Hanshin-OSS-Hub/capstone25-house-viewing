@@ -1,10 +1,10 @@
 package com.house.houseviewing.domain.user.service;
 
+import com.house.houseviewing.domain.global.exception.AppException;
+import com.house.houseviewing.domain.global.exception.ExceptionCode;
 import com.house.houseviewing.domain.user.model.login.UserLoginRQ;
 import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
 import com.house.houseviewing.domain.global.jpa.entity.UserEntity;
-import com.house.houseviewing.domain.global.exception.DuplicateLoginIdException;
-import com.house.houseviewing.domain.global.exception.LoginFailedException;
 import com.house.houseviewing.domain.global.jpa.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,7 +23,7 @@ public class UserService {
     public Long register(UserRegisterRQ request){
 
         if(userRepository.existsAllByLoginId(request.getLoginId())){
-            throw new DuplicateLoginIdException();
+            throw new AppException(ExceptionCode.DUPLICATE_LOGIN_ID);
         }
         UserEntity userEntity = new UserEntity(
                 request.getName(),
@@ -38,7 +38,7 @@ public class UserService {
     public Long login(UserLoginRQ request){
         Optional<UserEntity> user = userRepository.findByLoginIdAndPassword(request.getLoginId(), request.getPassword());
         if (user.isEmpty()){
-            throw new LoginFailedException();
+            throw new AppException(ExceptionCode.LOGIN_FAILED);
         }
         UserEntity successUserEntity = user.get();
         return successUserEntity.getId();
