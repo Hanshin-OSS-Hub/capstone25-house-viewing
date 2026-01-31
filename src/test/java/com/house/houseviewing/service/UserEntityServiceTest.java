@@ -7,13 +7,13 @@ import com.house.houseviewing.domain.user.service.UserService;
 import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
 import com.house.houseviewing.domain.global.jpa.entity.UserEntity;
 import com.house.houseviewing.domain.global.jpa.repository.UserRepository;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
@@ -52,7 +52,7 @@ class UserEntityServiceTest {
         //when
 
         //then
-        Assertions.assertThatThrownBy(() -> userService.register(userDto))
+        assertThatThrownBy(() -> userService.register(userDto))
                 .isInstanceOf(AppException.class);
     }
 
@@ -81,14 +81,13 @@ class UserEntityServiceTest {
         UserLoginRQ user = new UserLoginRQ("yooyoo9191", "okok0635");
 
         // then
-        Assertions.assertThatThrownBy(() -> userService.login(user))
+        assertThatThrownBy(() -> userService.login(user))
                 .isInstanceOf(AppException.class)
                 .satisfies(e -> {
                     AppException ex = (AppException) e;
                     assertThat(ex.getExceptionCode())
                             .isEqualTo(ExceptionCode.LOGIN_FAILED);
                 });
-
     }
 
     private UserRegisterRQ getUserDto() {
