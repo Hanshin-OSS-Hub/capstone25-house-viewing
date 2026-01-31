@@ -13,6 +13,7 @@ public class UserEntity extends BaseTimeEntity {
     @Column(name = "user_id")
     private Long id;
 
+    @Column(name = "user_name")
     private String name;
 
     private String email;

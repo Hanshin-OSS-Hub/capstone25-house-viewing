@@ -2,6 +2,7 @@ package com.house.houseviewing.domain.user.service;
 
 import com.house.houseviewing.domain.global.exception.AppException;
 import com.house.houseviewing.domain.global.exception.ExceptionCode;
+import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
 import com.house.houseviewing.domain.user.model.login.UserLoginRQ;
 import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
 import com.house.houseviewing.domain.global.jpa.entity.UserEntity;
@@ -40,7 +41,16 @@ public class UserService {
         if (user.isEmpty()){
             throw new AppException(ExceptionCode.LOGIN_FAILED);
         }
-        UserEntity successUserEntity = user.get();
-        return successUserEntity.getId();
+        UserEntity userEntity = user.get();
+        return userEntity.getId();
+    }
+
+    public String findId(UserFindIdRQ request){
+        Optional<UserEntity> user = userRepository.findByEmailAndName(request.getEmail(), request.getName());
+        if(user.isEmpty()){
+            throw new AppException(ExceptionCode.FIND_LOGIN_ID_FAILED);
+        }
+        UserEntity userEntity = user.get();
+        return userEntity.getLoginId();
     }
 }

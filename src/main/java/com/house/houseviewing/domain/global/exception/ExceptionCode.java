@@ -8,7 +8,9 @@ import org.springframework.http.HttpStatus;
 public enum ExceptionCode {
 
     DUPLICATE_LOGIN_ID("DB001",HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다."),
-    LOGIN_FAILED("VP001",HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 틀렸습니다.");
+    LOGIN_FAILED("VP001",HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 틀렸습니다."),
+    FIND_LOGIN_ID_FAILED("VP002",HttpStatus.CONFLICT, "이메일 또는 아이디가 틀렸습니다.");
+
 
     private final String code;
     private final HttpStatus status;

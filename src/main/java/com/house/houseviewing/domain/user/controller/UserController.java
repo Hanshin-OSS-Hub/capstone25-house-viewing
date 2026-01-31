@@ -1,5 +1,7 @@
 package com.house.houseviewing.domain.user.controller;
 
+import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
+import com.house.houseviewing.domain.user.model.findid.UserFindIdRS;
 import com.house.houseviewing.domain.user.model.login.UserLoginRQ;
 import com.house.houseviewing.domain.user.model.login.UserLoginRS;
 import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
@@ -29,6 +31,13 @@ public class UserController {
     public UserLoginRS login(@Valid @RequestBody UserLoginRQ request){
         Long userId = userService.login(request);
         return new UserLoginRS(userId);
+    }
+
+    @PostMapping("/find-id")
+    public UserFindIdRS findId(@Valid @RequestBody UserFindIdRQ request){
+
+        String loginId = userService.findId(request);
+        return new UserFindIdRS(loginId);
     }
 
 }
