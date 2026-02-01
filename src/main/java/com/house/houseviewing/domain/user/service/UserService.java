@@ -3,6 +3,7 @@ package com.house.houseviewing.domain.user.service;
 import com.house.houseviewing.domain.global.exception.AppException;
 import com.house.houseviewing.domain.global.exception.ExceptionCode;
 import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
+import com.house.houseviewing.domain.user.model.password.reset.UserResetPasswordRQ;
 import com.house.houseviewing.domain.user.model.password.verify.UserVerifyPasswordRQ;
 import com.house.houseviewing.domain.user.model.login.UserLoginRQ;
 import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
@@ -53,5 +54,15 @@ public class UserService {
     public void passwordVerify(UserVerifyPasswordRQ request){
         UserEntity user = userRepository.findByEmailAndNameAndLoginId(request.getEmail(), request.getName(), request.getLoginId())
                 .orElseThrow(() -> new AppException(ExceptionCode.VERIFY_PASSWORD_FAILED));
+    }
+
+    @Transactional
+    public void passwordReset(UserResetPasswordRQ request){
+        if(!request.getNewPassword().equals(request.getConfirmPassword())){
+            throw new AppException(ExceptionCode.MISMATCH_PASSWORD);
+        }
+        UserEntity user = userRepository.findById(request.getUserId()).get();
+
+        user.updatePassword(request.getConfirmPassword());
     }
 }

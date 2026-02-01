@@ -10,7 +10,8 @@ public enum ExceptionCode {
     DUPLICATE_LOGIN_ID("DB001",HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다."),
     LOGIN_FAILED("VP001",HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 틀렸습니다."),
     FIND_LOGIN_ID_FAILED("VP002",HttpStatus.BAD_REQUEST, "이메일 또는 아이디가 틀렸습니다."),
-    VERIFY_PASSWORD_FAILED("VP003", HttpStatus.BAD_REQUEST, "입력하신 정보가 틀렸습니다.");
+    VERIFY_PASSWORD_FAILED("VP003", HttpStatus.BAD_REQUEST, "입력하신 정보가 틀렸습니다."),
+    MISMATCH_PASSWORD("VP003", HttpStatus.BAD_REQUEST, "입력하신 정보가 틀렸습니다.");
 
 
 
