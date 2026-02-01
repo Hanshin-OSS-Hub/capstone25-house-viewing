@@ -4,6 +4,7 @@ import com.house.houseviewing.domain.global.exception.AppException;
 import com.house.houseviewing.domain.global.exception.ExceptionCode;
 import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
 import com.house.houseviewing.domain.user.model.login.UserLoginRQ;
+import com.house.houseviewing.domain.user.model.password.reset.UserResetPasswordRQ;
 import com.house.houseviewing.domain.user.service.UserService;
 import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
 import com.house.houseviewing.domain.global.jpa.entity.UserEntity;
@@ -108,11 +109,19 @@ class UserEntityServiceTest {
         UserEntity user1 = user();
     }
 
+    @Test
+    @DisplayName("비밀번호 변경")
+    void 비밀번호_변경(){
+        UserEntity user = user();
+        userService.passwordReset(new UserResetPasswordRQ(user.getId(), "12345678", "12345678"));
+
+        assertThat(user.getPassword()).isEqualTo("12345678");
+    }
+
     private UserEntity user() {
         UserRegisterRQ request = new UserRegisterRQ("유인근", "yooyoo9191@gmail.com", "yooyoo9191", "okok0635!");
         Long id = userService.register(request);
         UserEntity user = userRepository.findById(id).get();
         return user;
     }
-
 }
