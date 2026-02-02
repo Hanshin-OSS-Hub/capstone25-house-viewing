@@ -24,8 +24,7 @@ class FindPasswordActivity : AppCompatActivity() {
 
         // NOTE: 뒤로가기 버튼 (로그인 화면으로)
         binding.backButton.setOnClickListener {
-            intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
+            finish()
         }
     }
 }

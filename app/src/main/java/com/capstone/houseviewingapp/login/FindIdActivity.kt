@@ -23,8 +23,16 @@ class FindIdActivity : AppCompatActivity() {
         }
         // NOTE: 뒤로가기 버튼 (로그인 화면으로)
         binding.backButton.setOnClickListener {
-            intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
+//            intent = Intent(this, LoginActivity::class.java)
+//            startActivity(intent) // NOTE: 이렇게 작성하면 앱 화면이 쌓여서 나중에 오류 생김
+            finish()
+        }
+        binding.confirmButton.setOnClickListener {
+            // TODO: [백엔드 연동] 나중에 실제 서버 API를 호출해서 아이디를 받아와야 함!
+            // 지금은 테스트용으로 가짜 아이디("capstone123")를 넣어둠
+            val id = "capstone123"
+            val bottomsheet = FindIDResultFragment(id)
+            bottomsheet.show(supportFragmentManager, "FindIDResultTag")
         }
     }
 }

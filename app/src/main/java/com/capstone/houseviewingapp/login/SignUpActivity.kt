@@ -22,8 +22,7 @@ class SignUpActivity : AppCompatActivity() {
             insets
         }
         binding.backButton.setOnClickListener {
-            intent = Intent(this, LoginActivity::class.java)
-            startActivity(intent)
+            finish()
         }
     }
 }
