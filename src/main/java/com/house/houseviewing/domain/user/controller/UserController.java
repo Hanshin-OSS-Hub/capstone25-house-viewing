@@ -1,6 +1,5 @@
 package com.house.houseviewing.domain.user.controller;
 
-import com.house.houseviewing.domain.global.jpa.entity.UserEntity;
 import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
 import com.house.houseviewing.domain.user.model.findid.UserFindIdRS;
 import com.house.houseviewing.domain.user.model.login.UserLoginRQ;

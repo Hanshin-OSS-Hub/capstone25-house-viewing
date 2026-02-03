@@ -1,7 +1,6 @@
-package com.house.houseviewing.domain.global.jpa.repository;
+package com.house.houseviewing.domain.user.repository;
 
-import com.house.houseviewing.domain.global.jpa.entity.UserEntity;
-import org.apache.catalina.User;
+import com.house.houseviewing.domain.user.entity.UserEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

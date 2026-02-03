@@ -7,8 +7,8 @@ import com.house.houseviewing.domain.user.model.password.reset.UserResetPassword
 import com.house.houseviewing.domain.user.model.password.verify.UserVerifyPasswordRQ;
 import com.house.houseviewing.domain.user.model.login.UserLoginRQ;
 import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
-import com.house.houseviewing.domain.global.jpa.entity.UserEntity;
-import com.house.houseviewing.domain.global.jpa.repository.UserRepository;
+import com.house.houseviewing.domain.user.entity.UserEntity;
+import com.house.houseviewing.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
