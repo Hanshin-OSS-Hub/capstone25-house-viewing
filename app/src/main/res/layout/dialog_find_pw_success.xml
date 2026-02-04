@@ -5,7 +5,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@drawable/bg_bottom_sheet_white"
     android:paddingBottom="40dp">
-    
+
     <View
         android:id="@+id/handleBar"
         android:layout_width="40dp"
@@ -34,10 +34,10 @@
     </FrameLayout>
 
     <TextView
-        android:id="@+id/idFindSuccessTextview"
+        android:id="@+id/pwFindSuccessTextview"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="아이디 찾기 완료"
+        android:text="본인 확인 완료"
         android:textSize="24dp"
         app:layout_constraintTop_toBottomOf="@id/iconArea"
         app:layout_constraintStart_toStartOf="parent"
@@ -47,11 +47,11 @@
         />
 
     <TextView
-        android:id="@+id/idFindSuccessinfoTextView"
+        android:id="@+id/pwFindSuccessinfoTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="입력하신 정보와 일치하는 아이디입니다."
-        app:layout_constraintTop_toBottomOf="@id/idFindSuccessTextview"
+        android:text="본인 확인이 완료되었습니다."
+        app:layout_constraintTop_toBottomOf="@id/pwFindSuccessTextview"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="12dp"
@@ -60,59 +60,30 @@
         android:textSize="16dp"
         />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/resultBox"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        app:layout_constraintTop_toBottomOf="@id/idFindSuccessinfoTextView"
+    <TextView
+        android:id="@+id/pwFindSuccessinfoTextView2"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="새로운 비밀번호로 변경해주세요."
+        app:layout_constraintTop_toBottomOf="@id/pwFindSuccessinfoTextView"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:layout_marginTop="24dp"
-        android:background="@drawable/bg_rounded_edittext"
-        android:backgroundTint="@color/gray"
-        android:layout_marginHorizontal="24dp">
-        <TextView
-            android:id="@+id/foundIDTextView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="아이디 : ahr******"
-            android:textSize="20sp"
-            android:fontFamily="@font/pretendard_bold"
-            android:layout_marginStart="24dp"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            />
-
-        <TextView
-            android:id="@+id/copyButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:drawableStart="@drawable/baseline_content_copy_24"
-            android:drawableTint="@color/blue"
-            android:drawablePadding="4dp"
-            android:text="복사"
-            android:fontFamily="@font/pretendard_bold"
-            android:textColor="@color/blue"
-            android:textSize="16sp"
-            android:layout_marginEnd="24dp"
-            app:layout_constraintTop_toTopOf="@id/foundIDTextView"
-            app:layout_constraintBottom_toBottomOf="@id/foundIDTextView"
-            app:layout_constraintEnd_toEndOf="@id/resultBox"/>
-
-
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        android:layout_marginTop="12dp"
+        android:textColor="@color/textgray"
+        android:fontFamily="@font/pretendard_medium"
+        android:textSize="16dp"
+        />
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/loginButton"
         android:layout_width="0dp"
         android:layout_height="60dp"
-        app:layout_constraintTop_toBottomOf="@id/resultBox"
+        app:layout_constraintTop_toBottomOf="@id/pwFindSuccessinfoTextView2"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="20dp"
         android:backgroundTint="@color/blue"
-        android:text="로그인"
+        android:text="비밀번호 재설정"
         android:textColor="@color/white"
         android:textStyle="bold"
         android:textSize="18sp"
@@ -129,7 +100,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:backgroundTint="@color/gray"
-        android:text="비밀번호 찾기"
+        android:text="닫기"
         android:textColor="@color/black"
         android:textStyle="bold"
         android:textSize="18sp"

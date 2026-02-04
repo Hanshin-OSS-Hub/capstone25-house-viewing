@@ -1,5 +1,8 @@
 package com.capstone.houseviewingapp.login
 
+import android.content.ClipData.*
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -7,6 +10,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
+import android.widget.Toast.*
 import com.capstone.houseviewingapp.databinding.DialogFindIdSuccessBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import androidx.core.graphics.drawable.toDrawable
@@ -29,7 +34,23 @@ class FindIDResultFragment(private val id: String ) : BottomSheetDialogFragment(
 
         dialog?.window?.setBackgroundDrawable(Color.TRANSPARENT.toDrawable())
 
-        binding.foundIDTextView.text = "아이디 : $id"
+        //NOTE : maskedId -> 별표 만들기 로직
+        val maskedId = if (id.length > 4) {
+            //NOTE : 아이디 0~ 3글자까지는 그냥 가져오고 그 뒤부턴 *로 반복해서 붙임 (남은 글자로)
+            id.substring(0,4) + "*".repeat(id.length - 4)
+        } else {
+            id
+        }
+
+        binding.foundIDTextView.text = "아이디 : $maskedId"
+
+        binding.copyButton.setOnClickListener {
+            val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+            val clip = newPlainText("Found id: ", id)
+            clipboard.setPrimaryClip(clip)
+
+            makeText(requireContext(), "아이디가 복사되었습니다", LENGTH_SHORT).show()
+        }
 
         binding.loginButton.setOnClickListener {
             val intent = Intent(requireContext(), LoginActivity::class.java)
