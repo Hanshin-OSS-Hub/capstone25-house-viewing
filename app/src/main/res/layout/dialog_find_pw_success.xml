@@ -75,7 +75,7 @@
         />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/loginButton"
+        android:id="@+id/resettingPWButton"
         android:layout_width="0dp"
         android:layout_height="60dp"
         app:layout_constraintTop_toBottomOf="@id/pwFindSuccessinfoTextView2"
@@ -93,10 +93,10 @@
         />
 
     <com.google.android.material.button.MaterialButton
-        android:id="@+id/findPWButton"
+        android:id="@+id/closeButton"
         android:layout_width="0dp"
         android:layout_height="60dp"
-        app:layout_constraintTop_toBottomOf="@id/loginButton"
+        app:layout_constraintTop_toBottomOf="@id/resettingPWButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         android:backgroundTint="@color/gray"

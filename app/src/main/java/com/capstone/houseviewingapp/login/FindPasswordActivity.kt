@@ -26,5 +26,10 @@ class FindPasswordActivity : AppCompatActivity() {
         binding.backButton.setOnClickListener {
             finish()
         }
+
+        binding.confirmButton.setOnClickListener {
+            val bottomSheet = FindPWResultFragment()
+            bottomSheet.show(supportFragmentManager, "FindPwResultTag")
+        }
     }
 }
