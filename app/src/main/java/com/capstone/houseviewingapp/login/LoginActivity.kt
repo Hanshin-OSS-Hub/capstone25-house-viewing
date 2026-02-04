@@ -6,6 +6,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.capstone.houseviewingapp.MainActivity
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.databinding.ActivityLoginBinding
 
@@ -35,6 +36,13 @@ class LoginActivity : AppCompatActivity() {
         // NOTE : 비밀번호 찾기 화면으로 이동
         binding.findPWTextView.setOnClickListener {
             intent = Intent(this, FindPasswordActivity::class.java)
+            startActivity(intent)
+        }
+        //NOTE : 홈 화면으로 이동
+        binding.loginButton.setOnClickListener {
+            //TODO: DB에 있는 아이디 비번이 맞는지 체크해서 로그인 홈화면으로
+
+            intent = Intent(this, MainActivity::class.java)
             startActivity(intent)
         }
     }
