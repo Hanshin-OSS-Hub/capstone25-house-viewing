@@ -1,5 +1,6 @@
 package com.capstone.houseviewingapp.login
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -24,7 +25,10 @@ class FindPWResultFragment : BottomSheetDialogFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.resettingPWButton.setOnClickListener {
-
+            var intent = Intent(requireContext(), ResetPasswordActivity::class.java)
+            startActivity(intent)
+            dismiss()
+            requireActivity().finish() // NOTE: 아이디 찾기 화면 종료
         }
 
         binding.closeButton.setOnClickListener {
