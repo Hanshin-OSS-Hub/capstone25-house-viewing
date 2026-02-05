@@ -1,4 +1,4 @@
-package com.house.houseviewing.domain.global.exception;
+package com.house.houseviewing.global.exception;
 
 import lombok.Getter;
 

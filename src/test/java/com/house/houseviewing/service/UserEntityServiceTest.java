@@ -1,7 +1,7 @@
 package com.house.houseviewing.service;
 
-import com.house.houseviewing.domain.global.exception.AppException;
-import com.house.houseviewing.domain.global.exception.ExceptionCode;
+import com.house.houseviewing.global.exception.AppException;
+import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
 import com.house.houseviewing.domain.user.model.login.UserLoginRQ;
 import com.house.houseviewing.domain.user.model.password.reset.UserResetPasswordRQ;
