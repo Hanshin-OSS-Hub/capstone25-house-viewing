@@ -64,7 +64,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/nameTextInputLayout"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 app:boxBackgroundMode="none"
                 app:hintEnabled="false"
                 app:layout_constraintStart_toStartOf="parent"
@@ -80,8 +80,9 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/bg_rounded_edittext"
                     android:backgroundTint="@color/gray"
-                    android:drawableStart="@drawable/person"
+                    android:drawableStart="@drawable/round_person_24"
                     android:drawablePadding="12dp"
+                    android:includeFontPadding="false"
                     android:drawableTint="@color/icongray"
                     android:hint="이름을 입력해주세요" />
 
@@ -105,7 +106,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/emailTextInputLayout"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 app:boxBackgroundMode="none"
                 app:hintEnabled="false"
                 app:layout_constraintStart_toStartOf="parent"
@@ -124,6 +125,7 @@
                     android:drawableStart="@drawable/baseline_email_24"
                     android:drawablePadding="12dp"
                     android:drawableTint="@color/icongray"
+                    android:includeFontPadding="false"
                     android:hint="example@email.com" />
 
             </com.google.android.material.textfield.TextInputLayout>

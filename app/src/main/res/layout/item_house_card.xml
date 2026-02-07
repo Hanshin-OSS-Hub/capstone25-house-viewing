@@ -9,5 +9,7 @@
     app:cardBackgroundColor="@color/white"
     app:strokeWidth="1dp"
     app:strokeColor="@color/icongray">
+    
+    
 
 </com.google.android.material.card.MaterialCardView>

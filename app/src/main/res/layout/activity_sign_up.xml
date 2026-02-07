@@ -52,7 +52,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="이름"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:fontFamily="@font/pretendard_medium"
                 android:textColor="@color/textgray"
                 android:textStyle="bold"
@@ -65,7 +65,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/nameTextInputLayout"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 app:boxBackgroundMode="none"
                 app:hintEnabled="false"
                 app:layout_constraintStart_toStartOf="parent"
@@ -81,10 +81,11 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/bg_rounded_edittext"
                     android:backgroundTint="@color/gray"
-                    android:drawableStart="@drawable/person"
+                    android:drawableStart="@drawable/round_person_24"
                     android:drawablePadding="12dp"
                     android:drawableTint="@color/icongray"
-                    android:hint="이름을 입력해주세요" />
+                    android:includeFontPadding="false"
+                    android:hint="이름 입력" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -93,7 +94,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="아이디"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:fontFamily="@font/pretendard_medium"
                 android:textColor="@color/textgray"
                 android:textStyle="bold"
@@ -106,7 +107,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/idTextInputLayout"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 app:boxBackgroundMode="none"
                 app:hintEnabled="false"
                 app:layout_constraintStart_toStartOf="parent"
@@ -126,14 +127,15 @@
                     android:drawableStart="@drawable/baseline_account_circle_24"
                     android:drawablePadding="12dp"
                     android:drawableTint="@color/icongray"
-                    android:hint="아이디를 입력해주세요" />
+                    android:includeFontPadding="false"
+                    android:hint="아이디 입력" />
 
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/checkButton"
                 android:layout_width="wrap_content"
-                android:layout_height="0dp"
+                android:layout_height="52dp"
                 app:layout_constraintStart_toEndOf="@id/idTextInputLayout"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="@id/idTextInputLayout"
@@ -141,7 +143,7 @@
                 app:cornerRadius="8dp"
                 android:text="중복 확인"
                 android:textColor="@color/white"
-                android:textSize="13sp"
+                android:textSize="12sp"
                 android:backgroundTint="@color/blue"
                 android:layout_marginEnd="24dp"
                 android:paddingLeft="12dp"
@@ -155,7 +157,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="이메일"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:fontFamily="@font/pretendard_medium"
                 android:textColor="@color/textgray"
                 android:textStyle="bold"
@@ -168,7 +170,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/emailTextInputLayout"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 app:boxBackgroundMode="none"
                 app:hintEnabled="false"
                 app:layout_constraintStart_toStartOf="parent"
@@ -185,6 +187,7 @@
                     android:background="@drawable/bg_rounded_edittext"
                     android:backgroundTint="@color/gray"
                     android:drawableStart="@drawable/baseline_email_24"
+                    android:includeFontPadding="false"
                     android:drawablePadding="12dp"
                     android:drawableTint="@color/icongray"
                     android:hint="example@email.com" />
@@ -196,7 +199,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="비밀번호"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:fontFamily="@font/pretendard_medium"
                 android:textColor="@color/textgray"
                 android:textStyle="bold"
@@ -209,7 +212,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/passwordTextInputLayout"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 app:boxBackgroundMode="none"
                 app:hintEnabled="false"
                 app:layout_constraintStart_toStartOf="parent"
@@ -227,9 +230,10 @@
                     android:layout_height="wrap_content"
                     android:background="@drawable/bg_rounded_edittext"
                     android:backgroundTint="@color/gray"
-                    android:drawableStart="@drawable/lock"
+                    android:drawableStart="@drawable/baseline_lock_24"
                     android:drawablePadding="12dp"
                     android:drawableTint="@color/icongray"
+                    android:includeFontPadding="false"
                     android:hint="8자 이상 입력" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -267,7 +271,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="비밀번호 확인"
-                android:textSize="16sp"
+                android:textSize="14sp"
                 android:fontFamily="@font/pretendard_medium"
                 android:textColor="@color/textgray"
                 android:textStyle="bold"
@@ -280,7 +284,7 @@
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/passwordCheckTextInputLayout"
                 android:layout_width="0dp"
-                android:layout_height="wrap_content"
+                android:layout_height="52dp"
                 app:boxBackgroundMode="none"
                 app:hintEnabled="false"
                 app:layout_constraintStart_toStartOf="parent"
@@ -290,6 +294,7 @@
                 android:layout_marginHorizontal="24dp"
                 app:errorEnabled="true"
                 app:helperTextEnabled="true"
+
                 >
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -301,10 +306,11 @@
                     android:drawableStart="@drawable/baseline_lock_check_24"
                     android:drawablePadding="12dp"
                     android:drawableTint="@color/icongray"
+                    android:includeFontPadding="false"
                     android:hint="비밀번호 재입력" />
 
             </com.google.android.material.textfield.TextInputLayout>
-            
+
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/termsCardView"
                 android:layout_width="0dp"
@@ -312,11 +318,11 @@
                 app:layout_constraintStart_toStartOf="@id/passwordCheckTextInputLayout"
                 app:layout_constraintTop_toBottomOf="@id/passwordCheckTextInputLayout"
                 app:layout_constraintEnd_toEndOf="@id/passwordCheckTextInputLayout"
-                android:layout_marginTop="10dp"
+                android:layout_marginTop="24dp"
                 app:cardCornerRadius="12dp"
                 app:cardBackgroundColor="@color/gray"
                 >
-                
+
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -385,7 +391,7 @@
                                 android:layout_height="wrap_content"
                                 android:text="이용약관 동의서"
                                 android:textColor="@color/textgray"
-                                android:textSize="14sp"
+                                android:textSize="12sp"
                                 android:fontFamily="@font/pretendard_medium"
                                 android:includeFontPadding="false"
                                 android:paddingBottom="1dp"
@@ -397,7 +403,7 @@
                                 android:text="(필수)"
                                 android:textColor="@color/blue"
                                 android:layout_marginStart="5dp"
-                                android:textSize="14sp"
+                                android:textSize="12sp"
                                 android:fontFamily="@font/pretendard_medium"
                                 android:includeFontPadding="false"
                                 android:paddingBottom="2dp"
@@ -414,7 +420,7 @@
                             android:layout_height="wrap_content"
                             android:text="보기"
                             android:textColor="@color/textgray"
-                            android:textSize="14sp"
+                            android:textSize="12sp"
                             android:fontFamily="@font/pretendard_medium"
                             android:includeFontPadding="false"
                             android:paddingBottom="1dp"
@@ -450,9 +456,9 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="개인정보 수 및 이용 동의서"
+                            android:text="개인정보 수집 및 이용 동의서"
                             android:textColor="@color/textgray"
-                            android:textSize="14sp"
+                            android:textSize="12sp"
                             android:fontFamily="@font/pretendard_medium"
                             android:includeFontPadding="false"
                             android:textStyle="bold"
@@ -463,7 +469,7 @@
                             android:text="(필수)"
                             android:textColor="@color/blue"
                             android:layout_marginStart="5dp"
-                            android:textSize="14sp"
+                            android:textSize="12sp"
                             android:fontFamily="@font/pretendard_medium"
                             android:includeFontPadding="false"
                             android:paddingBottom="1dp"
@@ -479,7 +485,7 @@
                             android:paddingBottom="1dp"
                             android:text="보기"
                             android:textColor="@color/textgray"
-                            android:textSize="14sp"
+                            android:textSize="12sp"
                             android:textStyle="bold"
                             android:layout_marginEnd="35dp"/>
 
@@ -499,6 +505,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/termsCardView"
+                app:layout_constraintBottom_toBottomOf="parent"
                 android:layout_marginTop="15dp"
                 android:backgroundTint="@color/blue"
                 android:text="집좀보자 시작하기"
@@ -507,41 +514,10 @@
                 app:cornerRadius="8dp"
                 android:fontFamily="@font/pretendard_bold"
                 android:layout_marginHorizontal="24dp"
+                android:layout_marginBottom="50dp"
+
                 android:gravity="center"
                 />
-
-            <TextView
-                android:id="@+id/havingIDTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="이미 계정이 있으신가요?"
-                android:layout_marginTop="6dp"
-                app:layout_constraintStart_toStartOf="@id/confirmButton"
-                app:layout_constraintTop_toBottomOf="@id/confirmButton"
-                android:layout_marginStart="65dp"
-                android:fontFamily="@font/pretendard_medium"
-                android:textColor="@color/textgray"
-                android:paddingStart="15dp"
-                />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="로그인"
-                android:layout_marginStart="4dp"
-                android:textColor="@color/blue"
-                android:fontFamily="@font/pretendard_bold"
-                app:layout_constraintStart_toEndOf="@id/havingIDTextView"
-                app:layout_constraintTop_toTopOf="@id/havingIDTextView"
-                />
-
-            <View
-                android:layout_width="wrap_content"
-                android:layout_height="50dp"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/havingIDTextView"
-                />
-
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

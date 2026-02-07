@@ -55,7 +55,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/idTextInputLayout"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="52dp"
         app:boxBackgroundMode="none"
         app:hintEnabled="false"
         app:layout_constraintStart_toStartOf="parent"
@@ -63,6 +63,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginTop="10dp"
         android:layout_marginHorizontal="24dp"
+        app:startIconScaleType="centerInside"
         >
 
         <com.google.android.material.textfield.TextInputEditText
@@ -72,8 +73,10 @@
             android:background="@drawable/bg_rounded_edittext"
             android:backgroundTint="@color/gray"
             android:hint="아이디 입력"
-            android:drawableStart="@drawable/person"
+            android:textColorHint="#AFAEAE"
+            android:drawableStart="@drawable/round_person_24"
             android:drawablePadding="12dp"
+            android:includeFontPadding="false"
             android:drawableTint="@color/icongray" />
 
     </com.google.android.material.textfield.TextInputLayout>
@@ -96,7 +99,7 @@
     <com.google.android.material.textfield.TextInputLayout
         android:id="@+id/passwordTextInputLayout"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="52dp"
         android:layout_marginTop="10dp"
         app:boxBackgroundMode="none"
         app:hintEnabled="false"
@@ -114,10 +117,12 @@
             android:layout_height="wrap_content"
             android:background="@drawable/bg_rounded_edittext"
             android:backgroundTint="@color/gray"
-            android:drawableStart="@drawable/lock"
+            android:drawableStart="@drawable/baseline_lock_24"
             android:drawablePadding="12dp"
             android:drawableTint="@color/icongray"
+            android:includeFontPadding="false"
             android:hint="비밀번호 입력"
+            android:textColorHint="#AFAEAE"
             android:inputType="textPassword"
             android:textColor="@color/darkgray" />
 
@@ -134,6 +139,7 @@
         android:backgroundTint="@color/blue"
         android:text="로그인"
         android:textStyle="bold"
+        android:textColor="@color/white"
         android:textSize="18sp"
         app:cornerRadius="12dp"
         android:fontFamily="@font/pretendard_bold"
