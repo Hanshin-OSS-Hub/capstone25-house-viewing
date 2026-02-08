@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Table(name = "houses")
 @NoArgsConstructor @Getter
 public class HouseEntity extends BaseTimeEntity {
 
