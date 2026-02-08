@@ -30,4 +30,9 @@ public class HouseEntity extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     MonitoringStatus monitoringStatus;
+
+    public HouseEntity(String nickname, Address address) {
+        this.nickname = nickname;
+        this.address = address;
+    }
 }
