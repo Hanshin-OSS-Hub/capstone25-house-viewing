@@ -1,4 +1,4 @@
-package com.house.houseviewing.domain.user.entity;
+package com.house.houseviewing.domain.common;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EntityListeners;

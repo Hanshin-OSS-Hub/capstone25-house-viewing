@@ -1,5 +1,6 @@
 package com.house.houseviewing.domain.user.entity;
 
+import com.house.houseviewing.domain.common.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
