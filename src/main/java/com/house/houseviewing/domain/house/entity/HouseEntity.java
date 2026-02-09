@@ -7,6 +7,7 @@ import com.house.houseviewing.domain.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Entity
 @Table(name = "houses")
@@ -17,6 +18,7 @@ public class HouseEntity extends BaseTimeEntity {
     @Column(name = "house_id")
     private Long id;
 
+    @Setter
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserEntity userEntity;
