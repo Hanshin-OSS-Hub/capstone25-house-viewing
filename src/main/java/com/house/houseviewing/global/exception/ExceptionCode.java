@@ -11,7 +11,8 @@ public enum ExceptionCode {
     LOGIN_FAILED("VP001",HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 틀렸습니다."),
     FIND_LOGIN_ID_FAILED("VP002",HttpStatus.BAD_REQUEST, "이메일 또는 아이디가 틀렸습니다."),
     VERIFY_PASSWORD_FAILED("VP003", HttpStatus.BAD_REQUEST, "입력하신 정보가 틀렸습니다."),
-    MISMATCH_PASSWORD("VP004", HttpStatus.BAD_REQUEST, "입력하신 정보가 틀렸습니다.");
+    MISMATCH_PASSWORD("VP004", HttpStatus.BAD_REQUEST, "입력하신 정보가 틀렸습니다."),
+    USER_NOT_FOUND("NF001", HttpStatus.NOT_FOUND, "해당 사용자는 존재하지 않습니다.");
 
 
 

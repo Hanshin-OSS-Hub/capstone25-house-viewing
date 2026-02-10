@@ -1,8 +1,9 @@
 package com.house.houseviewing.domain.house.service;
 
-import com.house.houseviewing.domain.common.Address;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
+import com.house.houseviewing.domain.house.model.register.HouseRegisterRQ;
 import com.house.houseviewing.domain.house.repository.HouseRepository;
+import com.house.houseviewing.domain.house.util.JsonUtil;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
 import com.house.houseviewing.domain.user.repository.UserRepository;
@@ -13,8 +14,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @SpringBootTest
 @Transactional
@@ -27,38 +26,44 @@ class HouseServiceTest {
     @Autowired HouseRepository houseRepository;
 
     @Test
-    @DisplayName("엔티티 연관관계 확인")
-    void 연관관계(){
-        UserRegisterRQ request = new UserRegisterRQ("유인근", "yooyoo9191@gmail.com", "yooyoo9191", "okok0635!");
-        Long id = userService.register(request);
-        UserEntity user = userRepository.findById(id).get();
+    @DisplayName("집 등록")
+    void 집_등록(){
 
-        Address address = new Address("경기도 오산시", "양산동 387", "18123");
-        HouseEntity house1 = new HouseEntity("우리집1", address);
-        HouseEntity house2 = new HouseEntity("우리집2", address);
+        UserEntity user = userRegister();
+        HouseEntity house = houseRegister(user.getId());
 
-        user.addHouse(house1);
-        user.addHouse(house2);
-
-        houseRepository.save(house1);
-        houseRepository.save(house2);
-
-        List<HouseEntity> houses = user.getHouses();
-        for (HouseEntity house : houses) {
-            System.out.println("house = " + house.getNickname());
-        }
+        Assertions.assertThat(user).isEqualTo(house.getUserEntity());
     }
 
-    private static HouseEntity registerHouse() {
-        Address address = new Address("경기도 오산시", "양산동 387", "18123");
-        return new HouseEntity("우리집", address);
-    }
-
-    private UserEntity user() {
-        UserRegisterRQ request = new UserRegisterRQ("유인근", "yooyoo9191@gmail.com", "yooyoo9191", "okok0635!");
-        Long id = userService.register(request);
-        UserEntity user = userRepository.findById(id).get();
+    UserEntity userRegister() {
+        String userJson = """
+                {
+                 "name": "유인근",
+                 "email": "yooyoo9191@gmail.com",
+                 "loginId": "yooyoo9191",
+                 "password": "okok0635!"
+                }
+                """;
+        UserRegisterRQ userRegisterRQ = JsonUtil.fromJson(userJson, UserRegisterRQ.class);
+        Long register = userService.register(userRegisterRQ);
+        UserEntity user = userRepository.findById(register).get();
         return user;
+    }
+
+    HouseEntity houseRegister(Long userid){
+        String houseJson = """
+                {
+                     "userId" : %d,
+                     "nickname" : "잠실 자취방",
+                     "city" : "서울 송파구",
+                     "street" : "송파동 173-6",
+                     "zipcode" : "11111"
+                }
+                """.formatted(userid);
+        HouseRegisterRQ registerRQ = JsonUtil.fromJson(houseJson, HouseRegisterRQ.class);
+        Long register = houseService.register(registerRQ);
+        HouseEntity house = houseRepository.findById(register).get();
+        return house;
     }
 
 }

@@ -24,7 +24,7 @@ public class UserController {
 
     private final UserService userService;
 
-    @PostMapping
+    @PostMapping("/register")
     public UserRegisterRS join(@Valid @RequestBody UserRegisterRQ request){
         Long userId = userService.register(request);
         return new UserRegisterRS(userId);

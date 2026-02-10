@@ -31,10 +31,12 @@ public class HouseEntity extends BaseTimeEntity {
     private Integer ltvScore;
 
     @Enumerated(EnumType.STRING)
-    MonitoringStatus monitoringStatus;
+    private MonitoringStatus monitoringStatus;
 
-    public HouseEntity(String nickname, Address address) {
+    public HouseEntity(String nickname, Address address, Integer ltvScore, MonitoringStatus monitoringStatus) {
         this.nickname = nickname;
         this.address = address;
+        this.ltvScore = ltvScore;
+        this.monitoringStatus = monitoringStatus;
     }
 }
