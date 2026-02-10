@@ -5,10 +5,15 @@
     <color name="blackTitle">#333333</color>
     <color name="gray">#F5F5F5</color>
     <color name="blue">#0056D2</color>
+    <color name="blue2">#2E72E4</color>
     <color name="darkgray">#666666</color>
     <color name="icongray">#909090</color>
     <color name="textgray">#757575</color>
     <color name="grayblue">#CDDEF4</color>
     <color name="coolgray">#F4F6FA</color>
     <color name="hintcolor">#AFAEAE</color>
+    <color name="textgreen">#1B5E20</color>
+    <color name="green">#D6EDD7</color>
+    <color name="amber">#EF9923</color>
+    <color name="red">#FF1C1C</color>
 </resources>

@@ -27,5 +27,14 @@ class MainActivity : AppCompatActivity() {
             v.setPadding(0, 0, 0, 0)
             insets
         }
+
+        // NOTE: ViewPager2에 카드 아이템들 연결하기 (나중에 API에서 받아온 데이터로 교체 예정)
+        val items = listOf(
+            HouseCardItem("서초 그랑자이 104동", "서울특별시 서초구 서초동 1234-56", 50),
+            HouseCardItem("마포 래미안 102동", "서울특별시 마포구 공덕동 11-22", 72),
+            HouseCardItem("강남 아이파크 203동", "서울특별시 강남구 역삼동 33-44", 66)
+        )
+
+        binding.viewpager.adapter = HouseCardAdapter(items)
     }
 }
