@@ -1,9 +1,10 @@
-package com.capstone.houseviewingapp
+package com.capstone.houseviewingapp.home
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
+import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.databinding.ItemHouseCardBinding
 
 data class HouseCardItem(
