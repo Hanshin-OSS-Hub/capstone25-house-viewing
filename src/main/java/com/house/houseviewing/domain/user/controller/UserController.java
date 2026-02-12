@@ -11,6 +11,8 @@ import com.house.houseviewing.domain.user.model.register.UserRegisterRS;
 import com.house.houseviewing.domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -20,27 +22,30 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
+@Slf4j
 public class UserController {
 
     private final UserService userService;
 
     @PostMapping("/register")
-    public UserRegisterRS join(@Valid @RequestBody UserRegisterRQ request){
+    public ResponseEntity<UserRegisterRS> join(@Valid @RequestBody UserRegisterRQ request){
         Long userId = userService.register(request);
-        return new UserRegisterRS(userId);
+        UserRegisterRS result = new UserRegisterRS(userId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @PostMapping("/login")
-    public UserLoginRS login(@Valid @RequestBody UserLoginRQ request){
+    public ResponseEntity<UserLoginRS> login(@Valid @RequestBody UserLoginRQ request){
         Long userId = userService.login(request);
-        return new UserLoginRS(userId);
+        UserLoginRS result = new UserLoginRS(userId);
+        return ResponseEntity.ok().body(result);
     }
 
     @PostMapping("/find/id")
-    public UserFindIdRS findId(@Valid @RequestBody UserFindIdRQ request){
-
+    public ResponseEntity<UserFindIdRS> findId(@Valid @RequestBody UserFindIdRQ request){
         String loginId = userService.findId(request);
-        return new UserFindIdRS(loginId);
+        UserFindIdRS result = new UserFindIdRS(loginId);
+        return ResponseEntity.ok().body(result);
     }
 
     @PostMapping("/password/verify")
