@@ -15,6 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
 @SpringBootTest
 @Transactional
 class HouseServiceTest {
@@ -32,7 +36,23 @@ class HouseServiceTest {
         UserEntity user = userRegister();
         HouseEntity house = houseRegister(user.getId());
 
-        Assertions.assertThat(user).isEqualTo(house.getUserEntity());
+        assertThat(user).isEqualTo(house.getUserEntity());
+    }
+
+    @Test
+    @DisplayName("집 삭제")
+    void 집_삭제(){
+
+        // given
+        UserEntity user = userRegister();
+        HouseEntity house = houseRegister(user.getId());
+
+        // when
+        houseService.delete(house.getId());
+
+        // then
+        Optional<HouseEntity> result = houseRepository.findById(house.getId());
+        assertThat(result).isEmpty();
     }
 
     UserEntity userRegister() {
