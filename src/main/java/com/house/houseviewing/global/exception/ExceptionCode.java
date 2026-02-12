@@ -1,0 +1,37 @@
+package com.house.houseviewing.global.exception;
+
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+@Getter @AllArgsConstructor
+public enum ExceptionCode {
+
+    DUPLICATE_LOGIN_ID("DB001",HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다."),
+    DUPLICATE_EMAIL("DB002", HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
+    LOGIN_FAILED("VP001",HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 틀렸습니다."),
+    FIND_LOGIN_ID_FAILED("VP002",HttpStatus.BAD_REQUEST, "이메일 또는 아이디가 틀렸습니다."),
+    VERIFY_PASSWORD_FAILED("VP003", HttpStatus.BAD_REQUEST, "입력하신 정보가 틀렸습니다."),
+    MISMATCH_PASSWORD("VP004", HttpStatus.BAD_REQUEST, "입력하신 정보가 틀렸습니다."),
+    USER_NOT_FOUND("NF001", HttpStatus.NOT_FOUND, "해당 사용자는 존재하지 않습니다.");
+
+
+
+
+    private final String code;
+    private final HttpStatus status;
+    private final String message;
+}
+
+
+/*
+AU: 로그인, 권한 토큰 -> 보안 관련
+VP: 사용자가 잘못 보낸 값 -> 입력값 오류
+DB: 데이터 충돌, 무결성 깨짐
+ER: 서버가 터짐
+NF: 리소스 없음
+
+400: 입력값 오류
+401: 신원 인증 실패
+409: 이미 있던 데이터와 충돌(중복)
+ */
