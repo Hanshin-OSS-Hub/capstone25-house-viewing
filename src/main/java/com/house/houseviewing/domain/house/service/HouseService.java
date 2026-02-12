@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 
 @Service
 @Transactional(readOnly = true)
@@ -36,4 +38,11 @@ public class HouseService {
         return house.getId();
     }
 
+    @Transactional
+    public void delete(Long houseId){
+        HouseEntity saved = houseRepository.findById(houseId)
+                .orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
+
+        houseRepository.deleteById(saved.getId());
+    }
 }

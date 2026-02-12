@@ -17,6 +17,7 @@ public enum ExceptionCode {
 
 
 
+
     private final String code;
     private final HttpStatus status;
     private final String message;
