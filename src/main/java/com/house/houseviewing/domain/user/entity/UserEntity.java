@@ -19,13 +19,16 @@ public class UserEntity extends BaseTimeEntity {
     @Column(name = "user_id")
     private Long id;
 
+    @Column(nullable = false)
     private String name;
 
+    @Column(nullable = false)
     private String email;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String loginId;
 
+    @Column(nullable = false)
     private String password;
 
     public void updatePassword(String password){
