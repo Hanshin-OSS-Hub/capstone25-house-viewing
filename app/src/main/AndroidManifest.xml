@@ -13,6 +13,9 @@
         android:theme="@style/Theme.HouseViewingApp"
         android:windowSoftInputMode="adjustResize">
         <activity
+            android:name=".registration.HouseRegistrationActivity"
+            android:exported="false" />
+        <activity
             android:name=".login.ResetPasswordActivity"
             android:exported="false" />
         <activity

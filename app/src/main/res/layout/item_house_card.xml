@@ -11,6 +11,7 @@
     app:strokeColor="@color/gray">
 
     <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/homeCard"
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 

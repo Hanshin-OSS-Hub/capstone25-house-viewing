@@ -1,5 +1,6 @@
 package com.capstone.houseviewingapp.home
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -8,6 +9,7 @@ import android.widget.Toast
 import androidx.fragment.app.Fragment
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.databinding.FragmentHomeBinding
+import com.capstone.houseviewingapp.registration.HouseRegistrationActivity
 
 class HomeFragment : Fragment (R.layout.fragment_home) {
 
@@ -44,6 +46,8 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
         //NOTE: 빈 화면에서 집 정보를 직접 입력하고 추가하는 방식
         binding.emptylayout.plusHouseButton.setOnClickListener {
             Toast.makeText(requireContext(), "살려줘....", Toast.LENGTH_SHORT).show()
+            val intent = Intent(requireContext(), HouseRegistrationActivity::class.java)
+            startActivity(intent)
         }
 
 

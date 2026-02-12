@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:padding="24dp"
+    android:background="@color/coolgray">
+
+    <TextView
+        android:id="@+id/infoTitleTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        android:text="등록하실 주택의\n기본 정보를 입력해주세요"
+        android:textSize="24dp"
+        android:fontFamily="@font/pretendard_bold"
+        android:includeFontPadding="false"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
+
+    <TextView
+        android:id="@+id/infoDescTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="정확한 주소를 입력해주세요"
+        android:fontFamily="@font/pretendard_medium"
+        android:textColor="@color/textgray"
+        android:includeFontPadding="false"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/infoTitleTextView"
+        android:layout_marginTop="8dp"
+        />
+
+    <TextView
+        android:id="@+id/houseNicknameLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="주택 닉네임"
+        android:textSize="16sp"
+        android:fontFamily="@font/pretendard_medium"
+        android:textColor="@color/textgray"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/infoDescTextView"
+        android:layout_marginTop="24dp"
+        />
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/houseNicknameTextInputLayout"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:boxBackgroundMode="none"
+        app:hintEnabled="false"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/houseNicknameLabel"
+        android:layout_marginTop="10dp"
+        >
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/houseNicknameEditText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_rounded_edittext"
+            android:backgroundTint="#90D8DFEA" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

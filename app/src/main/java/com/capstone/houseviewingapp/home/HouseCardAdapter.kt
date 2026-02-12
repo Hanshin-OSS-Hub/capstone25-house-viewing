@@ -43,6 +43,13 @@ data class HouseCardItem(
                 progressBar.setIndicatorColor(c)
                 percentText.setTextColor(c)
 
+                moreButton.setOnClickListener {
+                    //TODO : 수정, 삭제, 추가 기능 구현
+                }
+
+                homeCard.setOnClickListener {
+                    //TODO : 상세 페이지로 이동 기능 구현
+                }
             }
         }
     
