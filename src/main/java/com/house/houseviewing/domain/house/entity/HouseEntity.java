@@ -27,14 +27,13 @@ public class HouseEntity extends BaseTimeEntity {
     @JoinColumn(name = "user_id")
     private UserEntity userEntity;
 
-    @OneToMany(mappedBy = "contract_id")
+    @OneToMany(mappedBy = "houseEntity")
     private List<ContractEntity> contracts = new ArrayList<>();
 
     @Column(nullable = false)
     private String nickname;
 
     @Embedded
-    @Column(nullable = false)
     private Address address;
 
     private Integer ltvScore;
