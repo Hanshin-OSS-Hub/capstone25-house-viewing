@@ -14,6 +14,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -24,19 +25,25 @@ public class UserService {
     @Transactional
     public Long register(UserRegisterRQ request){
 
-        UserEntity userEntity = new UserEntity(
-                request.getName(),
-                request.getEmail(),
-                request.getLoginId(),
-                request.getPassword());
+        if(userRepository.existsByLoginId(request.getLoginId())){
+            throw new AppException(ExceptionCode.DUPLICATE_LOGIN_ID);
+        }
+        if(userRepository.existsByEmail(request.getEmail())){
+            throw new AppException(ExceptionCode.DUPLICATE_EMAIL);
+        }
 
         try{
-            userRepository.save(userEntity);
+            UserEntity userEntity = new UserEntity(
+                    request.getName(),
+                    request.getEmail(),
+                    request.getLoginId(),
+                    request.getPassword());
+            UserEntity saved = userRepository.save(userEntity);
+
+            return saved.getId();
         } catch (DataIntegrityViolationException e){
             throw new AppException(ExceptionCode.DUPLICATE_LOGIN_ID);
         }
-
-        return userEntity.getId();
     }
 
     public Long login(UserLoginRQ request){

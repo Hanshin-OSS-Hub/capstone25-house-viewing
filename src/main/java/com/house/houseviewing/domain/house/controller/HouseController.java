@@ -5,6 +5,7 @@ import com.house.houseviewing.domain.house.model.register.HouseRegisterRQ;
 import com.house.houseviewing.domain.house.service.HouseService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -23,6 +24,6 @@ public class HouseController {
 
         HouseRegisterRQ registerRQ = new HouseRegisterRQ(request.getUserId(), request.getNickname(), request.getCity(), request.getStreet(), request.getZipcode());
         houseService.register(registerRQ);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
