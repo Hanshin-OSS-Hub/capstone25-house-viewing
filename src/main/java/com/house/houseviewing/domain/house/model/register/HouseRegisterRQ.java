@@ -16,12 +16,7 @@ public class HouseRegisterRQ {
     @NotBlank(message = "주택 이름은 필수입니다.")
     private String nickname;
 
-    private String city;
-    private String street;
-    private String zipcode;
-
-    public Address address(){
-        return new Address(city, street, zipcode);
-    }
+    @NotBlank(message = "주소 입력은 필수입니다.")
+    private String originAddress;
 
 }

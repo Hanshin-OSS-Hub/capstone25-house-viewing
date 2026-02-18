@@ -9,12 +9,11 @@ import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.repository.UserRepository;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
+import com.house.houseviewing.global.external.kakao.client.KakaoApiClientImpl;
+import com.house.houseviewing.global.external.kakao.service.KakaoAddressService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
-
 
 @Service
 @Transactional(readOnly = true)
@@ -23,14 +22,14 @@ public class HouseService {
 
     private final UserRepository userRepository;
     private final HouseRepository houseRepository;
+    private final KakaoAddressService kakaoAddressService;
 
     @Transactional
     public Long register(HouseRegisterRQ request){
 
         UserEntity user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
-
-        Address address = new Address(request.getCity(), request.getStreet(), request.getZipcode());
+        Address address = kakaoAddressService.parsingAddress(request.getOriginAddress());
         HouseEntity house = new HouseEntity(request.getNickname(), address, null, MonitoringStatus.OFFLINE);
         houseRepository.save(house);
         user.addHouse(house);

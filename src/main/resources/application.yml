@@ -28,4 +28,4 @@ logging:
 kakao:
   api:
     key: ${KAKAO_REST_API_KEY}
-    url: "https://dapi.kakao.com/v2/local/search/address.json"
+    url: https://dapi.kakao.com

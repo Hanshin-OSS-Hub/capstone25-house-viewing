@@ -1,5 +1,6 @@
 package com.house.houseviewing.domain.house.model.register;
 
+import com.house.houseviewing.domain.common.Address;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -8,4 +9,5 @@ import lombok.Getter;
 public class HouseRegisterRS {
 
     private Long houseId;
+
 }

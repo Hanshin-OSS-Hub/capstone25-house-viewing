@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Address {
 
+    private String originAddress; // 파싱 전 주소 문자열
+
     private String fullAddress; // 경기도 오산시 양산동 387, 105호
 
     private String sido; // 경기도, 서울시
@@ -23,4 +25,15 @@ public class Address {
 
     private String detailAddress; // 105호
 
+    public Address(String fullAddress) {
+        this.fullAddress = fullAddress;
+    }
+
+    public Address(String sido, String sigungu, String bname, String jibun, String detailAddress) {
+        this.sido = sido;
+        this.sigungu = sigungu;
+        this.bname = bname;
+        this.jibun = jibun;
+        this.detailAddress = detailAddress;
+    }
 }

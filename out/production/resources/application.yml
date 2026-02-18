@@ -18,7 +18,6 @@ spring:
       hibernate:
         format_sql: true # sql문을 정렬
 
-
 logging:
   level:
     root: info
@@ -26,3 +25,7 @@ logging:
     org.hibernate.SQL: debug # 실제 DB 로그를 보여줌
     org.hibernate.type.descriptor.sql.BasicBinder: trace # sql ? 값을 보여줌
 
+kakao:
+  api:
+    key: ${KAKAO_REST_API_KEY}
+    url: https://dapi.kakao.com

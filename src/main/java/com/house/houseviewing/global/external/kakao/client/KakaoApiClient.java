@@ -1,9 +1,9 @@
 package com.house.houseviewing.global.external.kakao.client;
 
 
-import com.house.houseviewing.global.external.kakao.dto.KakaoAddressRQ;
+import com.house.houseviewing.global.external.kakao.dto.KakaoAddressRS;
 
 public interface KakaoApiClient {
 
-    KakaoAddressRQ result(String query);
+    KakaoAddressRS searchAddress(String query);
 }
