@@ -10,4 +10,6 @@ public class HouseRegisterRS {
 
     private Long houseId;
 
+    private Address address;
+
 }

@@ -13,12 +13,4 @@ import static org.junit.jupiter.api.Assertions.*;
 @ActiveProfiles("test")
 class KakaoAddressServiceTest {
 
-    @Autowired KakaoAddressService kakaoAddressService;
-
-    @Test
-    @DisplayName("집 주소 데이터 파싱")
-    void 카카오_API(){
-        Address address = kakaoAddressService.parsingAddress("경기도 오산시 양산동 387, 105호");
-        System.out.println("address = " + address);
-    }
 }

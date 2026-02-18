@@ -28,12 +28,4 @@ public class Address {
     public Address(String fullAddress) {
         this.fullAddress = fullAddress;
     }
-
-    public Address(String sido, String sigungu, String bname, String jibun, String detailAddress) {
-        this.sido = sido;
-        this.sigungu = sigungu;
-        this.bname = bname;
-        this.jibun = jibun;
-        this.detailAddress = detailAddress;
-    }
 }

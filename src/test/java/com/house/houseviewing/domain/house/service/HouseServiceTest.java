@@ -2,6 +2,7 @@ package com.house.houseviewing.domain.house.service;
 
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.house.model.register.HouseRegisterRQ;
+import com.house.houseviewing.domain.house.model.register.HouseRegisterRS;
 import com.house.houseviewing.domain.house.repository.HouseRepository;
 import com.house.houseviewing.domain.house.util.JsonUtil;
 import com.house.houseviewing.domain.user.entity.UserEntity;
@@ -81,8 +82,8 @@ class HouseServiceTest {
                 }
                 """.formatted(userid);
         HouseRegisterRQ registerRQ = JsonUtil.fromJson(houseJson, HouseRegisterRQ.class);
-        Long register = houseService.register(registerRQ);
-        HouseEntity house = houseRepository.findById(register).get();
+        HouseRegisterRS register = houseService.register(registerRQ);
+        HouseEntity house = houseRepository.findById(register.getHouseId()).get();
         return house;
     }
 
