@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
-@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class HouseService {
 
@@ -37,14 +36,22 @@ public class HouseService {
                 .findFirst()
                 .orElseThrow(() -> new AppException(ExceptionCode.ADDRESS_NOT_FOUND));
         ParsedAddress parsedAddress = document.getParsedAddress();
-        Address address = new Address(request.getOriginAddress(), parsedAddress.getAddressName(), parsedAddress.getRegion1DepthName(),
+        String detailAddress = extractDetailAddress(request.getOriginAddress());
+        Address address = new Address(parsedAddress.getAddressName(), parsedAddress.getRegion1DepthName(),
                 parsedAddress.getRegion2DepthName(),parsedAddress.getRegion3DepthName(),
-                parsedAddress.getMainAddressNo(),parsedAddress.getSubAddressNo());
+                parsedAddress.getMainAddressNo(),parsedAddress.getSubAddressNo(),detailAddress);
         HouseEntity house = new HouseEntity(request.getNickname(), address, null, MonitoringStatus.OFFLINE);
         houseRepository.save(house);
         user.addHouse(house);
 
         return new HouseRegisterRS(house.getId(), house.getAddress());
+    }
+
+    private String extractDetailAddress(String originAddress) {
+        if (!originAddress.contains(",")) {
+            return null;
+        }
+        return originAddress.split(",")[1].trim(); //
     }
 
     @Transactional

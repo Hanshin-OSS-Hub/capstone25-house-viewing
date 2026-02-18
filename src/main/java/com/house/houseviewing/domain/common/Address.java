@@ -1,5 +1,6 @@
 package com.house.houseviewing.domain.common;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,21 +12,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Address {
 
-    private String originAddress; // 파싱 전 주소 문자열
+    private String addressName; // 서울 강남구 역삼동 830-31, 105호
 
-    private String fullAddress; // 경기도 오산시 양산동 387, 105호
+    private String region1DepthName; // 서울
 
-    private String sido; // 경기도, 서울시
+    private String region2DepthName; // 강남구
 
-    private String sigungu; // 오산시, 송파구
+    private String region3DepthName; // 역삼동
 
-    private String bname; // 양산동, 송파동
+    private String mainAddressNo; // 830
 
-    private String jibun; // 387, 173-6
+    private String subAddressNo; // 31
 
     private String detailAddress; // 105호
 
-    public Address(String fullAddress) {
-        this.fullAddress = fullAddress;
-    }
 }
