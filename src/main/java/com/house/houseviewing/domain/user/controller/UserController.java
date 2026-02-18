@@ -1,5 +1,6 @@
 package com.house.houseviewing.domain.user.controller;
 
+import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
 import com.house.houseviewing.domain.user.model.findid.UserFindIdRS;
 import com.house.houseviewing.domain.user.model.login.UserLoginRQ;
@@ -27,8 +28,8 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<UserRegisterRS> join(@Valid @RequestBody UserRegisterRQ request){
-        Long userId = userService.register(request);
-        UserRegisterRS result = new UserRegisterRS(userId);
+        UserEntity register = userService.register(request);
+        UserRegisterRS result = new UserRegisterRS(register.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
