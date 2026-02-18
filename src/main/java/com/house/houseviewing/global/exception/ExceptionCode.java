@@ -26,7 +26,9 @@ public enum ExceptionCode {
     VERIFY_PASSWORD_FAILED("VP003", HttpStatus.BAD_REQUEST, "입력하신 정보가 틀렸습니다."),
     MISMATCH_PASSWORD("VP004", HttpStatus.BAD_REQUEST, "입력하신 정보가 틀렸습니다."),
     USER_NOT_FOUND("NF001", HttpStatus.NOT_FOUND, "해당 사용자는 존재하지 않습니다."),
-    ADDRESS_NOT_FOUND("NF002", HttpStatus.BAD_REQUEST, "주소를 다시 확인해주세요.");
+    ADDRESS_NOT_FOUND("NF002", HttpStatus.BAD_REQUEST, "주소를 다시 확인해주세요."),
+    HOUSE_NOT_FOUND("NF003", HttpStatus.NOT_FOUND, "해당 집은 등록되지 않았습니다.");
+
 
     private final String code;
     private final HttpStatus status;

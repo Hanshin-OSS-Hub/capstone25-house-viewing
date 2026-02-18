@@ -39,6 +39,12 @@ public class ContractEntity extends BaseTimeEntity {
 
     private LocalDateTime confirmDate;
 
-
-
+    public ContractEntity(ContractType contractType, Long deposit, Long monthlyAmount, Long maintenanceFee, LocalDateTime moveDate, LocalDateTime confirmDate) {
+        this.contractType = contractType;
+        this.deposit = deposit;
+        this.monthlyAmount = monthlyAmount;
+        this.maintenanceFee = maintenanceFee;
+        this.moveDate = moveDate;
+        this.confirmDate = confirmDate;
+    }
 }
