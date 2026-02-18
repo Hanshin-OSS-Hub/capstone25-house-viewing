@@ -33,6 +33,7 @@ public class HouseService {
         HouseEntity house = new HouseEntity(request.getNickname(), address, null, MonitoringStatus.OFFLINE);
         HouseEntity savedHouse = houseRepository.save(house);
         user.addHouse(savedHouse);
+        house.setUserEntity(user);
         return savedHouse;
     }
 
