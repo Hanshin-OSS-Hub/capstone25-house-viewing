@@ -1,6 +1,5 @@
 package com.house.houseviewing.domain.house.model.register;
 
-import com.house.houseviewing.domain.common.Address;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

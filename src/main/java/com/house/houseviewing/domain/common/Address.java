@@ -1,6 +1,5 @@
 package com.house.houseviewing.domain.common;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
 import lombok.Getter;

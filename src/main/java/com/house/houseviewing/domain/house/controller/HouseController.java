@@ -19,7 +19,8 @@ public class HouseController {
 
     @PostMapping("/register")
     public ResponseEntity<HouseRegisterRS> join(@Valid @RequestBody HouseRegisterRQ request){
-        HouseRegisterRS register = houseService.register(request);
+        HouseEntity house = houseService.register(request);
+        HouseRegisterRS register = new HouseRegisterRS(request.getUserId(), house.getAddress());
         return ResponseEntity.status(HttpStatus.CREATED).body(register);
     }
 

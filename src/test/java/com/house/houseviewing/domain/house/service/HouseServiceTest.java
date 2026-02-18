@@ -82,8 +82,7 @@ class HouseServiceTest {
                 }
                 """.formatted(userid);
         HouseRegisterRQ registerRQ = JsonUtil.fromJson(houseJson, HouseRegisterRQ.class);
-        HouseRegisterRS register = houseService.register(registerRQ);
-        HouseEntity house = houseRepository.findById(register.getHouseId()).get();
+        HouseEntity house = houseService.register(registerRQ);
         return house;
     }
 
