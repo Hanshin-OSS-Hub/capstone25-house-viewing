@@ -19,9 +19,9 @@ public class HouseController {
 
     @PostMapping("/register")
     public ResponseEntity<HouseRegisterRS> join(@Valid @RequestBody HouseRegisterRQ request){
-        Long saved = houseService.register(request);
-        HouseRegisterRS result = new HouseRegisterRS(saved);
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+        HouseEntity house = houseService.register(request);
+        HouseRegisterRS register = new HouseRegisterRS(request.getUserId(), house.getAddress());
+        return ResponseEntity.status(HttpStatus.CREATED).body(register);
     }
 
     @DeleteMapping("/delete/{houseId}")

@@ -1,5 +1,6 @@
 package com.house.houseviewing.domain.user.controller;
 
+import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
 import com.house.houseviewing.domain.user.model.findid.UserFindIdRS;
 import com.house.houseviewing.domain.user.model.login.UserLoginRQ;
@@ -11,7 +12,6 @@ import com.house.houseviewing.domain.user.model.register.UserRegisterRS;
 import com.house.houseviewing.domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,15 +22,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/users")
-@Slf4j
 public class UserController {
 
     private final UserService userService;
 
     @PostMapping("/register")
     public ResponseEntity<UserRegisterRS> join(@Valid @RequestBody UserRegisterRQ request){
-        Long userId = userService.register(request);
-        UserRegisterRS result = new UserRegisterRS(userId);
+        UserEntity register = userService.register(request);
+        UserRegisterRS result = new UserRegisterRS(register.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 

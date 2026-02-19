@@ -30,13 +30,13 @@ class UserEntityServiceTest {
     void 회원가입_성공(){
         //given
         UserRegisterRQ request = new UserRegisterRQ("유인근", "yooyoo9191@gmail.com", "yooyoo9191", "okok0635!");
-        Long userId = userService.register(request);
+        UserEntity register = userService.register(request);
 
         //when
-        UserEntity userEntity = userRepository.findById(userId).get();
+        UserEntity userEntity = userRepository.findById(register.getId()).get();
 
         //then
-        assertThat(userEntity.getId()).isEqualTo(userId);
+        assertThat(userEntity.getId()).isEqualTo(register.getId());
         assertThat("유인근").isEqualTo(userEntity.getName());
         assertThat("yooyoo9191@gmail.com").isEqualTo(userEntity.getEmail());
         assertThat("yooyoo9191").isEqualTo(userEntity.getLoginId());
@@ -49,7 +49,7 @@ class UserEntityServiceTest {
     void 아이디_중복_예외발생(){
         //given
         UserRegisterRQ userDto = new UserRegisterRQ("유인근", "yooyoo9191@gmail.com", "yooyoo9191", "okok0635!");
-        Long savedId = userService.register(userDto);
+        userService.register(userDto);
 
         //when
 
@@ -120,8 +120,8 @@ class UserEntityServiceTest {
 
     private UserEntity user() {
         UserRegisterRQ request = new UserRegisterRQ("유인근", "yooyoo9191@gmail.com", "yooyoo9191", "okok0635!");
-        Long id = userService.register(request);
-        UserEntity user = userRepository.findById(id).get();
-        return user;
+        UserEntity register = userService.register(request);
+        UserEntity saved = userRepository.save(register);
+        return saved;
     }
 }

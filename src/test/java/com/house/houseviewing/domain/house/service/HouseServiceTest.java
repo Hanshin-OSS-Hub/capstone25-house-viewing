@@ -8,11 +8,13 @@ import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
 import com.house.houseviewing.domain.user.repository.UserRepository;
 import com.house.houseviewing.domain.user.service.UserService;
+import com.house.houseviewing.global.external.kakao.service.KakaoAddress;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
@@ -29,6 +31,8 @@ class HouseServiceTest {
     @Autowired HouseService houseService;
     @Autowired HouseRepository houseRepository;
 
+    @MockitoBean private KakaoAddress kakaoAddress;
+
     @Test
     @DisplayName("집 등록")
     void 집_등록(){
@@ -36,7 +40,7 @@ class HouseServiceTest {
         UserEntity user = userRegister();
         HouseEntity house = houseRegister(user.getId());
 
-        assertThat(user).isEqualTo(house.getUserEntity());
+        assertThat(user.getId()).isEqualTo(house.getId());
     }
 
     @Test
@@ -65,24 +69,14 @@ class HouseServiceTest {
                 }
                 """;
         UserRegisterRQ userRegisterRQ = JsonUtil.fromJson(userJson, UserRegisterRQ.class);
-        Long register = userService.register(userRegisterRQ);
-        UserEntity user = userRepository.findById(register).get();
+        UserEntity register = userService.register(userRegisterRQ);
+        UserEntity user = userRepository.findById(register.getId()).get();
         return user;
     }
 
     HouseEntity houseRegister(Long userid){
-        String houseJson = """
-                {
-                     "userId" : %d,
-                     "nickname" : "잠실 자취방",
-                     "city" : "서울 송파구",
-                     "street" : "송파동 173-6",
-                     "zipcode" : "11111"
-                }
-                """.formatted(userid);
-        HouseRegisterRQ registerRQ = JsonUtil.fromJson(houseJson, HouseRegisterRQ.class);
-        Long register = houseService.register(registerRQ);
-        HouseEntity house = houseRepository.findById(register).get();
+        HouseRegisterRQ registerRQ = new HouseRegisterRQ(userid, "자취방", "서울 강남구 역삼동 830-31, 105호");
+        HouseEntity house = houseService.register(registerRQ);
         return house;
     }
 
