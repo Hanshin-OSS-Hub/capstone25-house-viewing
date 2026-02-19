@@ -1,13 +1,18 @@
 package com.house.houseviewing.domain.contract.model;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.house.houseviewing.domain.contract.enums.ContractType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
+@AllArgsConstructor
+@Builder
 public class ContractRegisterRQ {
 
     private Long houseId;
@@ -25,13 +30,15 @@ public class ContractRegisterRQ {
     @NotNull(message = "월 관리비를 입력해주세요.")
     private Long maintenanceFee;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @NotNull(message = "전입날짜를 입력해주세요.")
-    private LocalDateTime moveDate;
+    private LocalDate moveDate;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @NotNull(message = "확정일자를 입력해주세요.")
-    private LocalDateTime confirmDate;
+    private LocalDate confirmDate;
 
-    public ContractRegisterRQ(ContractType contractType, Long deposit, Long monthlyAmount, Long maintenanceFee, LocalDateTime moveDate, LocalDateTime confirmDate) {
+    public ContractRegisterRQ(ContractType contractType, Long deposit, Long monthlyAmount, Long maintenanceFee, LocalDate moveDate, LocalDate confirmDate) {
         this.contractType = contractType;
         this.deposit = deposit;
         this.monthlyAmount = monthlyAmount;

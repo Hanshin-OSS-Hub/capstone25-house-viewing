@@ -69,8 +69,8 @@ class HouseServiceTest {
                 }
                 """;
         UserRegisterRQ userRegisterRQ = JsonUtil.fromJson(userJson, UserRegisterRQ.class);
-        Long register = userService.register(userRegisterRQ);
-        UserEntity user = userRepository.findById(register).get();
+        UserEntity register = userService.register(userRegisterRQ);
+        UserEntity user = userRepository.findById(register.getId()).get();
         return user;
     }
 

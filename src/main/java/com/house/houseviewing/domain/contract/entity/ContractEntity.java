@@ -5,13 +5,16 @@ import com.house.houseviewing.domain.contract.enums.ContractType;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "contracts")
 @Getter
+@NoArgsConstructor
 public class ContractEntity extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -35,11 +38,11 @@ public class ContractEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private Long maintenanceFee;
 
-    private LocalDateTime moveDate;
+    private LocalDate moveDate;
 
-    private LocalDateTime confirmDate;
+    private LocalDate confirmDate;
 
-    public ContractEntity(ContractType contractType, Long deposit, Long monthlyAmount, Long maintenanceFee, LocalDateTime moveDate, LocalDateTime confirmDate) {
+    public ContractEntity(ContractType contractType, Long deposit, Long monthlyAmount, Long maintenanceFee, LocalDate moveDate, LocalDate confirmDate) {
         this.contractType = contractType;
         this.deposit = deposit;
         this.monthlyAmount = monthlyAmount;
