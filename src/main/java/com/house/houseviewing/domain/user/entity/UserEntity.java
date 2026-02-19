@@ -2,6 +2,7 @@ package com.house.houseviewing.domain.user.entity;
 
 import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
+import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -42,6 +43,9 @@ public class UserEntity extends BaseTimeEntity {
         houses.add(house);
         house.setUserEntity(this);
     }
+
+    @OneToMany(mappedBy = "subscription")
+    private List<SubscriptionEntity> subscriptions = new ArrayList<>();
 
     public UserEntity(String name, String email, String loginId, String password) {
         this.name = name;
