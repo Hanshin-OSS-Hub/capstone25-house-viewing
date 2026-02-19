@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class SubscriptionUpdateRQ {
 
     private Long userId;

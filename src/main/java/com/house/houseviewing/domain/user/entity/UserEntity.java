@@ -44,7 +44,7 @@ public class UserEntity extends BaseTimeEntity {
         house.setUserEntity(this);
     }
 
-    @OneToMany(mappedBy = "subscription")
+    @OneToMany(mappedBy = "user")
     private List<SubscriptionEntity> subscriptions = new ArrayList<>();
 
     public UserEntity(String name, String email, String loginId, String password) {

@@ -2,7 +2,9 @@ package com.house.houseviewing.domain.subscription.model;
 
 import com.house.houseviewing.domain.subscription.enums.PlanType;
 import lombok.Builder;
+import lombok.Getter;
 
+@Getter
 @Builder
 public class SubscriptionUpdateRS {
 
