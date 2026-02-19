@@ -23,7 +23,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     @Transactional
-    public Long register(UserRegisterRQ request){
+    public UserEntity register(UserRegisterRQ request){
 
         if(userRepository.existsByLoginId(request.getLoginId())){
             throw new AppException(ExceptionCode.DUPLICATE_LOGIN_ID);
@@ -40,7 +40,7 @@ public class UserService {
                     request.getPassword());
             UserEntity saved = userRepository.save(userEntity);
 
-            return saved.getId();
+            return saved;
         } catch (DataIntegrityViolationException e){
             throw new AppException(ExceptionCode.DUPLICATE_LOGIN_ID);
         }
