@@ -7,12 +7,14 @@ import jakarta.validation.constraints.PositiveOrZero;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 
 @Getter
 @AllArgsConstructor
 @Builder
+@NoArgsConstructor
 public class ContractRegisterRQ {
 
     private Long houseId;
