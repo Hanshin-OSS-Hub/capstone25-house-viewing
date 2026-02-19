@@ -24,6 +24,7 @@ public class ContractService {
 
         HouseEntity house = houseRepository.findById(request.getHouseId())
                 .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
+
         ContractEntity contract = new ContractEntity(request.getContractType(), request.getDeposit(),
                 request.getMonthlyAmount(), request.getMaintenanceFee(), request.getMoveDate(), request.getConfirmDate());
 
