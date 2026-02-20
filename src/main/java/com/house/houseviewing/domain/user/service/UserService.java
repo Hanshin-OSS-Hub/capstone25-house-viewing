@@ -1,5 +1,9 @@
 package com.house.houseviewing.domain.user.service;
 
+import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
+import com.house.houseviewing.domain.subscription.model.SubscriptionUpdateRQ;
+import com.house.houseviewing.domain.subscription.service.SubscriptionService;
+import com.house.houseviewing.domain.user.enums.MonitoringStatus;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
@@ -21,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final SubscriptionService subscriptionService;
 
     @Transactional
     public UserEntity register(UserRegisterRQ request){
@@ -33,11 +38,14 @@ public class UserService {
         }
 
         try{
-            UserEntity userEntity = new UserEntity(
-                    request.getName(),
-                    request.getEmail(),
-                    request.getLoginId(),
-                    request.getPassword());
+            UserEntity userEntity = UserEntity.builder()
+                    .name(request.getName())
+                    .loginId(request.getLoginId())
+                    .email(request.getEmail())
+                    .password(request.getPassword())
+                    .monitoringStatus(MonitoringStatus.OFFLINE)
+                    .build();
+
             UserEntity saved = userRepository.save(userEntity);
 
             return saved;

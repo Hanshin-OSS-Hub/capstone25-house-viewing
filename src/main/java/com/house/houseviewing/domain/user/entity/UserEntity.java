@@ -2,11 +2,13 @@ package com.house.houseviewing.domain.user.entity;
 
 import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
+import com.house.houseviewing.domain.user.enums.MonitoringStatus;
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,6 +16,7 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @Getter @NoArgsConstructor
+@AllArgsConstructor @Builder
 public class UserEntity extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -39,6 +42,9 @@ public class UserEntity extends BaseTimeEntity {
     @OneToMany(mappedBy = "userEntity")
     private List<HouseEntity> houses = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    private MonitoringStatus monitoringStatus;
+
     public void addHouse(HouseEntity house){
         houses.add(house);
         house.setUserEntity(this);
@@ -47,13 +53,10 @@ public class UserEntity extends BaseTimeEntity {
     @OneToMany(mappedBy = "user")
     private List<SubscriptionEntity> subscriptions = new ArrayList<>();
 
-    public UserEntity(String name, String email, String loginId, String password) {
-        this.name = name;
-        this.email = email;
-        this.loginId = loginId;
+    public UserEntity(String password, String loginId, String email, String name) {
         this.password = password;
+        this.loginId = loginId;
+        this.email = email;
+        this.name = name;
     }
-
-
-
 }

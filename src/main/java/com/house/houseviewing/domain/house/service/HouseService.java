@@ -2,7 +2,7 @@ package com.house.houseviewing.domain.house.service;
 
 import com.house.houseviewing.domain.common.Address;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
-import com.house.houseviewing.domain.house.enums.MonitoringStatus;
+import com.house.houseviewing.domain.user.enums.MonitoringStatus;
 import com.house.houseviewing.domain.house.model.register.HouseRegisterRQ;
 import com.house.houseviewing.domain.house.repository.HouseRepository;
 import com.house.houseviewing.domain.user.entity.UserEntity;
@@ -30,7 +30,7 @@ public class HouseService {
 
         Address address = kakaoAddress.parsingAddress(request.getOriginAddress());
 
-        HouseEntity house = new HouseEntity(request.getNickname(), address, null, MonitoringStatus.OFFLINE);
+        HouseEntity house = new HouseEntity(request.getNickname(), address, null);
         HouseEntity savedHouse = houseRepository.save(house);
         user.addHouse(savedHouse);
         house.setUserEntity(user);
