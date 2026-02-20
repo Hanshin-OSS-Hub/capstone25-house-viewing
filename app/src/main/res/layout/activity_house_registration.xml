@@ -5,7 +5,8 @@
     android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".registration.HouseRegistrationActivity">
+    tools:context=".registration.HouseRegistrationActivity"
+    android:background="@color/coolgray">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/toolBar"
@@ -23,6 +24,7 @@
             android:src="@drawable/outline_arrow_back_ios_24" />
 
         <TextView
+            android:id="@+id/toolBarTextView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -55,7 +57,8 @@
         app:layout_constraintStart_toStartOf="@id/stepTextView"
         app:layout_constraintEnd_toEndOf="parent"
         android:layout_marginEnd="24dp"
-        app:trackColor="@color/gray"
+        app:trackColor="@color/grayblue"
+        app:indicatorColor="@color/blue"
         android:indeterminate="false"
         app:trackCornerRadius="4dp"
         app:trackStopIndicatorSize="0dp"
@@ -68,7 +71,6 @@
         android:id="@+id/registerationFragmentContainer"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="24dp"
         app:layout_constraintTop_toBottomOf="@id/registrationProgressBar"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
@@ -79,15 +81,16 @@
     <com.google.android.material.button.MaterialButton
         android:id="@+id/nextButton"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
+        android:layout_height="60dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:cornerRadius="8dp"
         android:backgroundTint="@color/blue"
         android:text="다음"
-        android:textSize="15sp"
+        android:textSize="18sp"
         android:textColor="@color/white"
+        android:layout_margin="24dp"
         />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

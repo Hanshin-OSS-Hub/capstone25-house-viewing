@@ -45,7 +45,6 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
 
         //NOTE: 빈 화면에서 집 정보를 직접 입력하고 추가하는 방식
         binding.emptylayout.plusHouseButton.setOnClickListener {
-            Toast.makeText(requireContext(), "살려줘....", Toast.LENGTH_SHORT).show()
             val intent = Intent(requireContext(), HouseRegistrationActivity::class.java)
             startActivity(intent)
         }
