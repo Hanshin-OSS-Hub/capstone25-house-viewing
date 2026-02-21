@@ -37,6 +37,7 @@ public class UserEntity extends BaseTimeEntity {
         this.password = password;
     }
 
+    @Builder.Default
     @OneToMany(mappedBy = "userEntity")
     private List<HouseEntity> houses = new ArrayList<>();
 
@@ -57,6 +58,6 @@ public class UserEntity extends BaseTimeEntity {
     }
 
     public boolean checkSubscription() {
-        return this.getSubscription().getPlanType() == PlanType.PREMIUM;
+        return this.getSubscription().getPlanType() == PlanType.PREMIUM && this.getSubscription() != null;
     }
 }
