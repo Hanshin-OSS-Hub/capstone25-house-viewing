@@ -16,4 +16,5 @@
     <color name="green">#D6EDD7</color>
     <color name="amber">#EF9923</color>
     <color name="red">#FF1C1C</color>
+    <color name="textviewgray">#E8EDF5</color>
 </resources>

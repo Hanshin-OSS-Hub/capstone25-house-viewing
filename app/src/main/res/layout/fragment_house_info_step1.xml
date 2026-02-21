@@ -68,7 +68,7 @@
             android:layout_height="wrap_content"
             android:background="@drawable/bg_rounded_edittext"
             android:backgroundTint="#90D8DFEA"
-            android:hint="닉네임을 입력해주세요 (예 : 우리집, 자취방)"/>
+            android:hint="닉네임을 입력해주세요"/>
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -170,7 +170,7 @@
                 android:textColor="@color/textgray"
                 android:fontFamily="@font/pretendard_medium"
                 android:includeFontPadding="false"
-                android:textSize="15sp" />
+                android:textSize="12sp" />
 
         </LinearLayout>
 

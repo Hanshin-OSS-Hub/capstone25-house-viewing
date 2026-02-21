@@ -80,6 +80,7 @@ class HouseRegistrationActivity : AppCompatActivity() {
         }
         if (currentStep == 2) {
             binding.toolBarTextView.text = "계약 정보 입력"
+            binding.nextButton.text = "다음"
         }
         if (currentStep == 3) {
             binding.nextButton.text = "문서 검증"
