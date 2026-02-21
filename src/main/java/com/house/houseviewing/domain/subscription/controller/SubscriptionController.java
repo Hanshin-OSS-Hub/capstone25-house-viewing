@@ -1,9 +1,8 @@
 package com.house.houseviewing.domain.subscription.controller;
 
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
-import com.house.houseviewing.domain.subscription.enums.PlanType;
-import com.house.houseviewing.domain.subscription.model.SubscriptionUpdateRQ;
-import com.house.houseviewing.domain.subscription.model.SubscriptionUpdateRS;
+import com.house.houseviewing.domain.subscription.model.SubscriptionPremiumRQ;
+import com.house.houseviewing.domain.subscription.model.SubscriptionPremiumRS;
 import com.house.houseviewing.domain.subscription.service.SubscriptionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,14 +20,13 @@ public class SubscriptionController {
 
     private final SubscriptionService subscriptionService;
 
-    @PostMapping("/register")
-    public ResponseEntity<SubscriptionUpdateRS> join(@Valid @RequestBody SubscriptionUpdateRQ request){
-        SubscriptionEntity register = subscriptionService.register(request);
-
-        SubscriptionUpdateRS result = SubscriptionUpdateRS.builder()
-                .userId(register.getUser().getId())
-                .subscriptionId(register.getId())
-                .planType(register.getPlanType())
+    @PostMapping("/premium")
+    public ResponseEntity<SubscriptionPremiumRS> premium(@Valid @RequestBody SubscriptionPremiumRQ request){
+        SubscriptionEntity subscription = subscriptionService.premium(request);
+        SubscriptionPremiumRS result = SubscriptionPremiumRS.builder()
+                .userId(subscription.getUser().getId())
+                .subscriptionId(subscription.getId())
+                .planType(subscription.getPlanType())
                 .build();
 
         return ResponseEntity.status(HttpStatus.OK).body(result);

@@ -21,6 +21,7 @@ public class SubscriptionEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PlanType planType;

@@ -6,7 +6,7 @@ import lombok.Getter;
 
 @Getter
 @Builder
-public class SubscriptionUpdateRS {
+public class SubscriptionPremiumRS {
 
     private Long userId;
 

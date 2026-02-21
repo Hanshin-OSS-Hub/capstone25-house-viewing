@@ -2,9 +2,7 @@ package com.house.houseviewing.domain.user.service;
 
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
-import com.house.houseviewing.domain.subscription.model.SubscriptionUpdateRQ;
 import com.house.houseviewing.domain.subscription.service.SubscriptionService;
-import com.house.houseviewing.domain.user.enums.MonitoringStatus;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
