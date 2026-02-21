@@ -5,10 +5,7 @@ import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.user.enums.MonitoringStatus;
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,16 +39,9 @@ public class UserEntity extends BaseTimeEntity {
     @OneToMany(mappedBy = "userEntity")
     private List<HouseEntity> houses = new ArrayList<>();
 
-    @Enumerated(EnumType.STRING)
-    private MonitoringStatus monitoringStatus;
-
-    public void addHouse(HouseEntity house){
-        houses.add(house);
-        house.setUserEntity(this);
-    }
-
-    @OneToMany(mappedBy = "user")
-    private List<SubscriptionEntity> subscriptions = new ArrayList<>();
+    @Setter
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private SubscriptionEntity subscription;
 
     public UserEntity(String password, String loginId, String email, String name) {
         this.password = password;
@@ -59,4 +49,10 @@ public class UserEntity extends BaseTimeEntity {
         this.email = email;
         this.name = name;
     }
+
+    public void addHouse(HouseEntity house){
+        houses.add(house);
+        house.setUserEntity(this);
+    }
+
 }

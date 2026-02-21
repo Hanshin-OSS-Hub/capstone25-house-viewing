@@ -1,6 +1,7 @@
 package com.house.houseviewing.domain.user.service;
 
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
+import com.house.houseviewing.domain.subscription.enums.PlanType;
 import com.house.houseviewing.domain.subscription.model.SubscriptionUpdateRQ;
 import com.house.houseviewing.domain.subscription.service.SubscriptionService;
 import com.house.houseviewing.domain.user.enums.MonitoringStatus;
@@ -17,6 +18,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDateTime;
 
 
 @Service
@@ -43,8 +46,15 @@ public class UserService {
                     .loginId(request.getLoginId())
                     .email(request.getEmail())
                     .password(request.getPassword())
-                    .monitoringStatus(MonitoringStatus.OFFLINE)
                     .build();
+
+            SubscriptionEntity subscription = SubscriptionEntity.builder()
+                    .user(userEntity)
+                    .planType(PlanType.FREE)
+                    .startedAt(LocalDateTime.now())
+                    .build();
+
+            userEntity.setSubscription(subscription);
 
             UserEntity saved = userRepository.save(userEntity);
 

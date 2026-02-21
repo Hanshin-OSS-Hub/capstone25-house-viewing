@@ -17,7 +17,7 @@ public class SubscriptionEntity {
     @Column(name = "subscription_id")
     private Long id;
 
-    @ManyToOne
+    @OneToOne
     @JoinColumn(name = "user_id")
     private UserEntity user;
 

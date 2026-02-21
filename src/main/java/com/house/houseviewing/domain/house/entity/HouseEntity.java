@@ -4,6 +4,7 @@ import com.house.houseviewing.domain.common.Address;
 import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
 import com.house.houseviewing.domain.user.entity.UserEntity;
+import com.house.houseviewing.domain.user.enums.MonitoringStatus;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
 import jakarta.persistence.*;
@@ -38,6 +39,9 @@ public class HouseEntity extends BaseTimeEntity {
     private Address address;
 
     private Integer ltvScore;
+
+    @Enumerated(EnumType.STRING)
+    private MonitoringStatus monitoringStatus;
 
     public void addContract(ContractEntity contract){
         checkContract(contract);
