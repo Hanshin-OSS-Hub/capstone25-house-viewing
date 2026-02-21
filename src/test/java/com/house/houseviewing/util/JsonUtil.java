@@ -1,4 +1,4 @@
-package com.house.houseviewing.domain.house.util;
+package com.house.houseviewing.util;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

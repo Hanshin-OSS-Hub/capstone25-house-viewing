@@ -4,9 +4,7 @@ import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.contract.enums.ContractType;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -15,6 +13,7 @@ import java.time.LocalDateTime;
 @Table(name = "contracts")
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor @Builder
 public class ContractEntity extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

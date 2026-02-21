@@ -1,4 +1,4 @@
-package com.house.houseviewing.domain.house.service;
+package com.house.houseviewing.service;
 
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
@@ -124,4 +124,6 @@ class UserEntityServiceTest {
         UserEntity saved = userRepository.save(register);
         return saved;
     }
+
 }
+
