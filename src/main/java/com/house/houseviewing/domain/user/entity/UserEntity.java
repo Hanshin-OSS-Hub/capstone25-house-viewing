@@ -2,6 +2,7 @@ package com.house.houseviewing.domain.user.entity;
 
 import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
+import com.house.houseviewing.domain.subscription.enums.PlanType;
 import com.house.houseviewing.domain.user.enums.MonitoringStatus;
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import jakarta.persistence.*;
@@ -55,4 +56,7 @@ public class UserEntity extends BaseTimeEntity {
         house.setUserEntity(this);
     }
 
+    public boolean checkSubscription() {
+        return this.getSubscription().getPlanType() == PlanType.PREMIUM;
+    }
 }

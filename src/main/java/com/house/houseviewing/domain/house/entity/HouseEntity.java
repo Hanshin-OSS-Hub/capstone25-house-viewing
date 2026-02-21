@@ -3,6 +3,7 @@ package com.house.houseviewing.domain.house.entity;
 import com.house.houseviewing.domain.common.Address;
 import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
+import com.house.houseviewing.domain.subscription.enums.PlanType;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.enums.MonitoringStatus;
 import com.house.houseviewing.global.exception.AppException;
@@ -40,6 +41,7 @@ public class HouseEntity extends BaseTimeEntity {
 
     private Integer ltvScore;
 
+    @Setter
     @Enumerated(EnumType.STRING)
     private MonitoringStatus monitoringStatus;
 

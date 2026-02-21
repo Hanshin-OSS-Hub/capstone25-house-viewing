@@ -32,6 +32,9 @@ public class HouseService {
 
         HouseEntity house = new HouseEntity(request.getNickname(), address, null);
         HouseEntity savedHouse = houseRepository.save(house);
+        if(user.checkSubscription()){
+            savedHouse.setMonitoringStatus(MonitoringStatus.LIVE);
+        }
         user.addHouse(savedHouse);
         house.setUserEntity(user);
         return savedHouse;
