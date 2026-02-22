@@ -30,6 +30,7 @@ public class HouseEntity extends BaseTimeEntity {
     private UserEntity userEntity;
 
     @OneToMany(mappedBy = "houseEntity")
+    @Builder.Default
     private List<ContractEntity> contracts = new ArrayList<>();
 
     @Column(nullable = false)
@@ -44,16 +45,16 @@ public class HouseEntity extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private MonitoringStatus monitoringStatus;
 
-    public void addContract(ContractEntity contract){
-        checkContract(contract);
-        contracts.add(contract);
-        contract.setHouseEntity(this);
-    }
-
     public HouseEntity(String nickname, Address address, Integer ltvScore) {
         this.nickname = nickname;
         this.address = address;
         this.ltvScore = ltvScore;
+    }
+
+    public void addContract(ContractEntity contract){
+        checkContract(contract);
+        contracts.add(contract);
+        contract.setHouseEntity(this);
     }
 
     public void checkContract(ContractEntity contract) {
