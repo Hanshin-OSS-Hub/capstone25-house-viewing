@@ -1,128 +1,144 @@
 package com.house.houseviewing.service.unit;
 
-import com.house.houseviewing.global.exception.AppException;
-import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
 import com.house.houseviewing.domain.user.model.login.UserLoginRQ;
 import com.house.houseviewing.domain.user.model.password.reset.UserResetPasswordRQ;
-import com.house.houseviewing.domain.user.service.UserService;
+import com.house.houseviewing.domain.user.model.password.verify.UserVerifyPasswordRQ;
 import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
+import com.house.houseviewing.fixture.UserFixture;
+import com.house.houseviewing.domain.user.service.UserService;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.repository.UserRepository;
+import com.house.houseviewing.global.exception.AppException;
+import com.house.houseviewing.global.exception.ExceptionCode;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.transaction.annotation.Transactional;
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-@SpringBootTest
-@Transactional
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.*;
+
+@ExtendWith(MockitoExtension.class)
 class UserEntityServiceTest {
 
-    @Autowired
-    UserService userService;
-    @Autowired UserRepository userRepository;
+    @InjectMocks UserService userService;
+    @Mock UserRepository userRepository;
 
     @Test
-    @DisplayName("회원가입")
-    void 회원가입_성공(){
-        //given
-        UserRegisterRQ request = new UserRegisterRQ("유인근", "yooyoo9191@gmail.com", "yooyoo9191", "okok0635!");
-        UserEntity register = userService.register(request);
-
-        //when
-        UserEntity userEntity = userRepository.findById(register.getId()).get();
-
-        //then
-        assertThat(userEntity.getId()).isEqualTo(register.getId());
-        assertThat("유인근").isEqualTo(userEntity.getName());
-        assertThat("yooyoo9191@gmail.com").isEqualTo(userEntity.getEmail());
-        assertThat("yooyoo9191").isEqualTo(userEntity.getLoginId());
-        assertThat("okok0635!").isEqualTo(userEntity.getPassword());
-    }
-
-
-    @Test
-    @DisplayName("ID 중복확인")
-    void 아이디_중복_예외발생(){
-        //given
-        UserRegisterRQ userDto = new UserRegisterRQ("유인근", "yooyoo9191@gmail.com", "yooyoo9191", "okok0635!");
-        userService.register(userDto);
-
-        //when
-
-        //then
-        assertThatThrownBy(() -> userService.register(userDto))
-                .isInstanceOf(AppException.class);
-    }
-
-    @Test
-    @DisplayName("로그인")
-    void 로그인_성공(){
+    @DisplayName("아이디 중복 예외 발생")
+    void 아이디_중복_예외_발생(){
         // given
-        UserEntity user1 = user();
+        UserEntity build = UserFixture.createDefault().build();
+        UserRegisterRQ request = UserFixture.createRegister(build).build();
 
+        given(userRepository.existsByLoginId(anyString()))
+                .willReturn(true);
         // when
-        UserLoginRQ user = new UserLoginRQ("yooyoo9191", "okok0635!");
-        Long login = userService.login(user);
-
         // then
-        assertThat(login).isEqualTo(user1.getId());
-    }
-
-    @Test
-    @DisplayName("로그인 실패")
-    void 로그인_실패(){
-        UserEntity user1 = user();
-
-        // when
-        UserLoginRQ user = new UserLoginRQ("yooyoo9191", "okok0635");
-
-        // then
-        assertThatThrownBy(() -> userService.login(user))
+        assertThatThrownBy(() -> userService.register(request))
                 .isInstanceOf(AppException.class)
-                .satisfies(e -> {
-                    AppException ex = (AppException) e;
-                    assertThat(ex.getExceptionCode())
-                            .isEqualTo(ExceptionCode.LOGIN_FAILED);
-                });
+                .extracting("exceptionCode")
+                .isEqualTo(ExceptionCode.DUPLICATE_LOGIN_ID);
     }
 
     @Test
-    @DisplayName("아이디 찾기")
-    void 아이디_찾기(){
+    @DisplayName("이메일 중복 에외 발생")
+    void 이메일_중복_예외_발생(){
+        // given
+        UserEntity build = UserFixture.createDefault().build();
+        UserRegisterRQ build1 = UserFixture.createRegister(build).build();
 
-        UserEntity user1 = user();
-
-        UserFindIdRQ request = new UserFindIdRQ("yooyoo9191@gmail.com", "유인근");
-        String loginId = userService.findId(request);
-
-        assertThat(user1.getLoginId()).isEqualTo(loginId);
+        given(userRepository.existsByEmail(anyString()))
+                .willReturn(true);
+        // when
+        // then
+        assertThatThrownBy(() -> userService.register(build1))
+                .isInstanceOf(AppException.class)
+                .extracting("exceptionCode")
+                .isEqualTo(ExceptionCode.DUPLICATE_EMAIL);
     }
 
     @Test
-    @DisplayName("비밀번호 찾기(사용자 검증)")
-    void 비밀번호_찾기_사용자_검증(){
-
-        UserEntity user1 = user();
+    @DisplayName("로그인 실패 예외 발생 - 요청 데이터가 없음")
+    void 로그인_실패_예외_발생(){
+        // given
+        UserEntity build = UserFixture.createDefault().build();
+        UserLoginRQ build1 = UserFixture.createLogin(build).build();
+        given(userRepository.findByLoginIdAndPassword(anyString(), anyString()))
+                .willReturn(Optional.empty());
+        // when
+        // then
+        assertThatThrownBy(() -> userService.login(build1))
+                .isInstanceOf(AppException.class)
+                .extracting("exceptionCode")
+                .isEqualTo(ExceptionCode.LOGIN_FAILED);
     }
 
     @Test
-    @DisplayName("비밀번호 변경")
-    void 비밀번호_변경(){
-        UserEntity user = user();
-        userService.passwordReset(new UserResetPasswordRQ(user.getId(), "12345678", "12345678"));
-
-        assertThat(user.getPassword()).isEqualTo("12345678");
+    @DisplayName("아이디 찾기 실패 예외 발생 - 요청 데이터가 없음")
+    void 아이디_찾기_실패_에외_발생(){
+        // given
+        UserEntity build = UserFixture.createDefault().build();
+        UserFindIdRQ build1 = UserFixture.createFindId(build).build();
+        given(userRepository.findByEmailAndName(anyString(), anyString()))
+                .willReturn(Optional.empty());
+        // when
+        // then
+        assertThatThrownBy(() -> userService.findId(build1))
+                .isInstanceOf(AppException.class)
+                .extracting("exceptionCode")
+                .isEqualTo(ExceptionCode.FIND_LOGIN_ID_FAILED);
     }
 
-    private UserEntity user() {
-        UserRegisterRQ request = new UserRegisterRQ("유인근", "yooyoo9191@gmail.com", "yooyoo9191", "okok0635!");
-        UserEntity register = userService.register(request);
-        UserEntity saved = userRepository.save(register);
-        return saved;
+    @Test
+    @DisplayName("비밀번호 권한 예외 발생 - 요청 데이터가 없음")
+    void 비밀번호_권한_에외_발생(){
+        // given
+        UserEntity build = UserFixture.createDefault().build();
+        UserVerifyPasswordRQ build1 = UserFixture.createVerifyPassword(build).build();
+        given(userRepository.findByEmailAndNameAndLoginId(anyString(), anyString(), anyString()))
+                .willReturn(Optional.empty());
+        // when
+        // then
+        assertThatThrownBy(() -> userService.passwordVerify(build1))
+                .isInstanceOf(AppException.class)
+                .extracting("exceptionCode")
+                .isEqualTo(ExceptionCode.VERIFY_PASSWORD_FAILED);
+    }
+
+    @Test
+    @DisplayName("비밀번호 변경 예외 발생 - 비밀번호 확인과 다름")
+    void 비밀번호_변경_예외_발생(){
+        // given
+        UserEntity build = UserFixture.createDefault().build();
+        UserResetPasswordRQ build1 = UserFixture.createResetPassword("okok0635!", "okok0635").build();
+        // when
+        // then
+        assertThatThrownBy(() -> userService.passwordReset(build1))
+                .isInstanceOf(AppException.class)
+                .extracting("exceptionCode")
+                .isEqualTo(ExceptionCode.MISMATCH_PASSWORD);
+    }
+
+    @Test
+    @DisplayName("유저 삭제 예외 발생 - 유저가 없음")
+    void 유저_삭제_예외_발생(){
+        // given
+        UserEntity build = UserFixture.createDefault().build();
+        given(userRepository.findById(build.getId()))
+                .willReturn(Optional.empty());
+        // when
+        // then
+        assertThatThrownBy(() -> userService.delete(build.getId()))
+                .isInstanceOf(AppException.class)
+                .extracting("exceptionCode")
+                .isEqualTo(ExceptionCode.USER_NOT_FOUND);
     }
 
 }

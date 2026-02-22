@@ -14,10 +14,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -57,6 +54,12 @@ public class UserController {
     public ResponseEntity<Boolean> resetPassword(@Valid @RequestBody UserResetPasswordRQ request){
         boolean b = userService.passwordReset(request);
         return ResponseEntity.ok().body(b);
+    }
+
+    @DeleteMapping("/delete/{user_id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long userId){
+        userService.delete(userId);
+        return ResponseEntity.noContent().build();
     }
 
 }

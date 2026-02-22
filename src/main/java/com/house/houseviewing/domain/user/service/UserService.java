@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 
 @Service
@@ -89,5 +90,13 @@ public class UserService {
 
         user.updatePassword(request.getConfirmPassword());
         return true;
+    }
+
+    @Transactional
+    public void delete(Long userId){
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
+
+        userRepository.deleteById(userId);
     }
 }
