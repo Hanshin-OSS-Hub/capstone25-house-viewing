@@ -3,12 +3,13 @@ package com.house.houseviewing.domain.user.model.password.reset;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
+@Getter @Builder
 public class UserResetPasswordRQ {
 
     private Long userId;

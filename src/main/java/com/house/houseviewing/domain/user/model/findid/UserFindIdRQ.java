@@ -3,10 +3,11 @@ package com.house.houseviewing.domain.user.model.findid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @AllArgsConstructor
-@Getter
+@Getter @Builder
 public class UserFindIdRQ {
 
     @Email

@@ -25,7 +25,7 @@ public class HouseEntity extends BaseTimeEntity {
     private Long id;
 
     @Setter
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserEntity userEntity;
 

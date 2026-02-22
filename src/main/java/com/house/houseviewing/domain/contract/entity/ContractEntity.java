@@ -21,7 +21,7 @@ public class ContractEntity extends BaseTimeEntity {
     private Long id;
 
     @Setter
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "house_id")
     private HouseEntity houseEntity;
 

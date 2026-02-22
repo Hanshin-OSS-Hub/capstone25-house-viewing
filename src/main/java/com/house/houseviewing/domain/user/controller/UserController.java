@@ -48,15 +48,15 @@ public class UserController {
     }
 
     @PostMapping("/password/verify")
-    public ResponseEntity<Void> verifyPassword(@Valid @RequestBody UserVerifyPasswordRQ request){
-        userService.passwordVerify(request);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Boolean> verifyPassword(@Valid @RequestBody UserVerifyPasswordRQ request){
+        boolean verify = userService.passwordVerify(request);
+        return ResponseEntity.ok().body(verify);
     }
 
     @PostMapping("/password/reset")
-    public ResponseEntity<Void> resetPassword(@Valid @RequestBody UserResetPasswordRQ request){
-        userService.passwordReset(request);
-        return ResponseEntity.ok().build();
+    public ResponseEntity<Boolean> resetPassword(@Valid @RequestBody UserResetPasswordRQ request){
+        boolean b = userService.passwordReset(request);
+        return ResponseEntity.ok().body(b);
     }
 
 }

@@ -74,18 +74,20 @@ public class UserService {
         return user.getLoginId();
     }
 
-    public void passwordVerify(UserVerifyPasswordRQ request){
+    public boolean passwordVerify(UserVerifyPasswordRQ request){
         UserEntity user = userRepository.findByEmailAndNameAndLoginId(request.getEmail(), request.getName(), request.getLoginId())
                 .orElseThrow(() -> new AppException(ExceptionCode.VERIFY_PASSWORD_FAILED));
+        return true;
     }
 
     @Transactional
-    public void passwordReset(UserResetPasswordRQ request){
+    public boolean passwordReset(UserResetPasswordRQ request){
         if(!request.getNewPassword().equals(request.getConfirmPassword())){
             throw new AppException(ExceptionCode.MISMATCH_PASSWORD);
         }
         UserEntity user = userRepository.findById(request.getUserId()).get();
 
         user.updatePassword(request.getConfirmPassword());
+        return true;
     }
 }
