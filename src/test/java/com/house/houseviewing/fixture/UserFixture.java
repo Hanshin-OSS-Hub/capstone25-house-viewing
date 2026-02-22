@@ -48,8 +48,9 @@ public class UserFixture {
                 .email(user.getEmail());
     }
 
-    public static UserResetPasswordRQ.UserResetPasswordRQBuilder createResetPassword(String newPassword, String confirmPassword){
+    public static UserResetPasswordRQ.UserResetPasswordRQBuilder createResetPassword(UserEntity user, String newPassword, String confirmPassword){
         return UserResetPasswordRQ.builder()
+                .userId(user.getId())
                 .newPassword(newPassword)
                 .confirmPassword(confirmPassword);
     }
