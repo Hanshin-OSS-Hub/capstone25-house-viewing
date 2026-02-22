@@ -1,4 +1,4 @@
-package com.house.houseviewing.service;
+package com.house.houseviewing.service.unit;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

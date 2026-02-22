@@ -1,4 +1,4 @@
-package com.house.houseviewing.service;
+package com.house.houseviewing.service.unit;
 
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;

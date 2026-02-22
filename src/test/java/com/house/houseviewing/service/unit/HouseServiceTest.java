@@ -1,4 +1,4 @@
-package com.house.houseviewing.service;
+package com.house.houseviewing.service.unit;
 
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
 import com.house.houseviewing.domain.contract.enums.ContractType;
