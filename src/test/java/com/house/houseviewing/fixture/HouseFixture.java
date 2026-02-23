@@ -1,6 +1,7 @@
 package com.house.houseviewing.fixture;
 
 import com.house.houseviewing.domain.house.entity.HouseEntity;
+import com.house.houseviewing.domain.house.model.register.HouseRegisterRQ;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 
 public class HouseFixture {
@@ -10,5 +11,12 @@ public class HouseFixture {
                 .userEntity(user)
                 .nickname("자취방")
                 .address(AddressFixture.createAddress().build());
+    }
+
+    public static HouseRegisterRQ.HouseRegisterRQBuilder createRegister(HouseEntity house){
+        return HouseRegisterRQ.builder()
+                .nickname(house.getNickname())
+                .userId(house.getUserEntity().getId())
+                .originAddress("서울시 강남구");
     }
 }

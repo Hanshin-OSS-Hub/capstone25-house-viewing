@@ -43,7 +43,7 @@ public class HouseService {
     @Transactional
     public void delete(Long houseId){
         HouseEntity saved = houseRepository.findById(houseId)
-                .orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
+                .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
 
         houseRepository.deleteById(saved.getId());
     }
