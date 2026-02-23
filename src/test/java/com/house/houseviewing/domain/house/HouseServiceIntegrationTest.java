@@ -15,13 +15,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
@@ -64,6 +62,7 @@ public class HouseServiceIntegrationTest {
         HouseRegisterRQ request = HouseFixture.createRegister(house).build();
         HouseEntity register = houseService.register(request);
         return register;
+
     }
 
     private UserEntity getUserEntity() {

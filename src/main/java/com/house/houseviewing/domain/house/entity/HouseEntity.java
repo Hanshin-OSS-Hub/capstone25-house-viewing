@@ -52,6 +52,9 @@ public class HouseEntity extends BaseTimeEntity {
     }
 
     public void addContract(ContractEntity contract){
+        if (this.contracts == null) {
+            this.contracts = new ArrayList<>();
+        }
         checkContract(contract);
         contracts.add(contract);
         contract.setHouseEntity(this);

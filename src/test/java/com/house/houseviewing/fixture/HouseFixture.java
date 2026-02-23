@@ -4,6 +4,8 @@ import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.house.model.register.HouseRegisterRQ;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 
+import java.util.ArrayList;
+
 public class HouseFixture {
 
     public static HouseEntity.HouseEntityBuilder createDefault(UserEntity user){

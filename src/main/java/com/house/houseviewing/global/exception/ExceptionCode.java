@@ -28,6 +28,7 @@ public enum ExceptionCode {
     USER_NOT_FOUND("NF001", HttpStatus.NOT_FOUND, "해당 사용자는 존재하지 않습니다."),
     ADDRESS_NOT_FOUND("NF002", HttpStatus.BAD_REQUEST, "주소를 다시 확인해주세요."),
     HOUSE_NOT_FOUND("NF003", HttpStatus.NOT_FOUND, "해당 집은 등록되지 않았습니다."),
+    CONTRACT_NOT_FOUND("NF004", HttpStatus.NOT_FOUND, "해당 계약은 등록되지 않았습니다"),
     ALREADY_REGISTERED_CONTRACT("DB003", HttpStatus.CONFLICT, "이미 등록된 계약이 있습니다.");
 
     private final String code;

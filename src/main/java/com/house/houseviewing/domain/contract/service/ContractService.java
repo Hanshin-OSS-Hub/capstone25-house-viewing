@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -33,6 +35,13 @@ public class ContractService {
         saved.setHouseEntity(house);
 
         return saved;
+    }
+
+    @Transactional
+    public void delete(Long contractId){
+        ContractEntity byId = contractRepository.findById(contractId)
+                .orElseThrow(() -> new AppException(ExceptionCode.CONTRACT_NOT_FOUND));
+        contractRepository.delete(byId);
     }
 
 }
