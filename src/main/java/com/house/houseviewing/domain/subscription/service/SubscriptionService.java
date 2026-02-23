@@ -25,13 +25,12 @@ public class SubscriptionService {
     @Transactional
     public SubscriptionEntity premium(SubscriptionPremiumRQ request){
 
-        Long userId = request.getUserId();
-        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
+        UserEntity user = userRepository.findById(request.getUserId()).orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
 
-        user.getSubscription().setPlanType(PlanType.PREMIUM);
+        SubscriptionEntity subscription = user.getSubscription();
+        subscription.setPlanType(PlanType.PREMIUM);
 
-        SubscriptionEntity byId = subscriptionRepository.findById(user.getSubscription().getId()).get();
-        return byId;
+        return subscription;
     }
 
 }
