@@ -57,7 +57,7 @@ public class HouseServiceIntegrationTest {
         houseService.delete(house.getId());
         // then
         assertThat(houseRepository.findById(house.getId())).isEmpty();
-    }g
+    }
 
     private HouseEntity getHouseEntity(UserEntity user) {
         HouseEntity house = HouseFixture.createDefault(user).build();
