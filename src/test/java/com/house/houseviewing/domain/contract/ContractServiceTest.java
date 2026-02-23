@@ -75,4 +75,41 @@ public class ContractServiceTest {
                     .isEqualTo(ExceptionCode.HOUSE_NOT_FOUND);
         }
     }
+
+    @Nested
+    @DisplayName("계약 삭제")
+    class Delete{
+
+        @Test
+        @DisplayName("성공")
+        void 성공(){
+            // given
+            UserEntity user = UserFixture.createDefault().build();
+            HouseEntity house = HouseFixture.createDefault(user).build();
+            ContractEntity contract = ContractFixture.createDefault(house).id(1L).build();
+            given(contractRepository.findById(anyLong()))
+                    .willReturn(Optional.of(contract));
+            // when
+            contractService.delete(contract.getId());
+            // then
+            then(contractRepository).should(times(1)).findById(1L);
+        }
+
+        @Test
+        @DisplayName("실패: 계약을 찾을 수 없음")
+        void 실패(){
+            // given
+            UserEntity user = UserFixture.createDefault().build();
+            HouseEntity house = HouseFixture.createDefault(user).build();
+            ContractEntity contract = ContractFixture.createDefault(house).id(1L).build();
+            given(contractRepository.findById(anyLong()))
+                    .willReturn(Optional.empty());
+            // when
+            // then
+            assertThatThrownBy(() -> contractService.delete(contract.getId()))
+                    .isInstanceOf(AppException.class)
+                    .extracting("exceptionCode")
+                    .isEqualTo(ExceptionCode.CONTRACT_NOT_FOUND);
+        }
+    }
 }
