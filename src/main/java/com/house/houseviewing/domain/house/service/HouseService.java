@@ -30,7 +30,7 @@ public class HouseService {
 
         Address address = kakaoAddress.parsingAddress(request.getOriginAddress());
 
-        HouseEntity house = new HouseEntity(request.getNickname(), address, null);
+        HouseEntity house = new HouseEntity(request.getNickname(), address);
         HouseEntity savedHouse = houseRepository.save(house);
         if(user.checkSubscription()){
             savedHouse.setMonitoringStatus(MonitoringStatus.LIVE);

@@ -40,8 +40,6 @@ public class HouseEntity extends BaseTimeEntity {
     @Embedded
     private Address address;
 
-    private Integer ltvScore;
-
     @Setter
     @Enumerated(EnumType.STRING)
     private MonitoringStatus monitoringStatus;
@@ -49,10 +47,9 @@ public class HouseEntity extends BaseTimeEntity {
     @OneToMany(mappedBy = "houseEntity" )
     private List<RegistrySnapshotEntity> registrySnapshots = new ArrayList<>();
 
-    public HouseEntity(String nickname, Address address, Integer ltvScore) {
+    public HouseEntity(String nickname, Address address) {
         this.nickname = nickname;
         this.address = address;
-        this.ltvScore = ltvScore;
     }
 
     public void addContract(ContractEntity contract){
