@@ -1,5 +1,6 @@
 package com.capstone.houseviewingapp.registration
 
+import android.R.attr.enabled
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -77,14 +78,27 @@ class HouseRegistrationActivity : AppCompatActivity() {
         binding.stepTextView.text = "$currentStep / 3 단계"
         if(currentStep == 1) {
             binding.toolBarTextView.text = "주택 기본 정보 입력"
+            setNextButtonEnabled(true)
         }
         if (currentStep == 2) {
             binding.toolBarTextView.text = "계약 정보 입력"
             binding.nextButton.text = "다음"
+            setNextButtonEnabled(true)
         }
         if (currentStep == 3) {
             binding.nextButton.text = "문서 검증"
+            setNextButtonEnabled(false) // TODO: 3단계에서 다음 버튼은 문서 검증이 완료된 후에만 활성화되도록 구현
         }
 
+    }
+
+    private fun setNextButtonEnabled(enabled: Boolean) {
+        binding.nextButton.isEnabled = enabled // NOTE : 다음 버튼 활성화/비활성화 설정
+
+        val colorRes = if (enabled) R.color.blue else R.color.icongray // 활성화 여부에 따른 색상 리소스 선택
+
+        val colorInt = androidx.core.content.ContextCompat.getColor(this, colorRes) // 색상 리소스에서 실제 색상 값 가져오기
+
+        binding.nextButton.backgroundTintList = android.content.res.ColorStateList.valueOf(colorInt) // 버튼 배경 색상 변경
     }
 }
