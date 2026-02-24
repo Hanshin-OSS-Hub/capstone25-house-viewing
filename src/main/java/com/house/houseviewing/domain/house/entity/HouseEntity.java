@@ -3,6 +3,7 @@ package com.house.houseviewing.domain.house.entity;
 import com.house.houseviewing.domain.common.Address;
 import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
+import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.enums.MonitoringStatus;
@@ -44,6 +45,9 @@ public class HouseEntity extends BaseTimeEntity {
     @Setter
     @Enumerated(EnumType.STRING)
     private MonitoringStatus monitoringStatus;
+
+    @OneToMany(mappedBy = "houseEntity" )
+    private List<RegistrySnapshotEntity> registrySnapshots = new ArrayList<>();
 
     public HouseEntity(String nickname, Address address, Integer ltvScore) {
         this.nickname = nickname;
