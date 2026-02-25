@@ -163,11 +163,13 @@
 
                 </androidx.constraintlayout.widget.ConstraintLayout>
 
+
                 <TextView
                     android:id="@+id/monthLabel"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
+                    android:visibility="gone"
                     android:fontFamily="@font/pretendard_bold"
                     android:includeFontPadding="false"
                     android:text="월 임대료"
@@ -181,6 +183,7 @@
                     android:layout_width="0dp"
                     android:layout_height="56dp"
                     android:layout_marginTop="10dp"
+                    android:visibility="gone"
                     android:background="@drawable/bg_rounded_edittext"
                     android:backgroundTint="@color/textviewgray"
                     android:paddingStart="16dp"
@@ -229,7 +232,7 @@
                     android:textColor="@color/textgray"
                     android:textSize="16sp"
                     app:layout_constraintStart_toStartOf="@id/depositLabel"
-                    app:layout_constraintTop_toBottomOf="@id/monthInputBox" />
+                    app:layout_constraintTop_toBottomOf="@id/depositInputBox" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/monthManageInputBox"
