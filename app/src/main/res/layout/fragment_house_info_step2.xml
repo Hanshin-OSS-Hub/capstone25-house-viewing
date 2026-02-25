@@ -169,7 +169,6 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
-                    android:visibility="gone"
                     android:fontFamily="@font/pretendard_bold"
                     android:includeFontPadding="false"
                     android:text="월 임대료"
@@ -183,7 +182,6 @@
                     android:layout_width="0dp"
                     android:layout_height="56dp"
                     android:layout_marginTop="10dp"
-                    android:visibility="gone"
                     android:background="@drawable/bg_rounded_edittext"
                     android:backgroundTint="@color/textviewgray"
                     android:paddingStart="16dp"
@@ -232,7 +230,7 @@
                     android:textColor="@color/textgray"
                     android:textSize="16sp"
                     app:layout_constraintStart_toStartOf="@id/depositLabel"
-                    app:layout_constraintTop_toBottomOf="@id/depositInputBox" />
+                    app:layout_constraintTop_toBottomOf="@id/monthInputBox" />
 
                 <androidx.constraintlayout.widget.ConstraintLayout
                     android:id="@+id/monthManageInputBox"
@@ -289,6 +287,136 @@
                     app:layout_constraintStart_toStartOf="@id/monthManageLabel"
                     app:layout_constraintTop_toBottomOf="@id/monthManageInputBox" />
 
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/yearSection"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:padding="24dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:id="@+id/yearDepositLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/pretendard_bold"
+                    android:text="보증금"
+                    android:textColor="@color/textgray"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/yearDepositInputBox"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_rounded_edittext"
+                    android:backgroundTint="@color/textviewgray"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/yearDepositLabel">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/yearDepositEditText"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:gravity="start|center_vertical"
+                        android:hint="0"
+                        android:inputType="number"
+                        android:textSize="18sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/yearDepositWonText"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/yearDepositWonText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/pretendard_medium"
+                        android:includeFontPadding="false"
+                        android:text="원"
+                        android:textColor="@color/textgray"
+                        android:textSize="20sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <TextView
+                    android:id="@+id/yearManageLabel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="24dp"
+                    android:fontFamily="@font/pretendard_bold"
+                    android:includeFontPadding="false"
+                    android:text="월 관리비"
+                    android:textColor="@color/textgray"
+                    android:textSize="16sp"
+                    app:layout_constraintStart_toStartOf="@id/yearDepositLabel"
+                    app:layout_constraintTop_toBottomOf="@id/yearDepositInputBox" />
+
+                <androidx.constraintlayout.widget.ConstraintLayout
+                    android:id="@+id/yearManageInputBox"
+                    android:layout_width="0dp"
+                    android:layout_height="56dp"
+                    android:layout_marginTop="10dp"
+                    android:background="@drawable/bg_rounded_edittext"
+                    android:backgroundTint="@color/textviewgray"
+                    android:paddingStart="16dp"
+                    android:paddingEnd="16dp"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="@id/yearManageLabel"
+                    app:layout_constraintTop_toBottomOf="@id/yearManageLabel">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/yearManageEditText"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:background="@null"
+                        android:gravity="start|center_vertical"
+                        android:hint="0"
+                        android:inputType="number"
+                        android:textSize="18sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toStartOf="@id/yearManageWonText"
+                        app:layout_constraintStart_toStartOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                    <TextView
+                        android:id="@+id/yearManageWonText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="@font/pretendard_medium"
+                        android:includeFontPadding="false"
+                        android:text="원"
+                        android:textColor="@color/textgray"
+                        android:textSize="20sp"
+                        app:layout_constraintBottom_toBottomOf="parent"
+                        app:layout_constraintEnd_toEndOf="parent"
+                        app:layout_constraintTop_toTopOf="parent" />
+
+                </androidx.constraintlayout.widget.ConstraintLayout>
+
+                <com.google.android.material.checkbox.MaterialCheckBox
+                    android:id="@+id/yearNoManageCheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:fontFamily="@font/pretendard_bold"
+                    android:includeFontPadding="false"
+                    android:text="관리비 미부과"
+                    android:textColor="@color/selector_checkbox_text"
+                    android:textSize="16sp"
+                    app:buttonTint="@color/selector_checkbox"
+                    app:layout_constraintStart_toStartOf="@id/yearManageLabel"
+                    app:layout_constraintTop_toBottomOf="@id/yearManageInputBox" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
