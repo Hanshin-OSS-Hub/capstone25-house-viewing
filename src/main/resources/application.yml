@@ -29,3 +29,7 @@ kakao:
   api:
     key: ${KAKAO_REST_API_KEY}
     url: https://dapi.kakao.com
+
+python:
+  api:
+    url: http://localhost:8080
