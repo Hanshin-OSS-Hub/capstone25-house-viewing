@@ -1,6 +1,5 @@
 package com.capstone.houseviewingapp.registration
 
-import android.R.attr.enabled
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -12,6 +11,7 @@ import com.capstone.houseviewingapp.databinding.ActivityHouseRegistrationBinding
 class HouseRegistrationActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHouseRegistrationBinding
     private var currentStep = 1 // TODO: 현재 단계에 따라 이 값을 업데이트
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -92,7 +92,7 @@ class HouseRegistrationActivity : AppCompatActivity() {
 
     }
 
-    private fun setNextButtonEnabled(enabled: Boolean) {
+    fun setNextButtonEnabled(enabled: Boolean) {
         binding.nextButton.isEnabled = enabled // NOTE : 다음 버튼 활성화/비활성화 설정
 
         val colorRes = if (enabled) R.color.blue else R.color.icongray // 활성화 여부에 따른 색상 리소스 선택
