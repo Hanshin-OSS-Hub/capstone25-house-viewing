@@ -5,11 +5,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
+@RequiredArgsConstructor
 public class PythonEngineClient {
 
     private final WebClient pythonWebClient;
 
-    public PythonEngineClient(WebClient pythonWebClient) {
-        this.pythonWebClient = pythonWebClient;
-    }
 }
