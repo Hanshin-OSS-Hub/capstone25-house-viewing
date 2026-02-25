@@ -1,10 +1,12 @@
 package com.capstone.houseviewingapp.registration
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.capstone.houseviewingapp.MainActivity
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.databinding.ActivityHouseRegistrationBinding
 
@@ -45,7 +47,10 @@ class HouseRegistrationActivity : AppCompatActivity() {
                     .commit()
                 currentStep = 3
             } else if (currentStep == 3) {
-
+                val intent = Intent(this, MainActivity::class.java)
+                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                startActivity(intent)
+                finish()
             }
 
             updateStepUi()
