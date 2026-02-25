@@ -19,16 +19,22 @@ NF: 리소스 없음
 @Getter @AllArgsConstructor
 public enum ExceptionCode {
 
-    DUPLICATE_LOGIN_ID("DB001",HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다."),
-    DUPLICATE_EMAIL("DB002", HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
+    // VP
     LOGIN_FAILED("VP001",HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 틀렸습니다."),
     FIND_LOGIN_ID_FAILED("VP002",HttpStatus.BAD_REQUEST, "이메일 또는 아이디가 틀렸습니다."),
     VERIFY_PASSWORD_FAILED("VP003", HttpStatus.BAD_REQUEST, "입력하신 정보가 틀렸습니다."),
     MISMATCH_PASSWORD("VP004", HttpStatus.BAD_REQUEST, "입력하신 정보가 틀렸습니다."),
+    VERIFY_FILE_FAILED("VP005", HttpStatus.BAD_REQUEST, "유효하지 않은 파일입니다"),
+
+    // NF
     USER_NOT_FOUND("NF001", HttpStatus.NOT_FOUND, "해당 사용자는 존재하지 않습니다."),
     ADDRESS_NOT_FOUND("NF002", HttpStatus.BAD_REQUEST, "주소를 다시 확인해주세요."),
     HOUSE_NOT_FOUND("NF003", HttpStatus.NOT_FOUND, "해당 집은 등록되지 않았습니다."),
     CONTRACT_NOT_FOUND("NF004", HttpStatus.NOT_FOUND, "해당 계약은 등록되지 않았습니다"),
+
+    //DB
+    DUPLICATE_LOGIN_ID("DB001",HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다."),
+    DUPLICATE_EMAIL("DB002", HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
     ALREADY_REGISTERED_CONTRACT("DB003", HttpStatus.CONFLICT, "이미 등록된 계약이 있습니다.");
 
     private final String code;
