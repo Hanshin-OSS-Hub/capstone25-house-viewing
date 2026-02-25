@@ -62,11 +62,35 @@ class HouseInfoStep2Fragment : Fragment(R.layout.fragment_house_info_step2) {
             showConfirmDatePicker()
         }
         setupConfirmDateInputFormat()
+
+        setupRentTypeToggle()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private fun setupRentTypeToggle() {
+        showMonthlySection()
+        binding.toggleGroup.addOnButtonCheckedListener { _, checkedId, isChecked ->
+           if(!isChecked) return@addOnButtonCheckedListener //
+            if(checkedId == R.id.monthButton) {
+                showMonthlySection()
+            } else if(checkedId == R.id.yearButton) {
+                showYearlySection()
+            }
+        }
+    }
+
+    private fun showMonthlySection() {
+        binding.monthSection.visibility = View.VISIBLE
+        binding.yearSection.visibility = View.GONE
+    }
+
+    private fun showYearlySection() {
+        binding.monthSection.visibility = View.GONE
+        binding.yearSection.visibility = View.VISIBLE
     }
 
     // NOTE : 전입일 선택 다이얼로그 띄우는 함수
