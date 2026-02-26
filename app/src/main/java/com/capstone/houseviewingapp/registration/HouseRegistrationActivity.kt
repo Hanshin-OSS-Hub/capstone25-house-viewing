@@ -3,6 +3,7 @@ package com.capstone.houseviewingapp.registration
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -12,6 +13,7 @@ import com.capstone.houseviewingapp.databinding.ActivityHouseRegistrationBinding
 
 class HouseRegistrationActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHouseRegistrationBinding
+    private val vm: HouseRegistrationViewModel by viewModels()
     private var currentStep = 1 // TODO: 현재 단계에 따라 이 값을 업데이트
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -35,11 +37,23 @@ class HouseRegistrationActivity : AppCompatActivity() {
         binding.nextButton.setOnClickListener {
             //TODO: 다음 버튼 클릭 시 다음 단계로 이동하는 로직 구현
             if(currentStep == 1) {
+                val step1 = supportFragmentManager
+                    .findFragmentById(R.id.registerationFragmentContainer) as? HouseInfoStep1Fragment
+                    ?: return@setOnClickListener
+
+                val input = step1.collectStep1Data() ?: return@setOnClickListener
+
+                vm.updateStep1(
+                    nickname = input.nickname,
+                    originAddress = input.originAddress,
+                    detailAddress = input.detailAddress
+                )
+
                 supportFragmentManager.beginTransaction()
                     .replace(R.id.registerationFragmentContainer, HouseInfoStep2Fragment())
                     .addToBackStack(null)
                     .commit()
-                    currentStep = 2
+                currentStep = 2
             } else if (currentStep == 2) {
                 supportFragmentManager.beginTransaction()
                     .replace(R.id.registerationFragmentContainer, HouseInfoStep3Fragment())
