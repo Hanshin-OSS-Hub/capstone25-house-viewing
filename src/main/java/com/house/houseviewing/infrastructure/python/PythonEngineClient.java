@@ -1,6 +1,6 @@
 package com.house.houseviewing.infrastructure.python;
 
-import com.house.houseviewing.infrastructure.python.model.PythonAnalysisRS;
+import com.house.houseviewing.infrastructure.python.model.analysis.PythonAnalysisRS;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;

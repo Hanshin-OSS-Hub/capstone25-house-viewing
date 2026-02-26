@@ -38,8 +38,6 @@ public class PdfUploadService {
             log.info("파일 저장 실패: {}", e.getMessage());
             throw new AppException(ExceptionCode.FILE_SAVE_FAILED);
         }
-
-
     }
 
 }

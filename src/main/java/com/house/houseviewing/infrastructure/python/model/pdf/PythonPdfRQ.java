@@ -1,4 +1,4 @@
-package com.house.houseviewing.infrastructure.python.model;
+package com.house.houseviewing.infrastructure.python.model.pdf;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,9 +7,7 @@ import lombok.NoArgsConstructor;
 
 @AllArgsConstructor @Builder
 @NoArgsConstructor @Getter
-public class PythonAnalysisRS {
-
-    private Integer ltvScore;
+public class PythonPdfRQ {
 
     private String rawData;
 }
