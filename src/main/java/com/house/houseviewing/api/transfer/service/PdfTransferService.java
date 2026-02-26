@@ -39,7 +39,7 @@ public class PdfTransferService {
             String pdfPath = "S3경로" + pdfName;
 
             try {
-                Files.write(Paths.get(pdfPath), pdfBytes);
+                Files.write(Paths.get(pdfPath), pdfBytes); // pdf 저장
 
                 registrySnapshotService.pdfRegister(registrySnapshotId, pdfPath);
 

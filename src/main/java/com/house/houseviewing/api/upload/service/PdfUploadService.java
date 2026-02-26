@@ -32,7 +32,7 @@ public class PdfUploadService {
         String fullPath = uploadPath + s3FileName;
 
         try{
-            file.transferTo(new File(fullPath));
+            file.transferTo(new File(fullPath)); // 등기부 저장
 
             pythonEngineClient.sendPdf(file).subscribe(response -> {
                 Long register = registrySnapshotService.register(response, originFileName, fullPath);
