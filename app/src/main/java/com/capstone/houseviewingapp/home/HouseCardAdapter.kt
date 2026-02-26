@@ -7,11 +7,6 @@ import androidx.recyclerview.widget.RecyclerView
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.databinding.ItemHouseCardBinding
 
-data class HouseCardItem(
-    val homeName: String,
-    val address: String,
-    val ltv : Int
-)
     class HouseCardAdapter (private val items: List<HouseCardItem>) : RecyclerView.Adapter<HouseCardAdapter.ViewHolder>() {
     
         inner class ViewHolder(val binding: ItemHouseCardBinding) : RecyclerView.ViewHolder(binding.root)
@@ -27,22 +22,37 @@ data class HouseCardItem(
             with(holder.binding){
                 homeNameText.text = item.homeName
                 addressText.text = item.address
-                ltvpercentTextView.text = item.ltv.toString()
 
                 progressBar.max = 100
-                progressBar.progress = item.ltv
 
-                val stateColor = when {
-                    item.ltv <= 60 -> R.color.blue
-                    item.ltv <= 70 -> R.color.amber
-                    else -> R.color.red
+                val ltv = item.ltv
+                if (ltv == null) {
+                    // TODO : LTV 분석 API 연동 후 null(분석 대기) 분기 제거/수정
+                    // TODO : else 이후로는 나중에 백엔드와 연동하면 else 이후 부분만 남기고 삭제 -> null이 아닌 실제 LTV 값으로 설정
+                    ltvpercentTextView.text = "--"
+                    percentText.text = ""
+                    progressBar.progress = 0
+
+                    val pendingColor = ContextCompat.getColor(root.context, R.color.icongray)
+                    ltvpercentTextView.setTextColor(pendingColor)
+                    percentText.setTextColor(pendingColor)
+                    progressBar.setIndicatorColor(pendingColor)
+                } else {
+                    ltvpercentTextView.text = ltv.toString()
+                    percentText.text = "%"
+                    progressBar.progress = ltv
+
+                    val stateColor = when {
+                        ltv <= 60 -> R.color.blue
+                        ltv <= 70 -> R.color.amber
+                        else -> R.color.red
+                    }
+
+                    val c = ContextCompat.getColor(root.context, stateColor)
+                    ltvpercentTextView.setTextColor(c)
+                    percentText.setTextColor(c)
+                    progressBar.setIndicatorColor(c)
                 }
-
-                val c = ContextCompat.getColor(root.context, stateColor)
-                ltvpercentTextView.setTextColor(c)
-                progressBar.setIndicatorColor(c)
-                percentText.setTextColor(c)
-
                 moreButton.setOnClickListener {
                     //TODO : 수정, 삭제, 추가 기능 구현
                 }
