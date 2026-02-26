@@ -12,7 +12,7 @@ public class PdfUploadService {
     private final PythonEngineClient pythonEngineClient;
 
     public void upload(MultipartFile file){
-        
+        pythonEngineClient.sendPdf(file);
     }
 
 }
