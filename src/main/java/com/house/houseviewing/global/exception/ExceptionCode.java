@@ -25,6 +25,7 @@ public enum ExceptionCode {
     VERIFY_PASSWORD_FAILED("VP003", HttpStatus.BAD_REQUEST, "입력하신 정보가 틀렸습니다."),
     MISMATCH_PASSWORD("VP004", HttpStatus.BAD_REQUEST, "입력하신 정보가 틀렸습니다."),
     VERIFY_FILE_FAILED("VP005", HttpStatus.BAD_REQUEST, "유효하지 않은 파일입니다"),
+    FILE_SAVE_FAILED("VP006", HttpStatus.BAD_REQUEST, "파일이 저장되지 않았습니다."),
 
     // NF
     USER_NOT_FOUND("NF001", HttpStatus.NOT_FOUND, "해당 사용자는 존재하지 않습니다."),

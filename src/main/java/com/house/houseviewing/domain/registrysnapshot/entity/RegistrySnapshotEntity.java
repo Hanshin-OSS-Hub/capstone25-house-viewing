@@ -20,7 +20,7 @@ public class RegistrySnapshotEntity {
     @JoinColumn(name = "house_id")
     HouseEntity houseEntity;
 
-    private String fileUrl; // 새 등기부 PDF 경
+    private String fileUrl; // 새 등기부 PDF 경로
 
     private String reportFileUrl; // 변동 분석 PDF 경로
 

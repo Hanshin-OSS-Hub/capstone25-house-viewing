@@ -17,15 +17,15 @@ public class RegistrySnapshotService {
     private final RegistrySnapshotRepository registrySnapshotRepository;
 
     @Transactional
-    public RegistrySnapshotEntity register(PythonAnalysisRS response, String originFileName){
+    public void register(PythonAnalysisRS response, String originFileName, String path){
         RegistrySnapshotEntity snapshotEntity = RegistrySnapshotEntity.builder()
                 .originalFileName(originFileName)
+                .fileUrl(path)
                 .rawData(response.getRawData())
                 .ltvScore(response.getLtvScore())
                 .createdAt(LocalDateTime.now())
+                .isChanged(false)
                 .build();
-        RegistrySnapshotEntity save = registrySnapshotRepository.save(snapshotEntity);
-        return save;
+        registrySnapshotRepository.save(snapshotEntity);
     }
-
 }
