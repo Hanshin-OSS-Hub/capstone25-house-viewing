@@ -1,5 +1,7 @@
 package com.house.houseviewing.api.upload.service;
 
+import com.house.houseviewing.api.transfer.service.PdfTransferService;
+import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.domain.registrysnapshot.service.RegistrySnapshotService;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
@@ -20,6 +22,7 @@ public class PdfUploadService {
 
     private final PythonEngineClient pythonEngineClient;
     private final RegistrySnapshotService registrySnapshotService;
+    private final PdfTransferService pdfTransferService;
 
     private final String uploadPath = "S3 PATH";
 
@@ -32,7 +35,8 @@ public class PdfUploadService {
             file.transferTo(new File(fullPath));
 
             pythonEngineClient.sendPdf(file).subscribe(response -> {
-                registrySnapshotService.register(response, originFileName, fullPath);
+                Long register = registrySnapshotService.register(response, originFileName, fullPath);
+                pdfTransferService.transfer(register);
             });
         } catch (IOException e){
             log.info("파일 저장 실패: {}", e.getMessage());

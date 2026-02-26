@@ -17,7 +17,7 @@ public class RegistrySnapshotService {
     private final RegistrySnapshotRepository registrySnapshotRepository;
 
     @Transactional
-    public void register(PythonAnalysisRS response, String originFileName, String path){
+    public Long register(PythonAnalysisRS response, String originFileName, String path){
         RegistrySnapshotEntity snapshotEntity = RegistrySnapshotEntity.builder()
                 .originalFileName(originFileName)
                 .fileUrl(path)
@@ -26,6 +26,7 @@ public class RegistrySnapshotService {
                 .createdAt(LocalDateTime.now())
                 .isChanged(false)
                 .build();
-        registrySnapshotRepository.save(snapshotEntity);
+        RegistrySnapshotEntity savedEntity =registrySnapshotRepository.save(snapshotEntity);
+        return savedEntity.getId();
     }
 }
