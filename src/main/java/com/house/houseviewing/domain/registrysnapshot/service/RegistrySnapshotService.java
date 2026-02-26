@@ -38,6 +38,6 @@ public class RegistrySnapshotService {
         RegistrySnapshotEntity snapshotEntity = registrySnapshotRepository.findById(registryId)
                 .orElseThrow(() -> new AppException(ExceptionCode.SNAPSHOT_NOT_FOUND));
 
-        snapshotEntity.setReportFileUrl(path);
+        snapshotEntity.addReportFileUrl(path);
     }
 }
