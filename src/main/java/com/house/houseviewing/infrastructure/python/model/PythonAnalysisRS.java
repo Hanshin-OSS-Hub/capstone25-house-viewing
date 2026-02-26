@@ -2,10 +2,11 @@ package com.house.houseviewing.infrastructure.python.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @AllArgsConstructor @Builder
-@NoArgsConstructor
+@NoArgsConstructor @Getter
 public class PythonAnalysisRS {
 
     private Integer ltvScore;

@@ -2,6 +2,7 @@ package com.house.houseviewing.domain.registrysnapshot.controller;
 
 import com.house.houseviewing.domain.registrysnapshot.service.RegistrySnapshotService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -11,4 +12,5 @@ import org.springframework.web.bind.annotation.RestController;
 public class RegistrySnapshotController {
 
     private final RegistrySnapshotService registrySnapshotService;
+
 }
