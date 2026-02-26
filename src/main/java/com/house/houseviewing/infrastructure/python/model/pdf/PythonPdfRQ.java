@@ -9,5 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor @Getter
 public class PythonPdfRQ {
 
+    private Long snapshotId;
+
     private String rawData;
 }

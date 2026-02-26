@@ -1,6 +1,7 @@
 package com.house.houseviewing.domain.registrysnapshot.entity;
 
 import com.house.houseviewing.domain.house.entity.HouseEntity;
+import com.house.houseviewing.global.exception.AppException;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -35,4 +36,7 @@ public class RegistrySnapshotEntity {
 
     private boolean isChanged; // 변동 여부
 
+    public void addReportFileUrl(String path){
+        this.reportFileUrl = path;
+    }
 }

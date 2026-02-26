@@ -2,15 +2,18 @@ package com.house.houseviewing.domain.registrysnapshot.service;
 
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.domain.registrysnapshot.repository.RegistrySnapshotRepository;
+import com.house.houseviewing.global.exception.AppException;
+import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.infrastructure.python.model.analysis.PythonAnalysisRS;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class RegistrySnapshotService {
 
@@ -28,5 +31,13 @@ public class RegistrySnapshotService {
                 .build();
         RegistrySnapshotEntity savedEntity =registrySnapshotRepository.save(snapshotEntity);
         return savedEntity.getId();
+    }
+
+    @Transactional
+    public void pdfRegister(Long registryId, String path){
+        RegistrySnapshotEntity snapshotEntity = registrySnapshotRepository.findById(registryId)
+                .orElseThrow(() -> new AppException(ExceptionCode.SNAPSHOT_NOT_FOUND));
+
+        snapshotEntity.setReportFileUrl(path);
     }
 }
