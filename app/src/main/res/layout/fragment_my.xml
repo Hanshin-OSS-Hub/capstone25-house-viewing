@@ -142,8 +142,8 @@
 
                     <ImageButton
                         android:id="@+id/arrowIcon"
-                        android:layout_width="26dp"
-                        android:layout_height="26dp"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
                         android:background="@android:color/transparent"
                         android:rotation="180"
                         android:src="@drawable/outline_arrow_back_ios_24"
