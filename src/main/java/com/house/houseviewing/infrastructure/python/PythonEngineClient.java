@@ -15,11 +15,9 @@ import reactor.core.publisher.Mono;
 public class PythonEngineClient {
 
     private final WebClient pythonWebClient;
-    private final WebClient webClient;
 
-    public PythonEngineClient(@Qualifier("pythonWebClient") WebClient pythonWebClient, WebClient webClient) {
+    public PythonEngineClient(@Qualifier("pythonWebClient") WebClient pythonWebClient) {
         this.pythonWebClient = pythonWebClient;
-        this.webClient = webClient;
     }
 
     public Mono<PythonAnalysisRS> sendPdf(MultipartFile file){
@@ -36,7 +34,7 @@ public class PythonEngineClient {
     }
 
     public Mono<byte[]> sendRawDataAndReceivePdf(PythonPdfRQ request){
-        return webClient.post()
+        return pythonWebClient.post()
                 .uri("/generate/pdf")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)

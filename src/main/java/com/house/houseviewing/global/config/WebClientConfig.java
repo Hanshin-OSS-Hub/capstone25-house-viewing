@@ -25,7 +25,7 @@ public class WebClientConfig {
             @Value("${kakao.api.url}") String kakaoUrl){
         return WebClient.builder()
                 .baseUrl(kakaoUrl)
-                .defaultHeader("Authorization", "KAKAOAK " + kakaoKey )
+                .defaultHeader("Authorization", "KakaoAK " + kakaoKey )
                 .build();
     }
 }

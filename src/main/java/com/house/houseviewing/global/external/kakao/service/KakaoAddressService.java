@@ -14,11 +14,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
 @Service
-@RequiredArgsConstructor
 public class KakaoAddressService implements KakaoAddress {
 
-    @Qualifier("kakaoWebClient")
     private final WebClient kakaoWebClient;
+
+    public KakaoAddressService(@Qualifier("kakaoWebClient") WebClient kakaoWebClient) {
+        this.kakaoWebClient = kakaoWebClient;
+    }
 
     @Override
     public Address parsingAddress(String query) {
