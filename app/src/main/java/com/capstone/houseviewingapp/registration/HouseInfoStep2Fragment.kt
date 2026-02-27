@@ -31,6 +31,15 @@ class HouseInfoStep2Fragment : Fragment(R.layout.fragment_house_info_step2) {
         return binding.root
     }
 
+    data class Step2Data(
+        val contractType: ContractType, // 계약 유형 (전세/월세)
+        val deposit: Long, // 보증금
+        val monthlyAmount: Long, // 월세 금액 (월세인 경우) -> 전세면 0
+        val maintenanceFee: Long, // 관리비 (미포함이면 0)
+        val moveDate: String, // 전입일 (yyyy-MM-dd)
+        val confirmDate: String // 확정일자 (yyyy-MM-dd)
+    )
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
@@ -51,6 +60,7 @@ class HouseInfoStep2Fragment : Fragment(R.layout.fragment_house_info_step2) {
                 binding.monthManageInputBox.alpha = 1f
                 binding.monthManageWonText.alpha = 1f
             }
+            validateStep2Input()
         }
 
         binding.fixedDateIcon.setOnClickListener {
@@ -64,11 +74,89 @@ class HouseInfoStep2Fragment : Fragment(R.layout.fragment_house_info_step2) {
         setupConfirmDateInputFormat()
 
         setupRentTypeToggle()
+
+        binding.depositEditText.addTextChangedListener { validateStep2Input() }
+        binding.monthEditText.addTextChangedListener { validateStep2Input() }
+        binding.monthManageEditText.addTextChangedListener { validateStep2Input() }
+        binding.yearDepositEditText.addTextChangedListener { validateStep2Input() }
+        binding.yearManageEditText.addTextChangedListener { validateStep2Input() }
+        binding.moveInDateEditText.addTextChangedListener { validateStep2Input() }
+        binding.confirmDateEditText.addTextChangedListener { validateStep2Input() }
+        binding.yearNoManageCheckBox.setOnCheckedChangeListener { _, isChecked ->
+            binding.yearManageEditText.isEnabled = !isChecked
+            if (isChecked) {
+                binding.yearManageEditText.setText("0")
+                binding.yearManageEditText.isEnabled = false
+                binding.yearManageEditText.isFocusable = false
+                binding.yearManageEditText.isFocusableInTouchMode = false
+                binding.yearManageInputBox.alpha = 0.45f
+                binding.yearManageWonText.alpha = 0.45f
+            } else {
+                binding.yearManageEditText.isEnabled = true
+                binding.yearManageEditText.isFocusable = true
+                binding.yearManageEditText.isFocusableInTouchMode = true
+                binding.yearManageInputBox.alpha = 1f
+                binding.yearManageWonText.alpha = 1f
+            }
+            validateStep2Input()
+        }
+
+        validateStep2Input()
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    // NOTE : 계약 정보 필수 입력이 모두 채워졌는지 검사하고, 다음 버튼 활성/비활성 설정 (Step1·Step3와 동일 패턴)
+    private fun validateStep2Input() {
+        val canGoNext = collectStep2Data() != null
+        (activity as? HouseRegistrationActivity)?.setNextButtonEnabled(canGoNext)
+    }
+
+    fun collectStep2Data(): Step2Data? {
+
+        val isMonthly = binding.toggleGroup.checkedButtonId == R.id.monthButton // 월세 여부
+        val contractType = if (isMonthly) ContractType.WOLSE else ContractType.JEONSE // 계약 유형 결정
+
+        val depositText = if (isMonthly) { //
+            binding.depositEditText.text?.toString() // 월세일 때는 월세 카드의 보증금 입력창
+        } else {
+            binding.yearDepositEditText.text?.toString() // 전세일 때는 전세 카드의 보증금 입력창
+        }
+
+        val deposit = depositText?.toLongOrNull() ?: return null // 보증금은 필수 입력
+
+        val monthlyAmount = if (isMonthly) {
+            binding.monthEditText.text?.toString()?.toLongOrNull() ?: return null // 월세 금액은 월세일 때 필수 입력
+        } else {
+            0L // 전세일 때는 월세 금액 0으로 설정
+        }
+
+        val maintenanceFee = if (isMonthly) {
+            if(binding.noManageCheckBox.isChecked) 0L // "관리비 없음" 체크 여부 -> 0원
+            else binding.monthManageEditText.text?.toString()?.toLongOrNull() ?: return null // 체크가 안되어있으면 필수 입력
+        } else {
+            if(binding.yearNoManageCheckBox.isChecked) 0L
+            else binding.yearManageEditText.text?.toString()?.toLongOrNull() ?: return null // 체크가 안되어있으면 필수 입력 -> Long 변환 실패하면 null 반환
+        }
+
+        val moveDate = binding.moveInDateEditText.text?.toString()?.trim().orEmpty() // null 이면 빈 문자열로 처리
+        val confirmDate = binding.confirmDateEditText.text?.toString()?.trim().orEmpty()
+
+        if (moveDate.isBlank()) return null // 이것을 통해 빈문자열을 null로 반환
+        if (confirmDate.isBlank()) return null
+
+
+        return Step2Data(
+            contractType = contractType,
+            deposit = deposit,
+            monthlyAmount = monthlyAmount,
+            maintenanceFee = maintenanceFee,
+            moveDate = moveDate,
+            confirmDate = confirmDate
+        )
     }
 
     private fun setupRentTypeToggle() {
@@ -80,6 +168,7 @@ class HouseInfoStep2Fragment : Fragment(R.layout.fragment_house_info_step2) {
             } else if(checkedId == R.id.yearButton) {
                 showYearlySection()
             }
+            validateStep2Input()
         }
     }
 
@@ -115,30 +204,28 @@ class HouseInfoStep2Fragment : Fragment(R.layout.fragment_house_info_step2) {
 
 
             override fun afterTextChanged(s: Editable?) {
-                // [1] 포맷팅 중 재진입 방지
                 if (isFormattingMoveInDate) return
                 isFormattingMoveInDate = true
-
-                // [2] 숫자만 추출하고 최대 8자리(yyyyMMdd)까지만 사용
-                val digitsOnly = s.toString()
-                    .filter { it.isDigit() }
-                    .take(8)
-
-                // [3] yyyy-MM-dd 형태로 문자열 재조합
+                val str = s.toString()
+                val digitsBeforeCursor = str.take(binding.moveInDateEditText.selectionStart.coerceAtMost(str.length)).count { it.isDigit() }
+                val digitsOnly = str.filter { it.isDigit() }.take(8)
                 val formatted = buildString {
                     digitsOnly.forEachIndexed { index, c ->
                         append(c)
                         if (index == 3 || index == 5) append('-')
                     }
                 }
-
-                // [4] 현재 텍스트와 다를 때만 반영 (커서 포함)
-                if (s.toString() != formatted) {
+                if (str != formatted) {
                     binding.moveInDateEditText.setText(formatted)
-                    binding.moveInDateEditText.setSelection(formatted.length)
+                    var newPos = 0
+                    var digitCount = 0
+                    for (i in formatted.indices) {
+                        if (digitCount >= digitsBeforeCursor) break
+                        if (formatted[i].isDigit()) digitCount++
+                        newPos = i + 1
+                    }
+                    binding.moveInDateEditText.setSelection(newPos.coerceIn(0, formatted.length))
                 }
-
-                // [5] 포맷팅 종료
                 isFormattingMoveInDate = false
             }
         })
@@ -166,30 +253,28 @@ class HouseInfoStep2Fragment : Fragment(R.layout.fragment_house_info_step2) {
 
 
             override fun afterTextChanged(s: Editable?) {
-                // [1] 포맷팅 중 재진입 방지
                 if (isFormattingConfirmDate) return
                 isFormattingConfirmDate = true
-
-                // [2] 숫자만 추출하고 최대 8자리(yyyyMMdd)까지만 사용
-                val digitsOnly = s.toString()
-                    .filter { it.isDigit() }
-                    .take(8)
-
-                // [3] yyyy-MM-dd 형태로 문자열 재조합
+                val str = s.toString()
+                val digitsBeforeCursor = str.take(binding.confirmDateEditText.selectionStart.coerceAtMost(str.length)).count { it.isDigit() }
+                val digitsOnly = str.filter { it.isDigit() }.take(8)
                 val formatted = buildString {
                     digitsOnly.forEachIndexed { index, c ->
                         append(c)
                         if (index == 3 || index == 5) append('-')
                     }
                 }
-
-                // [4] 현재 텍스트와 다를 때만 반영 (커서 포함)
-                if (s.toString() != formatted) {
+                if (str != formatted) {
                     binding.confirmDateEditText.setText(formatted)
-                    binding.confirmDateEditText.setSelection(formatted.length)
+                    var newPos = 0
+                    var digitCount = 0
+                    for (i in formatted.indices) {
+                        if (digitCount >= digitsBeforeCursor) break
+                        if (formatted[i].isDigit()) digitCount++
+                        newPos = i + 1
+                    }
+                    binding.confirmDateEditText.setSelection(newPos.coerceIn(0, formatted.length))
                 }
-
-                // [5] 포맷팅 종료
                 isFormattingConfirmDate = false
             }
         })
