@@ -61,6 +61,7 @@ class HouseInfoStep1Fragment : Fragment(R.layout.fragment_house_info_step1) {
 
         if (nickname.isBlank()) return null
         if (originAddress.isBlank()) return null
+        if (detailAddress.isBlank()) return null
 
         return Step1Data(
             nickname = nickname,
