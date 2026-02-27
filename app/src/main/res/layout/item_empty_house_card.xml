@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_margin="5dp"
     app:cardCornerRadius="24dp"
     app:cardElevation="4dp"
@@ -13,12 +13,12 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp">
+        android:padding="20dp">
 
         <FrameLayout
             android:id="@+id/emptyhomeicon"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
+            android:layout_width="72dp"
+            android:layout_height="72dp"
             android:background="@drawable/bg_circle_sheet_white"
             android:backgroundTint="@color/grayblue"
             app:layout_constraintTop_toTopOf="parent"
@@ -51,7 +51,7 @@
             android:id="@+id/emptyDescText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="집을 추가하면 LTV와 감시 상태를 \n 한눈에 확인할 수 있어요"
+            android:text="LTV와 감시 상태를 한눈에 확인할 수 있어요"
             android:textSize="14sp"
             android:gravity="center"
             android:fontFamily="@font/pretendard_medium"
@@ -65,7 +65,7 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/plusHouseButton"
-            android:layout_width="wrap_content"
+            android:layout_width="180dp"
             android:layout_height="60dp"
             android:text="+ 집 추가하기"
             android:textSize="18dp"
