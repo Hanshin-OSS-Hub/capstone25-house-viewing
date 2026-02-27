@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
+// viewmodel은 등록 과정에서 입력된 데이터를 임시로 보관하는 역할을 합니다.
 class HouseRegistrationViewModel : ViewModel() {
     private val _draft = MutableStateFlow(HouseRegistrationDraft())
     val draft: StateFlow<HouseRegistrationDraft> = _draft
