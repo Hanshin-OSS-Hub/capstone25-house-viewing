@@ -19,6 +19,7 @@ class HouseInfoStep3Fragment : Fragment(R.layout.fragment_house_info_step3) {
 
     private var selectedFileUri: Uri? = null // 선택된 파일의 URI를 저장하는 변수
 
+    // NOTE : PDF 파일 선택을 위한 ActivityResultLauncher
     private val pickPDfLauncher =
         registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri: Uri? ->
             if (uri == null) {
@@ -55,6 +56,16 @@ class HouseInfoStep3Fragment : Fragment(R.layout.fragment_house_info_step3) {
         }
         renderSelectedFileState()
     }
+
+    // NOTE : PDF 파일이 선택되었는지 여부를 반환하는 함수
+    fun hasSelectedFile(): Boolean {
+        return selectedFileUri != null
+    }
+
+    // NOTE : 선택된 PDF 파일의 URI 문자열을 반환하는 함수 (없으면 null)
+    fun getSelectedFileUriString() : String? = selectedFileUri?.toString()
+
+    //TODO : 나중에 백엔드와 연동할 때, getSelectedFileUriString() 대신, selectedFileUri를 서버에 업로드하고, 서버에서 반환된 URL을 저장하도록 수정 필요
 
     // NOTE : 파일 상태에 따라 UI 업데이트
     private fun renderSelectedFileState() {
