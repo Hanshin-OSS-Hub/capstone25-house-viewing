@@ -9,7 +9,9 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.capstone.houseviewingapp.MainActivity
 import com.capstone.houseviewingapp.R
+import com.capstone.houseviewingapp.data.local.HouseLocalStore
 import com.capstone.houseviewingapp.databinding.ActivityHouseRegistrationBinding
+import com.capstone.houseviewingapp.home.HouseCardItem
 
 class HouseRegistrationActivity : AppCompatActivity() {
     private lateinit var binding: ActivityHouseRegistrationBinding
@@ -23,11 +25,13 @@ class HouseRegistrationActivity : AppCompatActivity() {
         setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
+            val bottom = maxOf(systemBars.bottom, ime.bottom)
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, bottom)
             insets
         }
 
-        if(savedInstanceState == null){
+        if (savedInstanceState == null) {
             supportFragmentManager.beginTransaction()
                 .replace(R.id.registerationFragmentContainer, HouseInfoStep1Fragment())
                 .commit()
@@ -36,12 +40,13 @@ class HouseRegistrationActivity : AppCompatActivity() {
 
         binding.nextButton.setOnClickListener {
             //TODO: 다음 버튼 클릭 시 다음 단계로 이동하는 로직 구현
-            if(currentStep == 1) {
+            if (currentStep == 1) {
                 val step1 = supportFragmentManager
                     .findFragmentById(R.id.registerationFragmentContainer) as? HouseInfoStep1Fragment
                     ?: return@setOnClickListener
 
-                val input = step1.collectStep1Data() ?: return@setOnClickListener
+                val input =
+                    step1.collectStep1Data() ?: return@setOnClickListener // null이면 다음 단계로 넘어가지 않음
 
                 vm.updateStep1(
                     nickname = input.nickname,
@@ -55,15 +60,50 @@ class HouseRegistrationActivity : AppCompatActivity() {
                     .commit()
                 currentStep = 2
             } else if (currentStep == 2) {
+                val step2 = supportFragmentManager
+                    .findFragmentById(R.id.registerationFragmentContainer) as? HouseInfoStep2Fragment
+                    ?: return@setOnClickListener
+
+                val input = step2.collectStep2Data() ?: return@setOnClickListener
+                vm.updateStep2(
+                    contractType = input.contractType,
+                    deposit = input.deposit,
+                    monthlyAmount = input.monthlyAmount,
+                    maintenanceFee = input.maintenanceFee,
+                    moveDate = input.moveDate,
+                    confirmDate = input.confirmDate
+                )
+
                 supportFragmentManager.beginTransaction()
                     .replace(R.id.registerationFragmentContainer, HouseInfoStep3Fragment())
                     .addToBackStack(null)
                     .commit()
                 currentStep = 3
             } else if (currentStep == 3) {
-                val intent = Intent(this, MainActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-                startActivity(intent)
+                val step3 = supportFragmentManager
+                    .findFragmentById(R.id.registerationFragmentContainer) as? HouseInfoStep3Fragment
+                    ?: return@setOnClickListener
+
+                if (!step3.hasSelectedFile()) {
+                    // TODO : 문서 검증이 완료되지 않은 경우, 사용자에게 알림 표시 (예: Toast)
+                    return@setOnClickListener
+                }
+
+                vm.updateStep3(step3.getSelectedFileUriString())
+
+                val draft = vm.draft.value
+                val address = listOf(draft.originAddress, draft.detailAddress).filter { it.isNotBlank() }.joinToString(" ") // 주소 조합
+                val cardItem = HouseCardItem(
+                    houseId = null, // TODO : 백엔드 연동 후 실제 houseId 값으로 설정
+                    homeName = draft.nickname,
+                    address = address,
+                    ltv = null // TODO : LTV 분석 API 연동 후 실제 LTV 값으로 설정
+                )
+
+                HouseLocalStore.addHouse(this, cardItem)
+                // TODO : 위 대신 집 등록 API 호출 후 houseId 수신 → 계약 등록 API → 성공 시 서버 데이터로 카드 갱신
+
+                setResult(RESULT_OK)
                 finish()
             }
 
@@ -72,12 +112,11 @@ class HouseRegistrationActivity : AppCompatActivity() {
         }
 
         binding.backButton.setOnClickListener {
-            if(supportFragmentManager.backStackEntryCount > 0) {
+            if (supportFragmentManager.backStackEntryCount > 0) {
                 supportFragmentManager.popBackStack()
                 currentStep = (currentStep - 1).coerceAtLeast(1) // 현재 단계가 1보다 작아지지 않도록 보장
                 updateStepUi()
-            }
-            else {
+            } else {
                 finish() // 백스택이 비어있으면 액티비티 종료
             }
         }
@@ -86,7 +125,7 @@ class HouseRegistrationActivity : AppCompatActivity() {
 
     private fun updateStepUi() {
         binding.registrationProgressBar.max = 100
-        val progress = when(currentStep) {
+        val progress = when (currentStep) {
             1 -> 34
             2 -> 67
             3 -> 100
@@ -95,14 +134,14 @@ class HouseRegistrationActivity : AppCompatActivity() {
 
         binding.registrationProgressBar.progress = progress
         binding.stepTextView.text = "$currentStep / 3 단계"
-        if(currentStep == 1) {
+        if (currentStep == 1) {
             binding.toolBarTextView.text = "주택 기본 정보 입력"
             setNextButtonEnabled(true)
         }
         if (currentStep == 2) {
             binding.toolBarTextView.text = "계약 정보 입력"
             binding.nextButton.text = "다음"
-            setNextButtonEnabled(true)
+            setNextButtonEnabled(false) // Step2 진입 시 비활성. Fragment에서 필수 입력 채우면 활성화
         }
         if (currentStep == 3) {
             binding.nextButton.text = "문서 검증"
@@ -116,8 +155,10 @@ class HouseRegistrationActivity : AppCompatActivity() {
 
         val colorRes = if (enabled) R.color.blue else R.color.icongray // 활성화 여부에 따른 색상 리소스 선택
 
-        val colorInt = androidx.core.content.ContextCompat.getColor(this, colorRes) // 색상 리소스에서 실제 색상 값 가져오기
+        val colorInt =
+            androidx.core.content.ContextCompat.getColor(this, colorRes) // 색상 리소스에서 실제 색상 값 가져오기
 
-        binding.nextButton.backgroundTintList = android.content.res.ColorStateList.valueOf(colorInt) // 버튼 배경 색상 변경
+        binding.nextButton.backgroundTintList =
+            android.content.res.ColorStateList.valueOf(colorInt) // 버튼 배경 색상 변경
     }
 }
