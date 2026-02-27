@@ -1,13 +1,15 @@
 package com.capstone.houseviewingapp.home
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.capstone.houseviewingapp.R
+import com.capstone.houseviewingapp.data.local.HouseLocalStore
 import com.capstone.houseviewingapp.databinding.FragmentHomeBinding
 import com.capstone.houseviewingapp.registration.HouseRegistrationActivity
 
@@ -15,6 +17,12 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
 
     private var _binding: FragmentHomeBinding? = null
     private val binding get() = _binding!!
+    private val registerLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
+        loadAndShowCards()
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -29,29 +37,40 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        loadAndShowCards()
 
-        val items = emptyList<HouseCardItem>()
-
-//         NOTE: ViewPager2에 카드 아이템들 연결하기 (나중에 API에서 받아온 데이터로 교체 예정)
-//        val items = listOf<HouseCardItem>(
-//            HouseCardItem("서초 그랑자이 104동", "서울특별시 서초구 서초동 1234-56", 50),
-//            HouseCardItem("마포 래미안 102동", "서울특별시 마포구 공덕동 11-22", 72),
-//            HouseCardItem("강남 아이파크 203동", "서울특별시 강남구 역삼동 33-44", 66)
-//        )
-
-        binding.viewpager.adapter = HouseCardAdapter(items)
-
-        updateEmptyState(items)
-
-        //NOTE: 빈 화면에서 집 정보를 직접 입력하고 추가하는 방식
+        //NOTE: 빈 화면에서는 버튼 클릭 시에만 집 등록
         binding.emptylayout.plusHouseButton.setOnClickListener {
             val intent = Intent(requireContext(), HouseRegistrationActivity::class.java)
-            startActivity(intent)
+            registerLauncher.launch(intent)
         }
-
 
     }
 
+    // NOTE : 카드 로드. 화면 갱심 함수
+    private fun loadAndShowCards() {
+        val items = HouseLocalStore.getHouses(requireContext())
+        binding.viewpager.adapter = HouseCardAdapter(
+            items,
+            // TODO : 수정 기능 구현 시 onEdit 람다 추가 예정
+//            onEdit = { item, index ->
+//                val intent = Intent(requireContext(), HouseRegistrationActivity::class.java)
+//                intent.putExtra(HouseRegistrationActivity.EXTRA_EDIT_INDEX, index)
+//                registerLauncher.launch(intent)
+//            },
+           onDelete = { _, index ->
+                HouseLocalStore.removeHouse(requireContext(), index)
+                loadAndShowCards()
+            },
+            onAddClick = {
+                val intent = Intent(requireContext(), HouseRegistrationActivity::class.java)
+                registerLauncher.launch(intent)
+            }
+        )
+        updateEmptyState(items)
+    }
+
+    // NOTE : 카드 목록이 비어있는지 여부에 따라 빈 화면과 카드 뷰의 표시 상태를 업데이트하는 함수
     private fun updateEmptyState(items: List<HouseCardItem>) {
         if (items.isEmpty()) {
             binding.viewpager.visibility = View.GONE
