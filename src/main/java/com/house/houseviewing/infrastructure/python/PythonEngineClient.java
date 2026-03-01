@@ -26,7 +26,7 @@ public class PythonEngineClient {
                 .filename(file.getOriginalFilename());
 
         return pythonWebClient.post()
-                .uri("/analyze")
+                .uri("/engine/analyze")
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(builder.build()))
                 .retrieve()
@@ -35,7 +35,7 @@ public class PythonEngineClient {
 
     public Mono<byte[]> sendRawDataAndReceivePdf(PythonPdfRQ request){
         return pythonWebClient.post()
-                .uri("/generate/pdf")
+                .uri("/engine/generate-pdf")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .retrieve()
