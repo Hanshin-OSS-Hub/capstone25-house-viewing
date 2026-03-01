@@ -28,7 +28,7 @@ public class SubscriptionService {
         UserEntity user = userRepository.findById(request.getUserId()).orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
 
         SubscriptionEntity subscription = user.getSubscription();
-        subscription.setPlanType(PlanType.PREMIUM);
+        subscription.updatePlanType(PlanType.PREMIUM);
 
         return subscription;
     }

@@ -53,7 +53,7 @@ public class UserService {
                     .startedAt(LocalDateTime.now())
                     .build();
 
-            userEntity.setSubscription(subscription);
+            userEntity.updateSubscription(subscription);
 
             UserEntity saved = userRepository.save(userEntity);
 

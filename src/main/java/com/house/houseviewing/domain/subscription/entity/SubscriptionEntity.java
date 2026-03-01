@@ -9,8 +9,8 @@ import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "subscriptions")
-@NoArgsConstructor @AllArgsConstructor
-@Builder @Getter
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class SubscriptionEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,18 +21,31 @@ public class SubscriptionEntity {
     @JoinColumn(name = "user_id")
     private UserEntity user;
 
-    @Setter
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private PlanType planType;
 
     @Column(nullable = false)
-    private LocalDateTime startedAt;
+    private LocalDateTime createdAt;
 
     private LocalDateTime purchasedAt;
 
+    private LocalDateTime endedAt;
+
     public void addUser(UserEntity user){
         this.user = user;
+    }
+
+    @Builder
+    public SubscriptionEntity(PlanType planType, LocalDateTime createdAt, LocalDateTime purchasedAt, LocalDateTime endedAt) {
+        this.planType = planType;
+        this.createdAt = createdAt;
+        this.purchasedAt = purchasedAt;
+        this.endedAt = endedAt;
+    }
+
+    public void updatePlanType(PlanType planType){
+        this.planType = planType;
     }
 
 }
