@@ -31,4 +31,8 @@ public class SubscriptionEntity {
 
     private LocalDateTime purchasedAt;
 
+    public void addUser(UserEntity user){
+        this.user = user;
+    }
+
 }

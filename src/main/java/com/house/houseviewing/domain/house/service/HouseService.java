@@ -32,7 +32,7 @@ public class HouseService {
 
         HouseEntity house = new HouseEntity(request.getNickname(), address);
         HouseEntity savedHouse = houseRepository.save(house);
-        if(user.checkSubscription()){
+        if(user.isPremium()){
             savedHouse.setMonitoringStatus(MonitoringStatus.LIVE);
         }
         user.addHouse(savedHouse);

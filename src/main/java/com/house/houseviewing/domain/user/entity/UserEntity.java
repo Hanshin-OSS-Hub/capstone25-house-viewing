@@ -3,7 +3,6 @@ package com.house.houseviewing.domain.user.entity;
 import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
-import com.house.houseviewing.domain.user.enums.MonitoringStatus;
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -13,8 +12,8 @@ import java.util.List;
 
 @Entity
 @Table(name = "users")
-@Getter @NoArgsConstructor
-@AllArgsConstructor @Builder
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class UserEntity extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,7 +23,7 @@ public class UserEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(unique = true, nullable = false)
     private String email;
 
     @Column(unique = true, nullable = false)
@@ -37,14 +36,13 @@ public class UserEntity extends BaseTimeEntity {
         this.password = password;
     }
 
-    @Builder.Default
-    @OneToMany(mappedBy = "userEntity")
+    @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HouseEntity> houses = new ArrayList<>();
 
-    @Setter
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private SubscriptionEntity subscription;
 
+    @Builder
     public UserEntity(String password, String loginId, String email, String name) {
         this.password = password;
         this.loginId = loginId;
@@ -57,7 +55,12 @@ public class UserEntity extends BaseTimeEntity {
         house.setUserEntity(this);
     }
 
-    public boolean checkSubscription() {
+    public void updateSubscription(SubscriptionEntity subscription){
+        this.subscription = subscription;
+        subscription.addUser(this);
+    }
+
+    public boolean isPremium() {
         return this.getSubscription().getPlanType() == PlanType.PREMIUM && this.getSubscription() != null;
     }
 }

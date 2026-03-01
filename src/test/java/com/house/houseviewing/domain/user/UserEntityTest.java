@@ -40,6 +40,6 @@ public class UserEntityTest {
         user.setSubscription(subscription);
         // then
         assertThat(user.getSubscription().getPlanType()).isEqualTo(PlanType.FREE);
-        assertThat(user.checkSubscription()).isFalse();
+        assertThat(user.isPremium()).isFalse();
     }
 }
