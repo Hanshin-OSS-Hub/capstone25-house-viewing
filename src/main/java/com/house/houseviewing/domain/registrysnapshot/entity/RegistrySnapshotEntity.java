@@ -1,18 +1,17 @@
 package com.house.houseviewing.domain.registrysnapshot.entity;
 
+import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.pdfreport.entity.PdfReportEntity;
 import com.house.houseviewing.domain.registrysnapshot.enums.RiskLevel;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "registrysnapshots")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class RegistrySnapshotEntity {
+public class RegistrySnapshotEntity extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "registrysnapshot_id")
@@ -43,9 +42,6 @@ public class RegistrySnapshotEntity {
     private RiskLevel riskLevel;
 
     @Column(nullable = false)
-    private LocalDateTime createdAt; // 생성 일
-
-    @Column(nullable = false)
     private boolean isChanged; // 변동 여부
 
     public void addHouse(HouseEntity house){
@@ -53,7 +49,7 @@ public class RegistrySnapshotEntity {
     }
 
     @Builder
-    public RegistrySnapshotEntity(Long id, HouseEntity houseEntity, PdfReportEntity pdfReport, String snapshotUrl, String originalFileName, String rawData, Integer ltvScore, RiskLevel riskLevel, LocalDateTime createdAt, boolean isChanged) {
+    public RegistrySnapshotEntity(Long id, HouseEntity houseEntity, PdfReportEntity pdfReport, String snapshotUrl, String originalFileName, String rawData, Integer ltvScore, RiskLevel riskLevel, boolean isChanged) {
         this.id = id;
         this.houseEntity = houseEntity;
         this.pdfReport = pdfReport;
@@ -62,7 +58,11 @@ public class RegistrySnapshotEntity {
         this.rawData = rawData;
         this.ltvScore = ltvScore;
         this.riskLevel = riskLevel;
-        this.createdAt = createdAt;
         this.isChanged = isChanged;
+    }
+
+    public void addPdfReport(PdfReportEntity pdfReport){
+        this.pdfReport = pdfReport;
+        pdfReport.addRegistrySnapshot(this);
     }
 }

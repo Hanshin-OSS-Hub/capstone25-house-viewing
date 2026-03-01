@@ -1,5 +1,6 @@
 package com.house.houseviewing.domain.subscription.entity;
 
+import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import jakarta.persistence.*;
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 @Table(name = "subscriptions")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class SubscriptionEntity {
+public class SubscriptionEntity extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "subscription_id")
@@ -25,9 +26,6 @@ public class SubscriptionEntity {
     @Column(nullable = false)
     private PlanType planType;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
     private LocalDateTime purchasedAt;
 
     private LocalDateTime endedAt;
@@ -37,11 +35,10 @@ public class SubscriptionEntity {
     }
 
     @Builder
-    public SubscriptionEntity(Long id, UserEntity user, PlanType planType, LocalDateTime createdAt, LocalDateTime purchasedAt, LocalDateTime endedAt) {
+    public SubscriptionEntity(Long id, UserEntity user, PlanType planType, LocalDateTime purchasedAt, LocalDateTime endedAt) {
         this.id = id;
         this.user = user;
         this.planType = planType;
-        this.createdAt = createdAt;
         this.purchasedAt = purchasedAt;
         this.endedAt = endedAt;
     }

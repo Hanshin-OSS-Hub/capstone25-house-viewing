@@ -12,8 +12,7 @@ public class SubscriptionFixture {
     public static SubscriptionEntity.SubscriptionEntityBuilder createDefault(UserEntity user){
         return SubscriptionEntity.builder()
                 .user(user)
-                .planType(PlanType.FREE)
-                .createdAt(LocalDateTime.now());
+                .planType(PlanType.FREE);
     }
 
     public static SubscriptionPremiumRQ.SubscriptionPremiumRQBuilder createPremium(SubscriptionEntity subscription){

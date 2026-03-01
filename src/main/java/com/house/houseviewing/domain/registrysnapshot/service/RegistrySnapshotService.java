@@ -7,8 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
-
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -23,7 +21,6 @@ public class RegistrySnapshotService {
                 .snapshotUrl(path)
                 .rawData(response.getRawData())
                 .ltvScore(response.getLtvScore())
-                .createdAt(LocalDateTime.now())
                 .isChanged(false)
                 .build();
         RegistrySnapshotEntity savedEntity =registrySnapshotRepository.save(snapshotEntity);

@@ -50,7 +50,6 @@ public class UserService {
             SubscriptionEntity subscription = SubscriptionEntity.builder()
                     .user(userEntity)
                     .planType(PlanType.FREE)
-                    .createdAt(LocalDateTime.now())
                     .build();
 
             userEntity.updateSubscription(subscription);

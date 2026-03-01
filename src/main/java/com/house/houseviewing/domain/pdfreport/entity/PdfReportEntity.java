@@ -1,5 +1,6 @@
 package com.house.houseviewing.domain.pdfreport.entity;
 
+import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -7,13 +8,11 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
-
 @Entity
 @Table(name = "pdfreports")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PdfReportEntity {
+public class PdfReportEntity extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "pdfreport_id")
@@ -25,15 +24,11 @@ public class PdfReportEntity {
     @Column(nullable = false)
     private String reportUrl;
 
-    @Column(nullable = false)
-    private LocalDateTime createdAt;
-
     @Builder
-    public PdfReportEntity(Long id, RegistrySnapshotEntity registrySnapshot, String reportUrl, LocalDateTime createdAt) {
+    public PdfReportEntity(Long id, RegistrySnapshotEntity registrySnapshot, String reportUrl) {
         this.id = id;
         this.registrySnapshot = registrySnapshot;
         this.reportUrl = reportUrl;
-        this.createdAt = createdAt;
     }
 
     public void addRegistrySnapshot(RegistrySnapshotEntity registrySnapshot){
