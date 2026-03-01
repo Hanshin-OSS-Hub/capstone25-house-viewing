@@ -40,7 +40,7 @@ public class HouseServiceIntegrationTest {
         HouseEntity house = getHouseEntity(user);
         // when
         user.addHouse(house);
-        house.setUserEntity(user);
+        house.addUser(user);
         // then
         assertThat(user.getId()).isEqualTo(house.getUserEntity().getId());
     }

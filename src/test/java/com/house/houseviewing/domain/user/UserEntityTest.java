@@ -37,7 +37,7 @@ public class UserEntityTest {
         UserEntity user = UserFixture.createDefault().build();
         SubscriptionEntity subscription = SubscriptionFixture.createDefault(user).build();
         // when
-        user.setSubscription(subscription);
+        user.updateSubscription(subscription);
         // then
         assertThat(user.getSubscription().getPlanType()).isEqualTo(PlanType.FREE);
         assertThat(user.isPremium()).isFalse();

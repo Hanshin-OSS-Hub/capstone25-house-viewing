@@ -3,7 +3,6 @@ package com.house.houseviewing.domain.registrysnapshot.entity;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.pdfreport.entity.PdfReportEntity;
 import com.house.houseviewing.domain.registrysnapshot.enums.RiskLevel;
-import com.house.houseviewing.global.exception.AppException;
 import jakarta.persistence.*;
 import lombok.*;
 

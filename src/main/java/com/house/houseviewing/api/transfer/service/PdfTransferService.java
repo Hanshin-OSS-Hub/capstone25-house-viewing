@@ -41,8 +41,6 @@ public class PdfTransferService {
             try {
                 Files.write(Paths.get(pdfPath), pdfBytes); // pdf 저장
 
-                registrySnapshotService.pdfRegister(registrySnapshotId, pdfPath);
-
             } catch (IOException e){
                 log.info("PDF 저장 중 오류가 발생했습니다.", e);
             }

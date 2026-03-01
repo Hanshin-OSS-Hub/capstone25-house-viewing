@@ -43,12 +43,13 @@ public class UserEntity extends BaseTimeEntity {
     private SubscriptionEntity subscription;
 
     @Builder
-    public UserEntity(Long id, String name, String email, String loginId, String password) {
+    public UserEntity(Long id, String name, String email, String loginId, String password, SubscriptionEntity subscription) {
         this.id = id;
         this.name = name;
         this.email = email;
         this.loginId = loginId;
         this.password = password;
+        this.subscription = subscription;
     }
 
     public void addHouse(HouseEntity house){
