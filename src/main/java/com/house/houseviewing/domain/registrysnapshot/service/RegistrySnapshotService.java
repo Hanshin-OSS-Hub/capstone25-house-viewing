@@ -23,7 +23,7 @@ public class RegistrySnapshotService {
     public Long register(PythonAnalysisRS response, String originFileName, String path){
         RegistrySnapshotEntity snapshotEntity = RegistrySnapshotEntity.builder()
                 .originalFileName(originFileName)
-                .fileUrl(path)
+                .snapshotUrl(path)
                 .rawData(response.getRawData())
                 .ltvScore(response.getLtvScore())
                 .createdAt(LocalDateTime.now())
