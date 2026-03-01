@@ -17,22 +17,23 @@ import java.util.List;
 
 @Entity
 @Table(name = "houses")
-@NoArgsConstructor @Getter
-@AllArgsConstructor @Builder
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HouseEntity extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "house_id")
     private Long id;
 
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
     private UserEntity userEntity;
 
-    @OneToMany(mappedBy = "houseEntity")
-    @Builder.Default
+    @OneToMany(mappedBy = "houseEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ContractEntity> contracts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "houseEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RegistrySnapshotEntity> registrySnapshots = new ArrayList<>();
 
     @Column(nullable = false)
     private String nickname;
@@ -40,22 +41,22 @@ public class HouseEntity extends BaseTimeEntity {
     @Embedded
     private Address address;
 
-    @Setter
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private MonitoringStatus monitoringStatus;
 
-    @OneToMany(mappedBy = "houseEntity" )
-    private List<RegistrySnapshotEntity> registrySnapshots = new ArrayList<>();
-
-    public HouseEntity(String nickname, Address address) {
+    @Builder
+    public HouseEntity(String nickname, Address address, MonitoringStatus monitoringStatus) {
         this.nickname = nickname;
         this.address = address;
+        this.monitoringStatus = monitoringStatus;
+    }
+
+    public void addUser(UserEntity user){
+        this.userEntity = user;
     }
 
     public void addContract(ContractEntity contract){
-        if (this.contracts == null) {
-            this.contracts = new ArrayList<>();
-        }
         checkContract(contract);
         contracts.add(contract);
         contract.setHouseEntity(this);
@@ -64,5 +65,9 @@ public class HouseEntity extends BaseTimeEntity {
     public void checkContract(ContractEntity contract) {
         if(!this.contracts.isEmpty())
             throw new AppException(ExceptionCode.ALREADY_REGISTERED_CONTRACT);
+    }
+
+    public void updateMonitoringStatus(MonitoringStatus monitoringStatus){
+        this.monitoringStatus = monitoringStatus;
     }
 }

@@ -52,7 +52,7 @@ public class UserEntity extends BaseTimeEntity {
 
     public void addHouse(HouseEntity house){
         houses.add(house);
-        house.setUserEntity(this);
+        house.addUser(this);
     }
 
     public void updateSubscription(SubscriptionEntity subscription){
