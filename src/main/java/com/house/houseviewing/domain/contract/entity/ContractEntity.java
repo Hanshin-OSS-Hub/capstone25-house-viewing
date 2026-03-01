@@ -12,15 +12,13 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "contracts")
 @Getter
-@NoArgsConstructor
-@AllArgsConstructor @Builder
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class ContractEntity extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "contract_id")
     private Long id;
 
-    @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "house_id")
     private HouseEntity houseEntity;
@@ -37,16 +35,25 @@ public class ContractEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private Long maintenanceFee;
 
+    @Column(nullable = false)
     private LocalDate moveDate;
 
+    @Column(nullable = false)
     private LocalDate confirmDate;
 
-    public ContractEntity(ContractType contractType, Long deposit, Long monthlyAmount, Long maintenanceFee, LocalDate moveDate, LocalDate confirmDate) {
+    @Builder
+    public ContractEntity(Long id, HouseEntity houseEntity, ContractType contractType, Long deposit, Long monthlyAmount, Long maintenanceFee, LocalDate moveDate, LocalDate confirmDate) {
+        this.id = id;
+        this.houseEntity = houseEntity;
         this.contractType = contractType;
         this.deposit = deposit;
         this.monthlyAmount = monthlyAmount;
         this.maintenanceFee = maintenanceFee;
         this.moveDate = moveDate;
         this.confirmDate = confirmDate;
+    }
+
+    public void addHouse(HouseEntity house){
+        this.houseEntity = house;
     }
 }

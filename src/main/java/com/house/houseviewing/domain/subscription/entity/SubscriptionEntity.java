@@ -37,7 +37,8 @@ public class SubscriptionEntity {
     }
 
     @Builder
-    public SubscriptionEntity(UserEntity user, PlanType planType, LocalDateTime createdAt, LocalDateTime purchasedAt, LocalDateTime endedAt) {
+    public SubscriptionEntity(Long id, UserEntity user, PlanType planType, LocalDateTime createdAt, LocalDateTime purchasedAt, LocalDateTime endedAt) {
+        this.id = id;
         this.user = user;
         this.planType = planType;
         this.createdAt = createdAt;

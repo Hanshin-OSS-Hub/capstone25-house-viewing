@@ -11,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -27,12 +25,19 @@ public class ContractService {
         HouseEntity house = houseRepository.findById(request.getHouseId())
                 .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
 
-        ContractEntity contract = new ContractEntity(request.getContractType(), request.getDeposit(),
-                request.getMonthlyAmount(), request.getMaintenanceFee(), request.getMoveDate(), request.getConfirmDate());
+        ContractEntity contract = ContractEntity.builder()
+                .houseEntity(houseRepository.findById(request.getHouseId()).get())
+                .contractType(request.getContractType())
+                .deposit(request.getDeposit())
+                .monthlyAmount(request.getMonthlyAmount())
+                .maintenanceFee(request.getMaintenanceFee())
+                .moveDate(request.getMoveDate())
+                .confirmDate(request.getConfirmDate())
+                .build();
 
         ContractEntity saved = contractRepository.save(contract);
         house.addContract(saved);
-        saved.setHouseEntity(house);
+        saved.addHouse(house);
 
         return saved;
     }
@@ -43,5 +48,4 @@ public class ContractService {
                 .orElseThrow(() -> new AppException(ExceptionCode.CONTRACT_NOT_FOUND));
         contractRepository.delete(byId);
     }
-
 }

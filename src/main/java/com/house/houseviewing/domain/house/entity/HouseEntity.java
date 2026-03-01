@@ -45,13 +45,6 @@ public class HouseEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private MonitoringStatus monitoringStatus;
 
-    @Builder
-    public HouseEntity(String nickname, Address address, MonitoringStatus monitoringStatus) {
-        this.nickname = nickname;
-        this.address = address;
-        this.monitoringStatus = monitoringStatus;
-    }
-
     public void addUser(UserEntity user){
         this.userEntity = user;
     }
@@ -59,7 +52,16 @@ public class HouseEntity extends BaseTimeEntity {
     public void addContract(ContractEntity contract){
         checkContract(contract);
         contracts.add(contract);
-        contract.setHouseEntity(this);
+        contract.addHouse(this);
+    }
+
+    @Builder
+    public HouseEntity(Long id, UserEntity userEntity, String nickname, Address address, MonitoringStatus monitoringStatus) {
+        this.id = id;
+        this.userEntity = userEntity;
+        this.nickname = nickname;
+        this.address = address;
+        this.monitoringStatus = monitoringStatus;
     }
 
     public void checkContract(ContractEntity contract) {
