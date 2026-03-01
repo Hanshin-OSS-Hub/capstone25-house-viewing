@@ -19,7 +19,7 @@ public class RegistrySnapshotEntity {
     @Setter
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "house_id")
-    HouseEntity houseEntity;
+    private HouseEntity houseEntity;
 
     private String fileUrl; // 새 등기부 PDF 경로
 
