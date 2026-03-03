@@ -12,8 +12,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
-
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -28,6 +26,9 @@ public class SubscriptionService {
         UserEntity user = userRepository.findById(request.getUserId()).orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
 
         SubscriptionEntity subscription = user.getSubscription();
+        if (subscription == null){
+            throw new AppException(ExceptionCode.SUBSCRIPTION_NOT_FOUND);
+        }
         subscription.updatePlanType(PlanType.PREMIUM);
 
         return subscription;

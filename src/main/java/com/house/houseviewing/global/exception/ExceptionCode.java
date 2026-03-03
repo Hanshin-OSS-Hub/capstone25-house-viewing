@@ -33,6 +33,7 @@ public enum ExceptionCode {
     HOUSE_NOT_FOUND("NF003", HttpStatus.NOT_FOUND, "해당 집은 등록되지 않았습니다."),
     CONTRACT_NOT_FOUND("NF004", HttpStatus.NOT_FOUND, "해당 계약은 등록되지 않았습니다"),
     SNAPSHOT_NOT_FOUND("NF005", HttpStatus.NOT_FOUND, "해당 스냅샷을 찾을 수 없습니다."),
+    SUBSCRIPTION_NOT_FOUND("NF006", HttpStatus.NOT_FOUND, "해당 구독권을 찾을 수 없습니다."),
 
     //DB
     DUPLICATE_LOGIN_ID("DB001",HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다."),
