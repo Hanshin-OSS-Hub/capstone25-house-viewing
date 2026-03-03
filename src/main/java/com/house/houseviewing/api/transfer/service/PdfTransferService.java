@@ -1,5 +1,8 @@
 package com.house.houseviewing.api.transfer.service;
 
+import com.house.houseviewing.api.upload.service.PdfUploadService;
+import com.house.houseviewing.domain.pdfreport.model.register.PdfReportRegisterRS;
+import com.house.houseviewing.domain.pdfreport.service.PdfReportService;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.domain.registrysnapshot.repository.RegistrySnapshotRepository;
 import com.house.houseviewing.domain.registrysnapshot.service.RegistrySnapshotService;
@@ -25,12 +28,14 @@ public class PdfTransferService {
     private final PythonEngineClient pythonEngineClient;
     private final RegistrySnapshotRepository registrySnapshotRepository;
     private final RegistrySnapshotService registrySnapshotService;
+    private final PdfReportService pdfReportService;
 
     public void transfer(Long registrySnapshotId){
         RegistrySnapshotEntity registrySnapshot = registrySnapshotRepository.findById(registrySnapshotId)
                 .orElseThrow(() -> new AppException(ExceptionCode.FILE_SAVE_FAILED));
         String rawData = registrySnapshot.getRawData();
         PythonPdfRQ request = PythonPdfRQ.builder()
+                .snapshotId(registrySnapshotId)
                 .rawData(rawData)
                 .build();
 
@@ -39,7 +44,14 @@ public class PdfTransferService {
             String pdfPath = "S3경로" + pdfName;
 
             try {
-                Files.write(Paths.get(pdfPath), pdfBytes); // pdf 저장
+                Files.write(Paths.get(pdfPath), pdfBytes);
+                PdfReportRegisterRS response = PdfReportRegisterRS.builder()
+                        .snapshotId(registrySnapshotId)
+                        .pdfName(pdfName)
+                        .pdfPath(pdfPath)
+                        .build();// pdf 저장
+
+                pdfReportService.register(response);
 
             } catch (IOException e){
                 log.info("PDF 저장 중 오류가 발생했습니다.", e);

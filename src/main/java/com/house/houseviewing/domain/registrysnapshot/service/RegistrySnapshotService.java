@@ -23,7 +23,7 @@ public class RegistrySnapshotService {
                 .ltvScore(response.getLtvScore())
                 .isChanged(false)
                 .build();
-        RegistrySnapshotEntity savedEntity =registrySnapshotRepository.save(snapshotEntity);
+        RegistrySnapshotEntity savedEntity = registrySnapshotRepository.save(snapshotEntity);
         return savedEntity.getId();
     }
 }

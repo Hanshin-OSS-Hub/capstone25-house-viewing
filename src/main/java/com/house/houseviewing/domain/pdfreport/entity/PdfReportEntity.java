@@ -22,13 +22,17 @@ public class PdfReportEntity extends BaseTimeEntity {
     private RegistrySnapshotEntity registrySnapshot;
 
     @Column(nullable = false)
-    private String reportUrl;
+    private String pdfName;
+
+    @Column(nullable = false)
+    private String pdfPath;
 
     @Builder
-    public PdfReportEntity(Long id, RegistrySnapshotEntity registrySnapshot, String reportUrl) {
+    public PdfReportEntity(Long id, RegistrySnapshotEntity registrySnapshot, String pdfName, String pdfPath) {
         this.id = id;
         this.registrySnapshot = registrySnapshot;
-        this.reportUrl = reportUrl;
+        this.pdfName = pdfName;
+        this.pdfPath = pdfPath;
     }
 
     public void addRegistrySnapshot(RegistrySnapshotEntity registrySnapshot){

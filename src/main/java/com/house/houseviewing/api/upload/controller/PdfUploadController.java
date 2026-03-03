@@ -20,7 +20,7 @@ public class PdfUploadController {
     private final PdfUploadService pdfUploadService;
 
     @PostMapping("/upload")
-    public ResponseEntity<Void> upload(@RequestParam("file")MultipartFile file){
+    public ResponseEntity<Void> upload( @RequestParam("file") MultipartFile file){
         if(file.isEmpty()){
             throw new AppException(ExceptionCode.VERIFY_FILE_FAILED);
         }
