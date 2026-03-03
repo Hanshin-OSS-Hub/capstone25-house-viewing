@@ -1,9 +1,16 @@
 package com.capstone.houseviewingapp.login
 
+import android.content.ComponentName
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
+import android.text.TextUtils
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.capstone.houseviewingapp.MainActivity
@@ -12,6 +19,13 @@ import com.capstone.houseviewingapp.databinding.ActivityLoginBinding
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
+
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        gotoMain()
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         binding = ActivityLoginBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
@@ -25,27 +39,48 @@ class LoginActivity : AppCompatActivity() {
             insets
         }
 
-       // NOTE : 회원가입 화면으로 이동
         binding.signupTextView.setOnClickListener {
-            intent = Intent(this, SignUpActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, SignUpActivity::class.java))
         }
-        // NOTE : 아이디 찾기 화면으로 이동
         binding.findIDTextView.setOnClickListener {
-            intent = Intent(this, FindIdActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, FindIdActivity::class.java))
         }
-        // NOTE : 비밀번호 찾기 화면으로 이동
         binding.findPWTextView.setOnClickListener {
-            intent = Intent(this, FindPasswordActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, FindPasswordActivity::class.java))
         }
-        //NOTE : 홈 화면으로 이동
         binding.loginButton.setOnClickListener {
-            //TODO: DB에 있는 아이디 비번이 맞는지 체크해서 로그인 홈화면으로
-
-            intent = Intent(this, MainActivity::class.java)
-            startActivity(intent)
+            // TODO: DB에 있는 아이디 비번이 맞는지 체크해서 로그인 홈화면으로
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
+                    != PackageManager.PERMISSION_GRANTED
+                ) {
+                    notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                    return@setOnClickListener
+                }
+            }
+            gotoMain()
         }
+    }
+
+    private fun gotoMain() {
+        if(isNotificationListenerEnabled()) {
+            startActivity(Intent(this, MainActivity::class.java))
+        } else {
+            startActivity(Intent(this, MainActivity::class.java).apply {
+                putExtra(MainActivity.EXTRA_SHOW_NOTIFICATION_ACCESS_GUIDE, true)
+            })
+        }
+        finish()
+    }
+
+    private fun isNotificationListenerEnabled(): Boolean {
+        val pkg = packageName
+        val flat = Settings.Secure.getString(contentResolver, "enabled_notification_listeners") ?: return false
+        for (name in flat.split(":")) {
+            if (TextUtils.isEmpty(name)) continue
+            val cn = ComponentName.unflattenFromString(name) ?: continue
+            if (cn.packageName == pkg) return true
+        }
+        return false
     }
 }
