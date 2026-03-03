@@ -1,5 +1,6 @@
 package com.capstone.houseviewingapp
 
+import android.app.Notification
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -8,8 +9,12 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.capstone.houseviewingapp.databinding.ActivityMainBinding
+import com.capstone.houseviewingapp.notification.NotificationAccessGuideBottomSheetFragment
 
 class MainActivity : AppCompatActivity() {
+    companion object {
+        const val EXTRA_SHOW_NOTIFICATION_ACCESS_GUIDE = "show_notification_access_guide"
+    }
     private lateinit var binding : ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,6 +39,12 @@ class MainActivity : AppCompatActivity() {
         val navController = navHostFragment.navController
 
         binding.navigationBar.setupWithNavController(navController)
+
+        if(intent?.getBooleanExtra(EXTRA_SHOW_NOTIFICATION_ACCESS_GUIDE, false) == true){
+            supportFragmentManager.executePendingTransactions()
+            NotificationAccessGuideBottomSheetFragment().show(supportFragmentManager,"notification_access_guide" )
+
+        }
 
     }
 
