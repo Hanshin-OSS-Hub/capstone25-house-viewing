@@ -16,6 +16,7 @@
         app:layout_constraintStart_toStartOf="parent"
         android:layout_marginTop="12dp"
         />
+
     <FrameLayout
         android:id="@+id/iconArea"
         android:layout_width="60dp"
