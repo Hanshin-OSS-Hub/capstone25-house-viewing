@@ -17,6 +17,7 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class ContractRegisterRQ {
 
+    @NotNull(message = "집 ID는 필수입니다.")
     private Long houseId;
 
     @NotNull(message = "계약 유형을 입력해주세요.")

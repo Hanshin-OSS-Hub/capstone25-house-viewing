@@ -32,5 +32,4 @@ public class SubscriptionService {
 
         return subscription;
     }
-
 }

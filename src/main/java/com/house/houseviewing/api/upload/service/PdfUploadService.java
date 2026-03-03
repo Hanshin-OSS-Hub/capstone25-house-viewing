@@ -1,7 +1,6 @@
 package com.house.houseviewing.api.upload.service;
 
 import com.house.houseviewing.api.transfer.service.PdfTransferService;
-import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.domain.registrysnapshot.service.RegistrySnapshotService;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;

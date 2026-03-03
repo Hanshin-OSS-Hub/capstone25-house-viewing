@@ -3,6 +3,7 @@ package com.house.houseviewing.fixture;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.house.model.register.HouseRegisterRQ;
 import com.house.houseviewing.domain.user.entity.UserEntity;
+import com.house.houseviewing.domain.user.enums.MonitoringStatus;
 
 import java.util.ArrayList;
 
@@ -12,6 +13,7 @@ public class HouseFixture {
         return HouseEntity.builder()
                 .userEntity(user)
                 .nickname("자취방")
+                .monitoringStatus(MonitoringStatus.OFFLINE)
                 .address(AddressFixture.createAddress().build());
     }
 
