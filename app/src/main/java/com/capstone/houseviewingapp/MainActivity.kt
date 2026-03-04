@@ -10,10 +10,12 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.capstone.houseviewingapp.databinding.ActivityMainBinding
 import com.capstone.houseviewingapp.notification.NotificationAccessGuideBottomSheetFragment
+import com.capstone.houseviewingapp.notification.RegistryChangeDetectedDialogFragment
 
 class MainActivity : AppCompatActivity() {
     companion object {
         const val EXTRA_SHOW_NOTIFICATION_ACCESS_GUIDE = "show_notification_access_guide"
+        const val EXTRA_SHOW_REGISTRY_CHANGE_DIALOG = "show_registry_change_dialog"
     }
     private lateinit var binding : ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,7 +45,10 @@ class MainActivity : AppCompatActivity() {
         if(intent?.getBooleanExtra(EXTRA_SHOW_NOTIFICATION_ACCESS_GUIDE, false) == true){
             supportFragmentManager.executePendingTransactions()
             NotificationAccessGuideBottomSheetFragment().show(supportFragmentManager,"notification_access_guide" )
-
+        }
+        if(intent?.getBooleanExtra(EXTRA_SHOW_REGISTRY_CHANGE_DIALOG,false) == true) {
+            supportFragmentManager.executePendingTransactions()
+            RegistryChangeDetectedDialogFragment().show(supportFragmentManager, "registry_change_dialog")
         }
 
     }
