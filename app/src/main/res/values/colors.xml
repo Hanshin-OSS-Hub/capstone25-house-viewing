@@ -17,4 +17,5 @@
     <color name="amber">#EF9923</color>
     <color name="red">#FF1C1C</color>
     <color name="textviewgray">#E8EDF5</color>
+    <color name="icon_muted_blue">#5570AB</color>
 </resources>
