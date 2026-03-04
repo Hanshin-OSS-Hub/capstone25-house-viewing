@@ -68,7 +68,7 @@ public class UserService {
         return user.getId();
     }
 
-    public String findId(UserFindIdRQ request){
+    public String findLoginId(UserFindIdRQ request){
         UserEntity user = userRepository.findByEmailAndName(request.getEmail(), request.getName())
                 .orElseThrow(() -> new AppException(ExceptionCode.FIND_LOGIN_ID_FAILED));
         return user.getLoginId();
@@ -98,4 +98,7 @@ public class UserService {
 
         userRepository.deleteById(userId);
     }
+
+
+
 }

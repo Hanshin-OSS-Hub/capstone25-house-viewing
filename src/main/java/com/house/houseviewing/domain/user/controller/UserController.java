@@ -37,9 +37,9 @@ public class UserController {
         return ResponseEntity.ok().body(result);
     }
 
-    @PostMapping("/find/id")
-    public ResponseEntity<UserFindIdRS> findId(@Valid @RequestBody UserFindIdRQ request){
-        String loginId = userService.findId(request);
+    @GetMapping("/find-id")
+    public ResponseEntity<UserFindIdRS> findLoginId(@Valid @ModelAttribute UserFindIdRQ request){
+        String loginId = userService.findLoginId(request);
         UserFindIdRS result = new UserFindIdRS(loginId);
         return ResponseEntity.ok().body(result);
     }
@@ -50,16 +50,15 @@ public class UserController {
         return ResponseEntity.ok().body(verify);
     }
 
-    @PostMapping("/password/reset")
+    @PatchMapping("/password/reset")
     public ResponseEntity<Boolean> resetPassword(@Valid @RequestBody UserResetPasswordRQ request){
         boolean b = userService.passwordReset(request);
         return ResponseEntity.ok().body(b);
     }
 
-    @DeleteMapping("/delete/{user_id}")
+    @DeleteMapping("/delete")
     public ResponseEntity<Void> deleteUser(@PathVariable Long userId){
         userService.delete(userId);
         return ResponseEntity.noContent().build();
     }
-
 }
