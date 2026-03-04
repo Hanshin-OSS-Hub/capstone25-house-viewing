@@ -53,7 +53,8 @@ class RegistryNotificationListenerService : NotificationListenerService() {
 
     private fun createContentIntent(): PendingIntent {
         val intent = Intent(this, MainActivity::class.java).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP // -> 기존 액티비티 재사용, 새로 시작하지 않음
+            putExtra(MainActivity.EXTRA_SHOW_REGISTRY_CHANGE_DIALOG, true)
         }
         return PendingIntent.getActivity(
             this,
