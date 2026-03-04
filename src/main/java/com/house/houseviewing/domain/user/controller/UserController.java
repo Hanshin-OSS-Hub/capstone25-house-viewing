@@ -32,8 +32,7 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<UserLoginRS> login(@Valid @RequestBody UserLoginRQ request){
-        Long userId = userService.login(request);
-        UserLoginRS result = new UserLoginRS(userId);
+        UserLoginRS result = userService.login(request);
         return ResponseEntity.ok().body(result);
     }
 
