@@ -21,6 +21,12 @@
         />
 
     <fragment
+        android:id="@+id/nav_analysis_loading"
+        android:name="com.capstone.houseviewingapp.analysis.AnalysisLoadingFragment"
+        android:label="등기부등본 분석"
+        />
+
+    <fragment
         android:id="@+id/nav_my"
         android:name="com.capstone.houseviewingapp.my.MyFragment"
         />
