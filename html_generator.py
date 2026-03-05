@@ -105,9 +105,130 @@ def _render_template(data: RiskAnalysisRequest, content: dict) -> str:
         for item in content.get("action_items", data.checklist)
     )
 
-    checklist_html = "".join(
-        f'<li><span class="chk-icon">&#10007;</span>{item}</li>'
-        for item in data.checklist
+    # ── 주의사항 체크리스트 (severity 배지 포함) ───────────────
+    if data.signals:
+        checklist_html = ""
+        for sig in data.signals:
+            severity = sig.get("severity", "MEDIUM")
+            explain  = sig.get("explain", "")
+            if severity == "HIGH":
+                badge_bg, badge_text, item_bg, item_border = "#c0392b", "고위험", "#fff5f5", "#fecaca"
+            else:
+                badge_bg, badge_text, item_bg, item_border = "#d35400", "주의", "#fff8f0", "#fed7aa"
+            checklist_html += (
+                f'<li style="background:{item_bg};border:1px solid {item_border};padding:0;overflow:hidden;">'
+                f'<span style="display:table-cell;width:54px;background:{badge_bg};color:#ffffff;'
+                f'font-size:7.5pt;font-weight:700;text-align:center;padding:8px 4px;vertical-align:middle;">{badge_text}</span>'
+                f'<span style="display:table-cell;font-size:9pt;color:#374151;padding:7px 10px;'
+                f'vertical-align:middle;line-height:1.6;">{explain}</span>'
+                f'</li>'
+            )
+    else:
+        checklist_html = "".join(
+            f'<li><span class="chk-icon">&#10007;</span>{item}</li>'
+            for item in data.checklist
+        )
+
+    # ── 대응 가이드라인 (플레이북 v2) ─────────────────────────
+    priority_label = {"SOON": "즉시 대응 필요", "LATER": "여유 있게 대응"}.get(
+        data.recovery_priority, data.recovery_priority
+    )
+    priority_color = "#c0392b" if data.recovery_priority == "SOON" else "#1e8449"
+    priority_icon  = "&#9888;" if data.recovery_priority == "SOON" else "&#10003;"
+    step_count = len(data.playbook)
+
+    # 우선순위 배너
+    playbook_html = (
+        f'<div style="display:table;width:100%;border:1px solid #e5e7eb;'
+        f'border-left:5px solid {priority_color};background:#f9fafb;'
+        f'padding:10px 16px;border-radius:4px;margin-bottom:14px;">'
+        f'<div style="display:table-cell;font-size:10pt;font-weight:700;'
+        f'color:{priority_color};vertical-align:middle;">'
+        f'{priority_icon}&nbsp; {priority_label}</div>'
+        f'<div style="display:table-cell;text-align:right;font-size:8.5pt;'
+        f'color:#6b7280;vertical-align:middle;">총 {step_count}단계 조치 필요</div>'
+        f'</div>'
+    )
+
+    for i, step in enumerate(data.playbook):
+        step_num    = step.get("step", i + 1)   # step 없으면 순서(1,2,3) 사용
+        step_title  = step.get("title", f"{step_num}단계")
+        output_text = step.get("output", "")
+        how_list    = step.get("how", [])
+
+        # 수행 방법 항목들
+        how_items_html = ""
+        if how_list:
+            for j, h in enumerate(how_list):
+                how_items_html += (
+                    f'<div style="display:table;width:100%;padding:6px 10px;margin-bottom:4px;'
+                    f'background:#f9fafb;border-left:3px solid #d1d5db;">'
+                    f'<div style="display:table-cell;width:20px;font-size:8.5pt;font-weight:700;'
+                    f'color:#9ca3af;vertical-align:top;padding-top:1px;">{j + 1}.</div>'
+                    f'<div style="display:table-cell;font-size:9pt;color:#374151;'
+                    f'line-height:1.7;vertical-align:top;">{h}</div>'
+                    f'</div>'
+                )
+        else:
+            how_items_html = (
+                f'<div style="font-size:9pt;color:#9ca3af;padding:6px 0;font-style:italic;">'
+                f'수행 방법이 아직 제공되지 않았습니다.</div>'
+            )
+
+        if output_text:
+            output_html = (
+                f'<div style="display:table;width:100%;background:#f0fdf4;'
+                f'border:1px solid #bbf7d0;border-radius:4px;padding:8px 12px;margin-top:10px;">'
+                f'<div style="display:table-cell;width:24px;font-size:11pt;color:#059669;'
+                f'font-weight:700;vertical-align:middle;">&#10003;</div>'
+                f'<div style="display:table-cell;width:76px;font-size:8.5pt;font-weight:700;'
+                f'color:#065f46;vertical-align:middle;">기대 결과물</div>'
+                f'<div style="display:table-cell;font-size:9pt;color:#047857;'
+                f'vertical-align:middle;">{output_text}</div>'
+                f'</div>'
+            )
+        else:
+            output_html = ""
+
+        step_header_html = (
+            f'<div style="display:table;width:100%;background:#1c2333;padding:9px 14px;">'
+            f'<div style="display:table-cell;width:60px;vertical-align:middle;">'
+            f'<span style="display:inline-block;background:{meta["color"]};color:#ffffff;'
+            f'font-size:8pt;font-weight:700;padding:3px 8px;border-radius:3px;">'
+            f'STEP {step_num}</span></div>'
+            f'<div style="display:table-cell;font-size:10pt;font-weight:700;'
+            f'color:#ffffff;vertical-align:middle;">{step_title}</div>'
+            f'</div>'
+        )
+        step_body_html = (
+            f'<div style="padding:12px 14px;background:#ffffff;">'
+            f'<div style="font-size:7.5pt;font-weight:700;color:#9ca3af;'
+            f'letter-spacing:0.8px;margin-bottom:8px;">&#128221; 수행 방법</div>'
+            f'{how_items_html}'
+            f'{output_html}'
+            f'</div>'
+        )
+        playbook_html += (
+            f'<div class="playbook-step">'
+            f'{step_header_html}'
+            f'{step_body_html}'
+            f'</div>'
+        )
+
+    # ── 법적 용어 가이드 ─────────────────────────────────────
+    _LEGAL_TERMS = [
+        ("갑구 (甲區)", "소유권에 관한 사항을 기재하는 구역. 소유자 이름과 소유권 변동 내역이 기록됨."),
+        ("을구 (乙區)", "소유권 이외의 권리를 기재하는 구역. 근저당권·전세권·임차권 등이 기록됨."),
+        ("근저당권", "일정 한도(채권최고액) 내에서 반복적으로 담보 제공이 가능한 저당권. 은행 대출 시 주로 설정됨."),
+        ("채권최고액", "근저당권이 담보하는 최대 금액. 통상 실제 대출액의 120% 수준으로 설정됨."),
+        ("말소 (抹消)", "등기부에 기재된 권리를 삭제하는 행위. 채무 완제 후 근저당 말소 필요."),
+        ("소유권보존", "부동산을 처음으로 등기부에 등록하는 행위. 건물 신축 후 최초 등기 시 발생."),
+        ("경매 배당", "경매 낙찰금을 선순위 채권자부터 순서대로 배분하는 절차. 순위가 높을수록 먼저 변제."),
+        ("LTV", "Loan-to-Value. 부동산 감정가 대비 (선순위채권 + 보증금)의 비율. 80% 초과 시 고위험."),
+    ]
+    legal_terms_html = "".join(
+        f'<tr><td class="term-name">{term}</td><td class="term-desc">{desc}</td></tr>'
+        for term, desc in _LEGAL_TERMS
     )
 
     return f"""<!DOCTYPE html>
@@ -350,6 +471,38 @@ def _render_template(data: RiskAnalysisRequest, content: dict) -> str:
       padding-right: 6px;
     }}
 
+    /* ── 대응 가이드라인 ── */
+    .playbook-step {{
+      border: 1px solid #e5e7eb;
+      border-radius: 6px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }}
+
+    /* ── 법적 용어 가이드 ── */
+    .term-table {{
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 8.5pt;
+    }}
+    .term-table tr {{
+      border-bottom: 1px solid #f3f4f6;
+    }}
+    .term-name {{
+      width: 28%;
+      padding: 6px 10px;
+      font-weight: 700;
+      color: #1c2333;
+      background: #f9fafb;
+      vertical-align: top;
+      border-right: 1px solid #e5e7eb;
+    }}
+    .term-desc {{
+      padding: 6px 10px;
+      color: #374151;
+      line-height: 1.7;
+    }}
+
     /* ── 면책 조항 ── */
     .disclaimer {{
       margin-top: 24px;
@@ -465,6 +618,20 @@ def _render_template(data: RiskAnalysisRequest, content: dict) -> str:
     <ul class="check-list">{checklist_html}</ul>
   </div>
 
+  <!-- 6. 대응 가이드라인 -->
+  <div class="section">
+    <div class="section-title">대응 가이드라인</div>
+    {playbook_html}
+  </div>
+
+  <!-- 7. 법적 용어 가이드 -->
+  <div class="section">
+    <div class="section-title">법적 용어 가이드</div>
+    <table class="term-table">
+      {legal_terms_html}
+    </table>
+  </div>
+
   <!-- 면책 조항 -->
   <div class="disclaimer">
     ※ 본 보고서는 AI 기반 자동 분석 시스템에 의해 생성된 참고 자료이며 법적 효력이 없습니다.
@@ -489,7 +656,7 @@ def generate_html_report(data: RiskAnalysisRequest) -> str:
     Gemini 실패 시 기본 텍스트(_fallback_content)로 자동 대체.
     """
     try:
-        from gemini_client import generate_analysis_content
+        from grok_client import generate_analysis_content
         content = generate_analysis_content(data)
         logger.info("Gemini 콘텐츠 생성 성공")
     except Exception as exc:

@@ -56,6 +56,9 @@ class RiskAnalysisRequest(BaseModel):
     expected_recovery_amount: int = Field(..., ge=0, description="예상 배당금 (원)")
     analysis_summary: str = Field(..., description="종합 분석 요약")
     checklist: List[str] = Field(..., description="주의사항 체크리스트")
+    signals: List[dict] = Field(default_factory=list, description="위험 시그널 목록 (severity, code, explain)")
+    playbook: List[dict] = Field(default_factory=list, description="복구 단계 플레이북")
+    recovery_priority: str = Field(default="", description="복구 우선순위 (SOON/LATER 등)")
 
     @field_validator("risk_score")
     @classmethod

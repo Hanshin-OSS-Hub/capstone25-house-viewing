@@ -143,6 +143,9 @@ def _build_render_data(snapshot_id: int, raw: dict) -> RiskAnalysisRequest:
         expected_recovery_amount=total_claim,
         analysis_summary=summary,
         checklist=checklist,
+        signals=signals,
+        playbook=playbook,
+        recovery_priority=raw.get("recovery", {}).get("priority", ""),
     )
 
 
