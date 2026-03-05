@@ -8,6 +8,9 @@ import android.view.ViewGroup
 import androidx.core.graphics.drawable.toDrawable
 import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.NavHostFragment
+import com.capstone.houseviewingapp.MainActivity
+import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.databinding.DialogRegistryChangeDetectedBinding
 
 class RegistryChangeDetectedDialogFragment: DialogFragment() {
@@ -32,8 +35,12 @@ class RegistryChangeDetectedDialogFragment: DialogFragment() {
         dialog?.window?.setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT)
 
         binding.analysisButton.setOnClickListener {
-            // TODO : 나중에 분석화면 구현시 분석 화면으로 이동하도록 수정
             dismiss()
+            (requireActivity() as? MainActivity)?.let { activity ->
+                (activity.supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as? NavHostFragment)
+                    ?.navController
+                    ?.navigate(R.id.nav_analysis_loading)
+            }
         }
         binding.buttonLater.setOnClickListener {
             dismiss()
