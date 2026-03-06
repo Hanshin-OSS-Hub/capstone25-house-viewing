@@ -36,8 +36,8 @@ public class UserController {
         return ResponseEntity.ok().body(result);
     }
 
-    @GetMapping("/find-id")
-    public ResponseEntity<UserFindIdRS> findLoginId(@Valid @ModelAttribute UserFindIdRQ request){
+    @PostMapping("/find-id")
+    public ResponseEntity<UserFindIdRS> findLoginId(@Valid @RequestBody UserFindIdRQ request){
         String loginId = userService.findLoginId(request);
         UserFindIdRS result = new UserFindIdRS(loginId);
         return ResponseEntity.ok().body(result);

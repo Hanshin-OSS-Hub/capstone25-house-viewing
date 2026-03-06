@@ -1,0 +1,4 @@
+package com.house.houseviewing.global.security;
+
+public class CustomUserDetailsService{
+}

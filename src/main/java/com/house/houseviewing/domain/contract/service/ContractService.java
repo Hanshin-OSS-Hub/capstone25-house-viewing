@@ -36,8 +36,6 @@ public class ContractService {
                 .build();
 
         ContractEntity saved = contractRepository.save(contract);
-        house.addContract(saved);
-        saved.addHouse(house);
 
         return saved;
     }

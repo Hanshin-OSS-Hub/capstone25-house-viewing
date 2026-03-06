@@ -2,8 +2,8 @@ package com.house.houseviewing.domain.user.service;
 
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
-import com.house.houseviewing.domain.subscription.service.SubscriptionService;
 import com.house.houseviewing.domain.user.model.login.UserLoginRS;
+import com.house.houseviewing.global.config.PasswordConfig;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
@@ -16,12 +16,9 @@ import com.house.houseviewing.domain.user.repository.UserRepository;
 import com.house.houseviewing.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-import java.util.Optional;
-
 
 @Service
 @Transactional(readOnly = true)
@@ -29,8 +26,8 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final SubscriptionService subscriptionService;
     private final JwtTokenProvider jwtTokenProvider;
+    private final PasswordConfig passwordConfig;
 
     @Transactional
     public UserEntity register(UserRegisterRQ request){
@@ -47,7 +44,7 @@ public class UserService {
                     .name(request.getName())
                     .loginId(request.getLoginId())
                     .email(request.getEmail())
-                    .password(request.getPassword())
+                    .password(passwordConfig.passwordEncoder(request.getPassword()))
                     .build();
 
             SubscriptionEntity subscription = SubscriptionEntity.builder()
@@ -112,7 +109,4 @@ public class UserService {
 
         userRepository.deleteById(userId);
     }
-
-
-
 }

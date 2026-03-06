@@ -65,7 +65,7 @@ public class HouseEntity extends BaseTimeEntity {
     }
 
     public void checkContract(ContractEntity contract) {
-        if(!this.contracts.isEmpty())
+        if(this.contracts.contains(contract))
             throw new AppException(ExceptionCode.ALREADY_REGISTERED_CONTRACT);
     }
 
