@@ -28,7 +28,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return userEntity.getName();
+        return userEntity.getLoginId();
     }
 
     @Override
@@ -53,10 +53,6 @@ public class CustomUserDetails implements UserDetails {
 
     public Long getUserId(){
         return userEntity.getId();
-    }
-
-    public String getLoginId() {
-        return userEntity.getLoginId();
     }
 
     public String getEmail() {
