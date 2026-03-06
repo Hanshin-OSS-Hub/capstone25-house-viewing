@@ -5,12 +5,8 @@ import lombok.Builder;
 import lombok.Getter;
 
 @AllArgsConstructor
-@Getter @Builder
+@Getter
 public class UserLoginRS {
 
-    private String token;
-
-    private String loginId;
-
-    private Long userId;
+    private String accessToken;
 }
