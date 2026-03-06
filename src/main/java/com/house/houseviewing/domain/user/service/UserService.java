@@ -15,6 +15,9 @@ import com.house.houseviewing.domain.user.repository.UserRepository;
 import com.house.houseviewing.global.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +30,7 @@ public class UserService {
     private final UserRepository userRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
+    private final AuthenticationManager authenticationManager;
 
     @Transactional
     public UserEntity register(UserRegisterRQ request){
@@ -64,20 +68,13 @@ public class UserService {
     }
 
     public UserLoginRS login(UserLoginRQ request){
-        UserEntity user = userRepository.findByLoginId(request.getLoginId())
-                .orElseThrow(() -> new AppException(ExceptionCode.LOGIN_FAILED));
-        if(!user.getPassword().equals(request.getPassword())){
-            throw new AppException(ExceptionCode.LOGIN_FAILED);
-        }
-
-        String token = jwtTokenProvider.createToken(user.getLoginId());
-        UserLoginRS response = UserLoginRS.builder()
-                .token(token)
-                .loginId(user.getLoginId())
-                .userId(user.getId())
-                .build();
-
-        return response;
+        Authentication authenticate = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        request.getLoginId(),
+                        request.getPassword()
+                )
+        );
+        return new UserLoginRS("LOGIN_SUCCESS");
     }
 
     public String findLoginId(UserFindIdRQ request){
