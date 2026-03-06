@@ -1,7 +1,6 @@
-package com.house.houseviewing.domain.user.model.login;
+package com.house.houseviewing.global.security.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 
 @AllArgsConstructor

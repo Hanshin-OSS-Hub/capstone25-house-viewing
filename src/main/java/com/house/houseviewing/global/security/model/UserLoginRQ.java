@@ -1,4 +1,4 @@
-package com.house.houseviewing.domain.user.model.login;
+package com.house.houseviewing.global.security.model;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

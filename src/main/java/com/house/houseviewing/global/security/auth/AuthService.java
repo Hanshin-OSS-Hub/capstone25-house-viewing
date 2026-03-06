@@ -1,7 +1,7 @@
-package com.house.houseviewing.global.security;
+package com.house.houseviewing.global.security.auth;
 
-import com.house.houseviewing.domain.user.model.login.UserLoginRQ;
-import com.house.houseviewing.domain.user.model.login.UserLoginRS;
+import com.house.houseviewing.global.security.model.UserLoginRQ;
+import com.house.houseviewing.global.security.model.UserLoginRS;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

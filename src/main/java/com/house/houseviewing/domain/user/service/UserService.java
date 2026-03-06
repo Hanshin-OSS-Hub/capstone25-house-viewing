@@ -2,14 +2,13 @@ package com.house.houseviewing.domain.user.service;
 
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
-import com.house.houseviewing.domain.user.model.login.UserLoginRS;
-import com.house.houseviewing.global.config.SecurityConfig;
+import com.house.houseviewing.global.security.model.UserLoginRS;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
 import com.house.houseviewing.domain.user.model.password.reset.UserResetPasswordRQ;
 import com.house.houseviewing.domain.user.model.password.verify.UserVerifyPasswordRQ;
-import com.house.houseviewing.domain.user.model.login.UserLoginRQ;
+import com.house.houseviewing.global.security.model.UserLoginRQ;
 import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.repository.UserRepository;
