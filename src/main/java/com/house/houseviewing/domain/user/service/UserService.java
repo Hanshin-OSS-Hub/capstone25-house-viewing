@@ -2,6 +2,7 @@ package com.house.houseviewing.domain.user.service;
 
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
+import com.house.houseviewing.global.security.CustomUserDetails;
 import com.house.houseviewing.global.security.model.UserLoginRS;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
@@ -74,7 +75,11 @@ public class UserService {
                         request.getPassword()
                 )
         );
-        return new UserLoginRS("LOGIN_SUCCESS");
+        CustomUserDetails userDetails = (CustomUserDetails) authenticate.getPrincipal();
+
+        String token = jwtTokenProvider.createToken(userDetails.getUserId(), userDetails.getUsername());
+
+        return new UserLoginRS(token);
     }
 
     public String findLoginId(UserFindIdRQ request){
