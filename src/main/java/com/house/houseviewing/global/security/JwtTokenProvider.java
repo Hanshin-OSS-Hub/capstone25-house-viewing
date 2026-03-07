@@ -66,7 +66,6 @@ public class JwtTokenProvider {
         return claims.get("loginId", String.class);
     }
 
-
     public Claims parseClaims(String token){
         return Jwts.parserBuilder()
                 .setSigningKey(key)
