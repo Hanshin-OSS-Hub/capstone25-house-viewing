@@ -33,3 +33,7 @@ kakao:
 python:
   api:
     url: http://localhost:8000
+
+jwt:
+  secret: 345645234236547
+  access-token-expiration: 3600000

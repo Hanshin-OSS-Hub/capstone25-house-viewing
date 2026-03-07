@@ -1,49 +1,78 @@
 package com.house.houseviewing.global.security;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
 
 @Component
 public class JwtTokenProvider {
 
-    private final Key key = Keys.secretKeyFor(SignatureAlgorithm.HS256); // 키 생성
-    private final long tokenValidityInMilliseconds = 3600000; // ms 단위로 1시간
+    @Value("${jwt.secret}")
+    private String secretKey;
 
-    public String createToken(String loginId){
-        Claims claims = Jwts.claims().setSubject(loginId);
-        Date now = new Date();
-        Date validity = new Date(now.getTime() + tokenValidityInMilliseconds);
+    @Value("${jwt.access-token-expiration}")
+    private long accessToken;
 
-        return Jwts.builder()
-                .setClaims(claims) // 유저 정보
-                .setIssuedAt(now) // 발급 시간 기록
-                .setExpiration(validity) // 만료 시간 기록
-                .signWith(key) // 암호화
-                .compact(); // 문자열로 변환
+    private Key key;
+
+    @PostConstruct
+    protected void init(){
+        this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String getLoginId(String token){
-        return Jwts.parserBuilder()
-                .setSigningKey(key) // 식별용 키 설정
-                .build()
-                .parseClaimsJws(token)// 해석
-                .getBody()
-                .getSubject(); // 유저 아이디 꺼내기
+    public String createToken(Long userId, String loginId){
+        Date now = new Date(); // 현재시간
+        Date expiry = new Date(now.getTime() + accessToken); // 만료시간
+
+        return Jwts.builder()
+                .setSubject(loginId)
+                .claim("userId", userId)
+                .claim("loginId", loginId)
+                .setIssuedAt(now) // 토큰 발행된 시간
+                .setExpiration(expiry) // 유효기간 설정
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
     }
 
     public boolean validateToken(String token){
         try{
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+            Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token);
+
             return true;
-        } catch (Exception e) {
+        } catch (JwtException | IllegalArgumentException e){
             return false;
         }
+    }
+
+    public Long getUserId(String token){
+        Claims claims = parseClaims(token);
+        return claims.get("userId", Long.class);
+    }
+
+    public String getLoginId(String token){
+        Claims claims = parseClaims(token);
+        return claims.get("loginId", String.class);
+    }
+
+
+    public Claims parseClaims(String token){
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 
 }
