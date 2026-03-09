@@ -19,6 +19,11 @@ NF: 리소스 없음
 @Getter @AllArgsConstructor
 public enum ExceptionCode {
 
+    // AU
+    UNAUTHORIZED("AU001", HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
+    INVALID_TOKEN("AU002", HttpStatus.UNAUTHORIZED, "유효하지 않거나 만료된 토큰입니다."),
+    FORBIDDEN("AU003", HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
+
     // VP
     LOGIN_FAILED("VP001",HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 일치하지 않습니다."),
     FIND_LOGIN_ID_FAILED("VP002",HttpStatus.BAD_REQUEST, "이메일 또는 아이디가 틀렸습니다."),

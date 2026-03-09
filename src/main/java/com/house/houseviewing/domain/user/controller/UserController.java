@@ -40,7 +40,7 @@ public class UserController {
 
     @GetMapping("/me")
     public ResponseEntity<String> me(@AuthenticationPrincipal CustomUserDetails userDetails){
-        String result = "userId = " + userDetails.getUserId() + "loginId = " + userDetails.getUsername();
+        String result = "userId = " + userDetails.getUserId() + "\nloginId = " + userDetails.getUsername();
         return ResponseEntity.ok(result);
     }
 
