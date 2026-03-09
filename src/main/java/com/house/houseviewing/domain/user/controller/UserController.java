@@ -38,6 +38,12 @@ public class UserController {
         return ResponseEntity.ok().body(result);
     }
 
+    @GetMapping("/me")
+    public ResponseEntity<String> me(@AuthenticationPrincipal CustomUserDetails userDetails){
+        String result = "userId = " + userDetails.getUserId() + "loginId = " + userDetails.getUsername();
+        return ResponseEntity.ok(result);
+    }
+
     @PostMapping("/find-id")
     public ResponseEntity<UserFindIdRS> findLoginId(@Valid @RequestBody UserFindIdRQ request){
         String loginId = userService.findLoginId(request);
