@@ -42,7 +42,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     writeErrorResponse(response, ExceptionCode.INVALID_TOKEN);
                     return;
                 }
-                
+
                 loginId = jwtTokenProvider.getLoginId(token);
             }
 
@@ -66,9 +66,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         } catch (Exception e){
-
+            writeErrorResponse(response, ExceptionCode.INVALID_TOKEN);
         }
-
     }
 
     private void writeErrorResponse(HttpServletResponse response, ExceptionCode exceptionCode) throws IOException {
