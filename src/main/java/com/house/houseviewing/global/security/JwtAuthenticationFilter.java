@@ -1,10 +1,13 @@
 package com.house.houseviewing.global.security;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.house.houseviewing.global.exception.ExceptionCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.Map;
 
 @Component
 @RequiredArgsConstructor
@@ -20,39 +24,61 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService customUserDetailsService;
+    private final ObjectMapper objectMapper;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         String authorizationHeader = request.getHeader("Authorization");
-
         String token = null;
         String loginId = null;
 
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")){
-            token = authorizationHeader.substring(7);
-            loginId = jwtTokenProvider.getLoginId(token);
-        }
+        try{
+            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")){
+                token = authorizationHeader.substring(7);
 
-        if (loginId != null && SecurityContextHolder.getContext().getAuthentication() == null){
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(loginId);
-
-            if(jwtTokenProvider.validateToken(token)){
-                UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
-
-                authenticationToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                if(!jwtTokenProvider.validateToken(token)){
+                    writeErrorResponse(response, ExceptionCode.INVALID_TOKEN);
+                    return;
+                }
+                
+                loginId = jwtTokenProvider.getLoginId(token);
             }
+
+            if (loginId != null && SecurityContextHolder.getContext().getAuthentication() == null){
+                UserDetails userDetails = customUserDetailsService.loadUserByUsername(loginId);
+
+                if(jwtTokenProvider.validateToken(token)){
+                    UsernamePasswordAuthenticationToken authenticationToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    userDetails,
+                                    null,
+                                    userDetails.getAuthorities()
+                            );
+
+                    authenticationToken.setDetails(
+                            new WebAuthenticationDetailsSource().buildDetails(request)
+                    );
+
+                    SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                }
+            }
+            filterChain.doFilter(request, response);
+        } catch (Exception e){
+
         }
-        filterChain.doFilter(request, response);
+
+    }
+
+    private void writeErrorResponse(HttpServletResponse response, ExceptionCode exceptionCode) throws IOException {
+        response.setStatus(exceptionCode.getStatus().value());
+        response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+        response.setCharacterEncoding("UTF-8");
+
+        Map<String, Object> body = Map.of( "code", exceptionCode.getCode(),
+                "message", exceptionCode.getMessage());
+
+        response.getWriter().write(objectMapper.writeValueAsString(body));
     }
 }
