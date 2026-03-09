@@ -3,6 +3,7 @@ package com.house.houseviewing.domain.user.controller;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
 import com.house.houseviewing.domain.user.model.findid.UserFindIdRS;
+import com.house.houseviewing.global.security.CustomUserDetails;
 import com.house.houseviewing.global.security.model.UserLoginRQ;
 import com.house.houseviewing.global.security.model.UserLoginRS;
 import com.house.houseviewing.domain.user.model.password.reset.UserResetPasswordRQ;
@@ -14,6 +15,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -50,14 +52,16 @@ public class UserController {
     }
 
     @PatchMapping("/password/reset")
-    public ResponseEntity<Boolean> resetPassword(@Valid @RequestBody UserResetPasswordRQ request){
-        boolean b = userService.passwordReset(request);
+    public ResponseEntity<Boolean> resetPassword(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
+            @Valid @RequestBody UserResetPasswordRQ request){
+        boolean b = userService.passwordReset(userDetails.getUserId(), request);
         return ResponseEntity.ok().body(b);
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long userId){
-        userService.delete(userId);
+    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails){
+        userService.delete(userDetails.getUserId());
         return ResponseEntity.noContent().build();
     }
 }
