@@ -2,6 +2,7 @@ package com.capstone.houseviewingapp.registration
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
@@ -14,15 +15,22 @@ import com.capstone.houseviewingapp.databinding.ActivityHouseRegistrationBinding
 import com.capstone.houseviewingapp.home.HouseCardItem
 
 class HouseRegistrationActivity : AppCompatActivity() {
+
+    companion object {
+        const val EXTRA_QUICK_DIAGNOSIS_MODE = "extra_quick_diagnosis_mode"
+    }
+
     private lateinit var binding: ActivityHouseRegistrationBinding
     private val vm: HouseRegistrationViewModel by viewModels()
     private var currentStep = 1 // TODO: 현재 단계에 따라 이 값을 업데이트
+    private var isQuickDiagnosisMode = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityHouseRegistrationBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        isQuickDiagnosisMode = intent.getBooleanExtra(EXTRA_QUICK_DIAGNOSIS_MODE, false)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
@@ -32,9 +40,16 @@ class HouseRegistrationActivity : AppCompatActivity() {
         }
 
         if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                .replace(R.id.registerationFragmentContainer, HouseInfoStep1Fragment())
-                .commit()
+            if(isQuickDiagnosisMode) {
+                currentStep = 3
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.registerationFragmentContainer, HouseInfoStep3Fragment())
+                    .commit()
+            } else {
+                supportFragmentManager.beginTransaction()
+                    .replace(R.id.registerationFragmentContainer, HouseInfoStep1Fragment())
+                    .commit()
+            }
             updateStepUi()
         }
 
@@ -83,47 +98,68 @@ class HouseRegistrationActivity : AppCompatActivity() {
                 val step3 = supportFragmentManager
                     .findFragmentById(R.id.registerationFragmentContainer) as? HouseInfoStep3Fragment
                     ?: return@setOnClickListener
-
                 if (!step3.hasSelectedFile()) {
-                    // TODO : 문서 검증이 완료되지 않은 경우, 사용자에게 알림 표시 (예: Toast)
+                    return@setOnClickListener
+                }
+                if (isQuickDiagnosisMode) {
+                    // TODO(백엔드): step3.getSelectedFileUriString() 업로드 -> 분석 시작 API 호출 -> jobId 수신
+                    val intent = Intent(this, MainActivity::class.java).apply {
+                        flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                        putExtra(MainActivity.EXTRA_SHOW_ANALYSIS_LOADING, true)
+                        // TODO(백엔드): putExtra("analysis_job_id", jobId)
+                    }
+                    startActivity(intent)
+                    finish()
                     return@setOnClickListener
                 }
 
+                // 기존 집 등록 플로우
                 vm.updateStep3(step3.getSelectedFileUriString())
-
                 val draft = vm.draft.value
-                val address = listOf(draft.originAddress, draft.detailAddress).filter { it.isNotBlank() }.joinToString(" ") // 주소 조합
+                val address = listOf(draft.originAddress, draft.detailAddress)
+                    .filter { it.isNotBlank() }
+                    .joinToString(" ")
                 val cardItem = HouseCardItem(
-                    houseId = null, // TODO : 백엔드 연동 후 실제 houseId 값으로 설정
+                    houseId = null,
                     homeName = draft.nickname,
                     address = address,
-                    ltv = null // TODO : LTV 분석 API 연동 후 실제 LTV 값으로 설정
+                    ltv = null
                 )
-
                 HouseLocalStore.addHouse(this, cardItem)
-                // TODO : 위 대신 집 등록 API 호출 후 houseId 수신 → 계약 등록 API → 성공 시 서버 데이터로 카드 갱신
-
                 setResult(RESULT_OK)
                 finish()
             }
-
             updateStepUi()
-
         }
 
         binding.backButton.setOnClickListener {
+            if (isQuickDiagnosisMode) {
+                finish()
+                return@setOnClickListener
+            }
+
             if (supportFragmentManager.backStackEntryCount > 0) {
                 supportFragmentManager.popBackStack()
-                currentStep = (currentStep - 1).coerceAtLeast(1) // 현재 단계가 1보다 작아지지 않도록 보장
+                currentStep = (currentStep - 1).coerceAtLeast(1)
                 updateStepUi()
             } else {
-                finish() // 백스택이 비어있으면 액티비티 종료
+                finish()
             }
         }
 
     }
 
     private fun updateStepUi() {
+        if (isQuickDiagnosisMode) {
+            binding.registrationProgressBar.visibility = View.GONE
+            binding.stepTextView.text = "빠른 진단"
+            binding.toolBarTextView.text = "PDF 문서 업로드"
+            binding.nextButton.text = "분석 시작"
+            setNextButtonEnabled(false) // Step3에서 파일 선택 시 Fragment가 true로 바꿔줌
+            return
+        }
+
+        binding.registrationProgressBar.visibility = View.VISIBLE
         binding.registrationProgressBar.max = 100
         val progress = when (currentStep) {
             1 -> 34
@@ -131,9 +167,9 @@ class HouseRegistrationActivity : AppCompatActivity() {
             3 -> 100
             else -> 0
         }
-
         binding.registrationProgressBar.progress = progress
         binding.stepTextView.text = "$currentStep / 3 단계"
+
         if (currentStep == 1) {
             binding.toolBarTextView.text = "주택 기본 정보 입력"
             setNextButtonEnabled(true)
@@ -141,13 +177,12 @@ class HouseRegistrationActivity : AppCompatActivity() {
         if (currentStep == 2) {
             binding.toolBarTextView.text = "계약 정보 입력"
             binding.nextButton.text = "다음"
-            setNextButtonEnabled(false) // Step2 진입 시 비활성. Fragment에서 필수 입력 채우면 활성화
+            setNextButtonEnabled(false)
         }
         if (currentStep == 3) {
             binding.nextButton.text = "문서 검증"
-            setNextButtonEnabled(false) // TODO: 3단계에서 다음 버튼은 문서 검증이 완료된 후에만 활성화되도록 구현
+            setNextButtonEnabled(false)
         }
-
     }
 
     fun setNextButtonEnabled(enabled: Boolean) {
