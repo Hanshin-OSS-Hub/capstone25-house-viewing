@@ -8,7 +8,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupWithNavController
 import com.capstone.houseviewingapp.databinding.ActivityMainBinding
 import com.capstone.houseviewingapp.notification.NotificationAccessGuideBottomSheetFragment
 import com.capstone.houseviewingapp.notification.RegistryChangeDetectedDialogFragment
@@ -16,6 +15,7 @@ import com.capstone.houseviewingapp.notification.RegistryChangeDetectedDialogFra
 class MainActivity : AppCompatActivity() {
 
     companion object {
+        const val EXTRA_ANALYSIS_SOURCE = "extra_analysis_source"
         const val EXTRA_SHOW_NOTIFICATION_ACCESS_GUIDE = "show_notification_access_guide"
         const val EXTRA_SHOW_REGISTRY_CHANGE_DIALOG = "show_registry_change_dialog"
         const val EXTRA_SHOW_ANALYSIS_LOADING = "show_analysis_loading"
@@ -82,10 +82,6 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-// NOTE: 재선택도 동일하게 처리 (특히 홈 탭 보장)
-        binding.navigationBar.setOnItemReselectedListener { item ->
-            navigateBottom(item.itemId)
-        }
 
 // NOTE: destination 바뀌면 하단바 체크 상태 동기화
         navController.addOnDestinationChangedListener { _, destination, _ ->
@@ -117,9 +113,18 @@ class MainActivity : AppCompatActivity() {
 
         // NOTE: 무료 진단 플로우에서 분석 로딩 화면 진입 트리거
         if (sourceIntent.getBooleanExtra(EXTRA_SHOW_ANALYSIS_LOADING, false)) {
-            navController.navigate(R.id.nav_analysis_loading)
+            val source = sourceIntent.getStringExtra(EXTRA_ANALYSIS_SOURCE)
+                ?: com.capstone.houseviewingapp.analysis.AnalysisFlow.SOURCE_MANUAL
+
+            navController.navigate(
+                R.id.nav_analysis_loading,
+                androidx.core.os.bundleOf(
+                    com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_ANALYSIS_SOURCE to source
+                )
+            )
             binding.navigationBar.menu.findItem(R.id.nav_analysis)?.isChecked = true
             sourceIntent.removeExtra(EXTRA_SHOW_ANALYSIS_LOADING)
+            sourceIntent.removeExtra(EXTRA_ANALYSIS_SOURCE)
         }
 
         // NOTE: 알림 접근 권한 안내 바텀시트 표시
