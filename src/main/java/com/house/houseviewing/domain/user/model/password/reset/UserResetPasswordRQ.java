@@ -13,9 +13,6 @@ import lombok.NoArgsConstructor;
 @Getter @Builder
 public class UserResetPasswordRQ {
 
-    @NotNull(message = "사용자 ID는 필수입니다.")
-    private Long userId;
-
     @Size(min = 8, message = "비밀번호를 8자 이상 입력해주세요")
     private String newPassword;
 

@@ -55,7 +55,6 @@ public class JwtTokenProvider {
         } catch (JwtException | IllegalArgumentException e) {
             throw new AppException(ExceptionCode.INVALID_TOKEN);
         }
-
     }
 
     public Long getUserId(String token){
@@ -75,5 +74,4 @@ public class JwtTokenProvider {
                 .parseClaimsJws(token)
                 .getBody();
     }
-
 }

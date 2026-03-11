@@ -1,6 +1,7 @@
 package com.house.houseviewing.domain.user.controller;
 
 import com.house.houseviewing.domain.user.entity.UserEntity;
+import com.house.houseviewing.domain.user.model.UserMe.UserMeRS;
 import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
 import com.house.houseviewing.domain.user.model.findid.UserFindIdRS;
 import com.house.houseviewing.global.security.CustomUserDetails;
@@ -39,8 +40,11 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<String> me(@AuthenticationPrincipal CustomUserDetails userDetails){
-        String result = "userId = " + userDetails.getUserId() + "\nloginId = " + userDetails.getUsername();
+    public ResponseEntity<UserMeRS> me(@AuthenticationPrincipal CustomUserDetails userDetails){
+        UserMeRS result = UserMeRS.builder()
+                .userId(userDetails.getUserId())
+                .loginId(userDetails.getUsername())
+                .build();
         return ResponseEntity.ok(result);
     }
 
