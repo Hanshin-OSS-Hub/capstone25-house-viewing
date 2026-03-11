@@ -91,6 +91,41 @@ class AnalysisLoadingFragment : Fragment() {
             .setTitle("분석 완료")
             .setMessage("등기부등본 분석이 완료되었습니다.")
             .setPositiveButton("확인") { _, _ ->
+                val sourceRaw = arguments?.getString(com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_ANALYSIS_SOURCE)
+                val source = if (sourceRaw == com.capstone.houseviewingapp.analysis.AnalysisFlow.SOURCE_AUTO) {
+                    com.capstone.houseviewingapp.analysis.RecordSource.AUTO
+                } else {
+                    com.capstone.houseviewingapp.analysis.RecordSource.MANUAL
+                }
+
+                val houses = com.capstone.houseviewingapp.data.local.HouseLocalStore.getHouses(requireContext())
+                val primaryHouse = houses.firstOrNull()
+                val level = when (source) {
+                    RecordSource.AUTO -> RiskLevel.RED
+                    RecordSource.MANUAL -> RiskLevel.AMBER
+                }
+
+                val record = com.capstone.houseviewingapp.analysis.AnalysisRecordItem(
+
+                    title = when (source) {
+                        com.capstone.houseviewingapp.analysis.RecordSource.AUTO ->
+                            primaryHouse?.homeName ?: "자동 감지 분석"
+                        com.capstone.houseviewingapp.analysis.RecordSource.MANUAL ->
+                            "무료 1회 진단"
+                    },
+                    address = when (source) {
+                        com.capstone.houseviewingapp.analysis.RecordSource.AUTO ->
+                            primaryHouse?.address ?: "등록된 집 정보 없음"
+                        com.capstone.houseviewingapp.analysis.RecordSource.MANUAL ->
+                            "주소 수신 대기"
+                    },
+                    riskSummary = "분석 결과 수신 대기",
+                    level = level, //TODO: 백엔드에서 실제값 매핑
+                    source = source,
+                    ltv = null
+                )
+                // TODO(backend): 실제 API 응답값으로 title/address/riskSummary/level/ltv 매핑
+                com.capstone.houseviewingapp.data.local.AnalysisLocalStore.addRecord(requireContext(), record)
                 val navController = findNavController()
                 val options = androidx.navigation.navOptions {
                     popUpTo(R.id.nav_analysis_loading) { inclusive = true }
