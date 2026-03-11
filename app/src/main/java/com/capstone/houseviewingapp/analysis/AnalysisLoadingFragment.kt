@@ -42,10 +42,6 @@ class AnalysisLoadingFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val bottomNav = requireActivity()
-            .findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.navigationBar)
-        bottomNav.menu.findItem(R.id.nav_analysis).isChecked = true
-
         binding.buttonCancel.setOnClickListener {
             findNavController().popBackStack()
         }
@@ -65,10 +61,12 @@ class AnalysisLoadingFragment : Fragment() {
         updateStepUi()
         playCheckAppearAnimation(iconForStep(currentStep))
 
+        // TODO: 실제 백엔드 연동 시, 각 단계별 완료 신호를 받아서 scheduleNextStep을 호출하도록 변경
+        // TODO: 지금은 시뮬레이션을 위해 3초마다 다음 단계로 넘어가도록 설정, 4단계는 1초
         if (currentStep < 4) {
-            handler.postDelayed({ scheduleNextStep() }, 2500)
+            handler.postDelayed({ scheduleNextStep() }, 3000)
         } else {
-            handler.postDelayed({ showCompleteDialog() }, 800)
+            handler.postDelayed({ showCompleteDialog() }, 1000)
         }
     }
 
@@ -87,18 +85,27 @@ class AnalysisLoadingFragment : Fragment() {
         4 -> binding.step4PulseRing
         else -> binding.step1PulseRing
     }
+
     private fun showCompleteDialog() {
         AlertDialog.Builder(requireContext())
             .setTitle("분석 완료")
             .setMessage("등기부등본 분석이 완료되었습니다.")
             .setPositiveButton("확인") { _, _ ->
-                // 로딩 화면 제거
-                findNavController().popBackStack()
+                val navController = findNavController()
+                val options = androidx.navigation.navOptions {
+                    popUpTo(R.id.nav_analysis_loading) { inclusive = true }
+                    launchSingleTop = true
+                }
+                navController.navigate(R.id.nav_analysis, null, options)
 
-                // 하단바 선택으로 이동시키면 selected 상태와 destination이 항상 동기화됨
+                // NOTE: 분석 화면으로 이동한 직후 하단바 선택 상태를 분석으로 강제 동기화
                 val bottomNav = requireActivity()
-                    .findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(R.id.navigationBar)
-                bottomNav.selectedItemId = R.id.nav_analysis
+                    .findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(
+                        R.id.navigationBar
+                    )
+                bottomNav.post {
+                    bottomNav.menu.findItem(R.id.nav_analysis).isChecked = true
+                }
             }
             .setCancelable(false)
             .show()
@@ -229,6 +236,7 @@ class AnalysisLoadingFragment : Fragment() {
         icon.alpha = 1f
     }
 
+    // TODO: 백엔드와 연동 시, 각 단계별 실제 상태에 따라 start/stopStepPulse를 호출하도록 변경
     private fun startStepPulse(step: Int) {
         val pulse = pulseViewForStep(step)
         pulse.visibility = View.VISIBLE
@@ -258,6 +266,7 @@ class AnalysisLoadingFragment : Fragment() {
         }
         stepPulseAnimators[step] = set
     }
+
     private fun stopStepPulse(step: Int) {
         stepPulseAnimators[step]?.cancel()
         stepPulseAnimators.remove(step)
