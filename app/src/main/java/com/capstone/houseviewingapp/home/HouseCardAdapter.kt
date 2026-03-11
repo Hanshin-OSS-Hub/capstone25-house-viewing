@@ -78,6 +78,7 @@ class HouseCardAdapter(
                         ltvpercentTextView.text = ltv.toString()
                         percentText.text = "%"
                         progressBar.progress = ltv
+                        // TODO: LTV는 나중에 백엔드가 최종 등급을 줌 -> 그걸로 색상 결정하도록 수정 예정
                         val stateColor = when {
                             ltv <= 60 -> R.color.blue
                             ltv <= 70 -> R.color.amber
