@@ -102,10 +102,10 @@ class HouseRegistrationActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
                 if (isQuickDiagnosisMode) {
-                    // TODO(백엔드): step3.getSelectedFileUriString() 업로드 -> 분석 시작 API 호출 -> jobId 수신
                     val intent = Intent(this, MainActivity::class.java).apply {
                         flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                         putExtra(MainActivity.EXTRA_SHOW_ANALYSIS_LOADING, true)
+                        putExtra(MainActivity.EXTRA_ANALYSIS_SOURCE, com.capstone.houseviewingapp.analysis.AnalysisFlow.SOURCE_MANUAL)
                         // TODO(백엔드): putExtra("analysis_job_id", jobId)
                     }
                     startActivity(intent)
