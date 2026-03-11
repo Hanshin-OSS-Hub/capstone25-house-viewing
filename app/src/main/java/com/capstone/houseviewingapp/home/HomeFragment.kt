@@ -45,6 +45,15 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
             registerLauncher.launch(intent)
         }
 
+        // TODO: startButton 경로만 quick 모드=true.
+        // TODO: plusHouseButton/onAddClick은 일반 등록 플로우(1->2->3) 유지.
+        binding.startButton.setOnClickListener {
+            val intent = Intent(requireContext(), HouseRegistrationActivity::class.java).apply{
+                putExtra(HouseRegistrationActivity.EXTRA_QUICK_DIAGNOSIS_MODE, true)
+            }
+            startActivity(intent)
+        }
+
     }
 
     // NOTE : 카드 로드. 화면 갱심 함수
