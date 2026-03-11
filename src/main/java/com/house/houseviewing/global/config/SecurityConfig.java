@@ -22,6 +22,13 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
+    private static final String[] PERMIT_URL_ARRAY = {
+            "/users/register",
+            "/users/login",
+            "/users/find-id",
+            "/users/password/verify"
+    };
+
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
@@ -42,10 +49,7 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/users/register",
-                                "/users/login",
-                                "/users/find-id",
-                                "/users/password/verify").permitAll()
+                        .requestMatchers(PERMIT_URL_ARRAY).permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
