@@ -15,4 +15,5 @@ public class PythonPdfRQ {
 
     @NotNull(message = "등기부 JSON은 필수입니다.")
     private String rawData;
+
 }

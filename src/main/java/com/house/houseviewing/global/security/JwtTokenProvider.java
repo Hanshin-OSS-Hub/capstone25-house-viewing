@@ -30,8 +30,8 @@ public class JwtTokenProvider {
     }
 
     public String createToken(Long userId, String loginId){
-        Date now = new Date(); // 현재시간
-        Date expiry = new Date(now.getTime() + accessToken); // 만료시간
+        final Date now = new Date(); // 현재시간
+        final Date expiry = new Date(now.getTime() + accessToken); // 만료시간
 
         return Jwts.builder()
                 .setSubject(loginId)
