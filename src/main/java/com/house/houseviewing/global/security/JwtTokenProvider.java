@@ -1,9 +1,8 @@
 package com.house.houseviewing.global.security;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import com.house.houseviewing.global.exception.AppException;
+import com.house.houseviewing.global.exception.ExceptionCode;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,9 +50,12 @@ public class JwtTokenProvider {
                     .parseClaimsJws(token);
 
             return true;
-        } catch (JwtException | IllegalArgumentException e){
-            return false;
+        } catch (ExpiredJwtException e) {
+            throw new AppException(ExceptionCode.UNAUTHORIZED);
+        } catch (JwtException | IllegalArgumentException e) {
+            throw new AppException(ExceptionCode.INVALID_TOKEN);
         }
+
     }
 
     public Long getUserId(String token){
