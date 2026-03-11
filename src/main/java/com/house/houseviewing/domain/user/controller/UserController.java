@@ -27,7 +27,7 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserRegisterRS> join(@Valid @RequestBody UserRegisterRQ request){
+    public ResponseEntity<UserRegisterRS> register(@Valid @RequestBody UserRegisterRQ request){
         UserEntity register = userService.register(request);
         UserRegisterRS result = new UserRegisterRS(register.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
@@ -69,7 +69,7 @@ public class UserController {
         return ResponseEntity.ok().body(b);
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/me")
     public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails){
         userService.delete(userDetails.getUserId());
         return ResponseEntity.noContent().build();
