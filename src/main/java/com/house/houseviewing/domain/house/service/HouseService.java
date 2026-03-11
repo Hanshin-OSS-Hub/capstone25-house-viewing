@@ -23,9 +23,9 @@ public class HouseService {
     private final KakaoAddress kakaoAddress;
 
     @Transactional
-    public HouseEntity register(HouseRegisterRQ request){
+    public HouseEntity register(Long userId, HouseRegisterRQ request){
 
-        UserEntity user = userRepository.findById(request.getUserId())
+        UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
 
         Address address = kakaoAddress.parsingAddress(request.getOriginAddress());
@@ -45,9 +45,13 @@ public class HouseService {
     }
 
     @Transactional
-    public void delete(Long houseId){
+    public void delete(Long userId, Long houseId){
         HouseEntity saved = houseRepository.findById(houseId)
                 .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
+
+        if(!saved.getUserEntity().getId().equals(userId)){
+            throw new AppException(ExceptionCode.FORBIDDEN);
+        }
 
         houseRepository.deleteById(saved.getId());
     }

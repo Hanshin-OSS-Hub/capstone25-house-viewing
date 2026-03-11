@@ -12,9 +12,6 @@ import lombok.NoArgsConstructor;
 @Getter @Builder
 public class HouseRegisterRQ {
 
-    @NotNull(message = "사용자 ID는 필수입니다.")
-    private Long userId; // 추후 세션이나 JWT로 발급한 토큰에서 사용자 정보를 가져옴
-
     @NotBlank(message = "주택 이름은 필수입니다.")
     private String nickname;
 
