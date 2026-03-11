@@ -39,7 +39,13 @@ class RegistryChangeDetectedDialogFragment: DialogFragment() {
             (requireActivity() as? MainActivity)?.let { activity ->
                 (activity.supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as? NavHostFragment)
                     ?.navController
-                    ?.navigate(R.id.nav_analysis_loading)
+                    ?.navigate(
+                        R.id.nav_analysis_loading,
+                        androidx.core.os.bundleOf(
+                            com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_ANALYSIS_SOURCE to
+                                    com.capstone.houseviewingapp.analysis.AnalysisFlow.SOURCE_AUTO
+                        )
+                    )
             }
         }
         binding.buttonLater.setOnClickListener {
