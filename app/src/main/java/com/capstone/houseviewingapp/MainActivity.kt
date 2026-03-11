@@ -1,11 +1,12 @@
 package com.capstone.houseviewingapp
 
-import android.app.Notification
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.capstone.houseviewingapp.databinding.ActivityMainBinding
@@ -13,44 +14,132 @@ import com.capstone.houseviewingapp.notification.NotificationAccessGuideBottomSh
 import com.capstone.houseviewingapp.notification.RegistryChangeDetectedDialogFragment
 
 class MainActivity : AppCompatActivity() {
+
     companion object {
         const val EXTRA_SHOW_NOTIFICATION_ACCESS_GUIDE = "show_notification_access_guide"
         const val EXTRA_SHOW_REGISTRY_CHANGE_DIALOG = "show_registry_change_dialog"
+        const val EXTRA_SHOW_ANALYSIS_LOADING = "show_analysis_loading"
     }
-    private lateinit var binding : ActivityMainBinding
+
+    private lateinit var binding: ActivityMainBinding
+    private lateinit var navController: NavController
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        //NOTE : bottom 빼고 여백 남기기
+
+        // NOTE: 루트는 좌/우/상만 시스템 바 패딩 적용, 하단은 네비 바 영역이 별도 담당
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
             insets
         }
 
-        // NOTE: BottomNavigationView가 멋대로 패딩 먹는 거 강제 차단
+        // NOTE: BottomNavigationView가 자체 패딩을 먹지 않도록 고정
         ViewCompat.setOnApplyWindowInsetsListener(binding.navigationBar) { v, insets ->
-            // NOTE : "좌, 우, 위, 아래 패딩 전부 0으로 고정해!"
             v.setPadding(0, 0, 0, 0)
             insets
         }
 
-        val navHostFragment = supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        val navController = navHostFragment.navController
+        val navHostFragment =
+            supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as NavHostFragment
+        navController = navHostFragment.navController
 
-        binding.navigationBar.setupWithNavController(navController)
+        // NOTE: 바텀 탭 수동 네비게이션 (상태 꼬임 방지)
+        fun navigateBottom(targetId: Int) {
+            // 같은 화면이면 무시
+            if (navController.currentDestination?.id == targetId) return
 
-        if(intent?.getBooleanExtra(EXTRA_SHOW_NOTIFICATION_ACCESS_GUIDE, false) == true){
-            supportFragmentManager.executePendingTransactions()
-            NotificationAccessGuideBottomSheetFragment().show(supportFragmentManager,"notification_access_guide" )
+            when (targetId) {
+                R.id.nav_home -> {
+                    // NOTE: 홈은 백스택에 있으면 pop, 없으면 navigate
+                    val popped = navController.popBackStack(R.id.nav_home, false)
+                    if (!popped) navController.navigate(R.id.nav_home)
+                }
+                R.id.nav_analysis -> navController.navigate(
+                    R.id.nav_analysis,
+                    null,
+                    androidx.navigation.navOptions { launchSingleTop = true }
+                )
+                R.id.nav_ar_check -> navController.navigate(
+                    R.id.nav_ar_check,
+                    null,
+                    androidx.navigation.navOptions { launchSingleTop = true }
+                )
+                R.id.nav_my -> navController.navigate(
+                    R.id.nav_my,
+                    null,
+                    androidx.navigation.navOptions { launchSingleTop = true }
+                )
+            }
         }
-        if(intent?.getBooleanExtra(EXTRA_SHOW_REGISTRY_CHANGE_DIALOG,false) == true) {
-            supportFragmentManager.executePendingTransactions()
-            RegistryChangeDetectedDialogFragment().show(supportFragmentManager, "registry_change_dialog")
+
+        binding.navigationBar.setOnItemSelectedListener { item ->
+            navigateBottom(item.itemId)
+            true
         }
 
+// NOTE: 재선택도 동일하게 처리 (특히 홈 탭 보장)
+        binding.navigationBar.setOnItemReselectedListener { item ->
+            navigateBottom(item.itemId)
+        }
+
+// NOTE: destination 바뀌면 하단바 체크 상태 동기화
+        navController.addOnDestinationChangedListener { _, destination, _ ->
+            binding.navigationBar.menu.findItem(destination.id)?.isChecked = true
+        }
+
+        // NOTE: 선택된 탭을 다시 눌렀을 때도 홈은 확실히 홈으로 보내기
+        binding.navigationBar.setOnItemReselectedListener { item ->
+            if (item.itemId == R.id.nav_home) {
+                val popped = navController.popBackStack(R.id.nav_home, false)
+                if (!popped) navController.navigate(R.id.nav_home)
+            }
+        }
+
+        // NOTE: 최초 실행(onCreate) 시 전달된 extra 처리
+        handleIntentExtras(intent)
     }
 
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        // NOTE: SINGLE_TOP / CLEAR_TOP으로 기존 MainActivity 재사용될 때는 onCreate가 아니라 onNewIntent가 호출됨
+        setIntent(intent)
+        // NOTE: 재진입 시에도 동일하게 extra 처리해야 로딩 화면 진입이 누락되지 않음
+        handleIntentExtras(intent)
+    }
+
+    private fun handleIntentExtras(sourceIntent: Intent?) {
+        if (sourceIntent == null) return
+
+        // NOTE: 무료 진단 플로우에서 분석 로딩 화면 진입 트리거
+        if (sourceIntent.getBooleanExtra(EXTRA_SHOW_ANALYSIS_LOADING, false)) {
+            navController.navigate(R.id.nav_analysis_loading)
+            binding.navigationBar.menu.findItem(R.id.nav_analysis)?.isChecked = true
+            sourceIntent.removeExtra(EXTRA_SHOW_ANALYSIS_LOADING)
+        }
+
+        // NOTE: 알림 접근 권한 안내 바텀시트 표시
+        if (sourceIntent.getBooleanExtra(EXTRA_SHOW_NOTIFICATION_ACCESS_GUIDE, false)) {
+            supportFragmentManager.executePendingTransactions()
+            NotificationAccessGuideBottomSheetFragment().show(
+                supportFragmentManager,
+                "notification_access_guide"
+            )
+            sourceIntent.removeExtra(EXTRA_SHOW_NOTIFICATION_ACCESS_GUIDE)
+        }
+
+        // NOTE: 등기 변경 감지 다이얼로그 표시
+        if (sourceIntent.getBooleanExtra(EXTRA_SHOW_REGISTRY_CHANGE_DIALOG, false)) {
+            supportFragmentManager.executePendingTransactions()
+            RegistryChangeDetectedDialogFragment().show(
+                supportFragmentManager,
+                "registry_change_dialog"
+            )
+            sourceIntent.removeExtra(EXTRA_SHOW_REGISTRY_CHANGE_DIALOG)
+        }
+    }
 }
