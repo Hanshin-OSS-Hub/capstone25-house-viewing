@@ -34,7 +34,7 @@ public class UserController {
     @PostMapping("/login")
     public ResponseEntity<UserLoginResponse> login(@Valid @RequestBody UserLoginRequest request){
         UserLoginResponse result = userService.login(request);
-        return ResponseEntity.ok().body(result);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping("/me")
@@ -52,15 +52,15 @@ public class UserController {
     @PostMapping("/password/verify")
     public ResponseEntity<Boolean> verifyPassword(@Valid @RequestBody UserVerifyPasswordRequest request){
         boolean verify = userService.passwordVerify(request);
-        return ResponseEntity.ok().body(verify);
+        return ResponseEntity.ok(verify);
     }
 
     @PatchMapping("/password/reset")
     public ResponseEntity<Boolean> resetPassword(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody UserResetPasswordRequest request){
-        boolean b = userService.passwordReset(userDetails.getUserId(), request);
-        return ResponseEntity.ok().body(b);
+        boolean result = userService.passwordReset(userDetails.getUserId(), request);
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/me")
