@@ -2,7 +2,6 @@ package com.house.houseviewing.domain.user.service;
 
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
-import com.house.houseviewing.domain.subscription.repository.SubscriptionRepository;
 import com.house.houseviewing.domain.user.dto.response.UserMeResponse;
 import com.house.houseviewing.global.security.CustomUserDetails;
 import com.house.houseviewing.domain.common.auth.dto.UserLoginRS;
@@ -51,22 +50,6 @@ public class UserService {
         } catch (DataIntegrityViolationException e){
             throw new AppException(ExceptionCode.DUPLICATE_RESOURCE);
         }
-    }
-
-    private void duplicateUser(UserRegisterRequest request) {
-        if(userRepository.existsByLoginId(request.getLoginId())){
-            throw new AppException(ExceptionCode.DUPLICATE_LOGIN_ID);
-        }
-        if(userRepository.existsByEmail(request.getEmail())){
-            throw new AppException(ExceptionCode.DUPLICATE_EMAIL);
-        }
-    }
-
-    private static SubscriptionEntity defaultSubscription(UserEntity user) {
-        return SubscriptionEntity.builder()
-                .user(user)
-                .planType(PlanType.FREE)
-                .build();
     }
 
     public UserLoginRS login(UserLoginRQ request){
@@ -132,5 +115,21 @@ public class UserService {
                 .orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
 
         userRepository.deleteById(userId);
+    }
+
+    private void duplicateUser(UserRegisterRequest request) {
+        if(userRepository.existsByLoginId(request.getLoginId())){
+            throw new AppException(ExceptionCode.DUPLICATE_LOGIN_ID);
+        }
+        if(userRepository.existsByEmail(request.getEmail())){
+            throw new AppException(ExceptionCode.DUPLICATE_EMAIL);
+        }
+    }
+
+    private static SubscriptionEntity defaultSubscription(UserEntity user) {
+        return SubscriptionEntity.builder()
+                .user(user)
+                .planType(PlanType.FREE)
+                .build();
     }
 }
