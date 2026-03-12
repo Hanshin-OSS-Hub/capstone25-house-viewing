@@ -1,8 +1,8 @@
 package com.house.houseviewing.domain.subscription.controller;
 
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
-import com.house.houseviewing.domain.subscription.model.SubscriptionPremiumRQ;
-import com.house.houseviewing.domain.subscription.model.SubscriptionPremiumRS;
+import com.house.houseviewing.domain.subscription.dto.request.SubscriptionPremiumRequest;
+import com.house.houseviewing.domain.subscription.dto.response.SubscriptionPremiumResponse;
 import com.house.houseviewing.domain.subscription.service.SubscriptionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +21,9 @@ public class SubscriptionController {
     private final SubscriptionService subscriptionService;
 
     @PostMapping("/premium")
-    public ResponseEntity<SubscriptionPremiumRS> premium(@Valid @RequestBody SubscriptionPremiumRQ request){
+    public ResponseEntity<SubscriptionPremiumResponse> premium(@Valid @RequestBody SubscriptionPremiumRequest request){
         SubscriptionEntity subscription = subscriptionService.premium(request);
-        SubscriptionPremiumRS result = SubscriptionPremiumRS.builder()
+        SubscriptionPremiumResponse result = SubscriptionPremiumResponse.builder()
                 .userId(subscription.getUser().getId())
                 .subscriptionId(subscription.getId())
                 .planType(subscription.getPlanType())

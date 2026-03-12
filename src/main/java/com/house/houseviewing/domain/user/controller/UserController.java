@@ -1,16 +1,17 @@
 package com.house.houseviewing.domain.user.controller;
 
 import com.house.houseviewing.domain.user.entity.UserEntity;
-import com.house.houseviewing.domain.user.model.UserMe.UserMeRS;
-import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
-import com.house.houseviewing.domain.user.model.findid.UserFindIdRS;
+import com.house.houseviewing.domain.user.dto.response.UserMeResponse;
+import com.house.houseviewing.domain.user.dto.request.UserFindIdRequest;
+import com.house.houseviewing.domain.user.dto.response.UserFindIdResponse;
+import com.house.houseviewing.domain.user.repository.UserRepository;
 import com.house.houseviewing.global.security.CustomUserDetails;
-import com.house.houseviewing.global.security.model.UserLoginRQ;
-import com.house.houseviewing.global.security.model.UserLoginRS;
-import com.house.houseviewing.domain.user.model.password.reset.UserResetPasswordRQ;
-import com.house.houseviewing.domain.user.model.password.verify.UserVerifyPasswordRQ;
-import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
-import com.house.houseviewing.domain.user.model.register.UserRegisterRS;
+import com.house.houseviewing.domain.common.auth.dto.UserLoginRQ;
+import com.house.houseviewing.domain.common.auth.dto.UserLoginRS;
+import com.house.houseviewing.domain.user.dto.request.UserResetPasswordRequest;
+import com.house.houseviewing.domain.user.dto.request.UserVerifyPasswordRequest;
+import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;
+import com.house.houseviewing.domain.user.dto.response.UserRegisterResponse;
 import com.house.houseviewing.domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -25,11 +26,12 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
 
     private final UserService userService;
+    private final UserRepository userRepository;
 
     @PostMapping("/register")
-    public ResponseEntity<UserRegisterRS> register(@Valid @RequestBody UserRegisterRQ request){
+    public ResponseEntity<UserRegisterResponse> register(@Valid @RequestBody UserRegisterRequest request){
         UserEntity register = userService.register(request);
-        UserRegisterRS result = new UserRegisterRS(register.getId());
+        UserRegisterResponse result = new UserRegisterResponse(register.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
@@ -40,23 +42,20 @@ public class UserController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<UserMeRS> me(@AuthenticationPrincipal CustomUserDetails userDetails){
-        UserMeRS result = UserMeRS.builder()
-                .userId(userDetails.getUserId())
-                .loginId(userDetails.getUsername())
-                .build();
+    public ResponseEntity<UserMeResponse> me(@AuthenticationPrincipal CustomUserDetails userDetails){
+        UserMeResponse result = userService.me(userDetails.getUserId());
         return ResponseEntity.ok(result);
     }
 
     @PostMapping("/find-id")
-    public ResponseEntity<UserFindIdRS> findLoginId(@Valid @RequestBody UserFindIdRQ request){
+    public ResponseEntity<UserFindIdResponse> findLoginId(@Valid @RequestBody UserFindIdRequest request){
         String loginId = userService.findLoginId(request);
-        UserFindIdRS result = new UserFindIdRS(loginId);
+        UserFindIdResponse result = new UserFindIdResponse(loginId);
         return ResponseEntity.ok().body(result);
     }
 
     @PostMapping("/password/verify")
-    public ResponseEntity<Boolean> verifyPassword(@Valid @RequestBody UserVerifyPasswordRQ request){
+    public ResponseEntity<Boolean> verifyPassword(@Valid @RequestBody UserVerifyPasswordRequest request){
         boolean verify = userService.passwordVerify(request);
         return ResponseEntity.ok().body(verify);
     }
@@ -64,7 +63,7 @@ public class UserController {
     @PatchMapping("/password/reset")
     public ResponseEntity<Boolean> resetPassword(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody UserResetPasswordRQ request){
+            @Valid @RequestBody UserResetPasswordRequest request){
         boolean b = userService.passwordReset(userDetails.getUserId(), request);
         return ResponseEntity.ok().body(b);
     }

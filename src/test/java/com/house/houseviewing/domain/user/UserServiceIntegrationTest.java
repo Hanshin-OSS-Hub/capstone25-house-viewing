@@ -1,11 +1,11 @@
 package com.house.houseviewing.domain.user;
 
 import com.house.houseviewing.domain.user.entity.UserEntity;
-import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
-import com.house.houseviewing.global.security.model.UserLoginRQ;
-import com.house.houseviewing.domain.user.model.password.reset.UserResetPasswordRQ;
-import com.house.houseviewing.domain.user.model.password.verify.UserVerifyPasswordRQ;
-import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
+import com.house.houseviewing.domain.user.dto.request.UserFindIdRequest;
+import com.house.houseviewing.domain.common.auth.dto.UserLoginRQ;
+import com.house.houseviewing.domain.user.dto.request.UserResetPasswordRequest;
+import com.house.houseviewing.domain.user.dto.request.UserVerifyPasswordRequest;
+import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;
 import com.house.houseviewing.domain.user.repository.UserRepository;
 import com.house.houseviewing.domain.user.service.UserService;
 import com.house.houseviewing.fixture.UserFixture;
@@ -30,7 +30,7 @@ public class UserServiceIntegrationTest {
     void 회원가입(){
         // given
         UserEntity user = UserFixture.createDefault().build();
-        UserRegisterRQ request = UserFixture.createRegister(user).build();
+        UserRegisterRequest request = UserFixture.createRegister(user).build();
         // when
         UserEntity register = userService.register(request);
         // then
@@ -58,7 +58,7 @@ public class UserServiceIntegrationTest {
     void 아이디_찾기(){
         // given
         UserEntity register = getUserEntity();
-        UserFindIdRQ findIdRQ = UserFindIdRQ.builder()
+        UserFindIdRequest findIdRQ = UserFindIdRequest.builder()
                 .email(register.getEmail())
                 .name(register.getName())
                 .build();
@@ -73,7 +73,7 @@ public class UserServiceIntegrationTest {
     void 비밀번호_권한_얻기(){
         // given
         UserEntity register = getUserEntity();
-        UserVerifyPasswordRQ request = UserVerifyPasswordRQ.builder()
+        UserVerifyPasswordRequest request = UserVerifyPasswordRequest.builder()
                 .email(register.getEmail())
                 .loginId(register.getLoginId())
                 .name(register.getName())
@@ -89,7 +89,7 @@ public class UserServiceIntegrationTest {
     void 비밀번호_재설정(){
         // given
         UserEntity register = getUserEntity();
-        UserResetPasswordRQ request = UserResetPasswordRQ.builder()
+        UserResetPasswordRequest request = UserResetPasswordRequest.builder()
                 .userId(register.getId())
                 .newPassword("okok0635")
                 .confirmPassword("okok0635")
@@ -113,7 +113,7 @@ public class UserServiceIntegrationTest {
 
     private UserEntity getUserEntity() {
         UserEntity build = UserFixture.createDefault().build();
-        UserRegisterRQ build1 = UserFixture.createRegister(build).build();
+        UserRegisterRequest build1 = UserFixture.createRegister(build).build();
         UserEntity register = userService.register(build1);
         return register;
     }

@@ -3,11 +3,11 @@ package com.house.houseviewing.fixture;
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
 import com.house.houseviewing.domain.user.entity.UserEntity;
-import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
-import com.house.houseviewing.global.security.model.UserLoginRQ;
-import com.house.houseviewing.domain.user.model.password.reset.UserResetPasswordRQ;
-import com.house.houseviewing.domain.user.model.password.verify.UserVerifyPasswordRQ;
-import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
+import com.house.houseviewing.domain.user.dto.request.UserFindIdRequest;
+import com.house.houseviewing.domain.common.auth.dto.UserLoginRQ;
+import com.house.houseviewing.domain.user.dto.request.UserResetPasswordRequest;
+import com.house.houseviewing.domain.user.dto.request.UserVerifyPasswordRequest;
+import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional
@@ -27,8 +27,8 @@ public class UserFixture {
                 .subscription(subscription);
     }
 
-    public static UserRegisterRQ.UserRegisterRQBuilder createRegister(UserEntity user){
-        return UserRegisterRQ.builder()
+    public static UserRegisterRequest.UserRegisterRQBuilder createRegister(UserEntity user){
+        return UserRegisterRequest.builder()
                 .name(user.getName())
                 .email(user.getEmail())
                 .loginId(user.getLoginId())
@@ -41,21 +41,21 @@ public class UserFixture {
                 .password(user.getPassword());
     }
 
-    public static UserFindIdRQ.UserFindIdRQBuilder createFindId(UserEntity user){
-        return UserFindIdRQ.builder()
+    public static UserFindIdRequest.UserFindIdRQBuilder createFindId(UserEntity user){
+        return UserFindIdRequest.builder()
                 .name(user.getName())
                 .email(user.getEmail());
     }
 
-    public static UserVerifyPasswordRQ.UserVerifyPasswordRQBuilder createVerifyPassword(UserEntity user){
-        return UserVerifyPasswordRQ.builder()
+    public static UserVerifyPasswordRequest.UserVerifyPasswordRQBuilder createVerifyPassword(UserEntity user){
+        return UserVerifyPasswordRequest.builder()
                 .name(user.getName())
                 .loginId(user.getLoginId())
                 .email(user.getEmail());
     }
 
-    public static UserResetPasswordRQ.UserResetPasswordRQBuilder createResetPassword(UserEntity user, String newPassword, String confirmPassword){
-        return UserResetPasswordRQ.builder()
+    public static UserResetPasswordRequest.UserResetPasswordRQBuilder createResetPassword(UserEntity user, String newPassword, String confirmPassword){
+        return UserResetPasswordRequest.builder()
                 .userId(user.getId())
                 .newPassword(newPassword)
                 .confirmPassword(confirmPassword);

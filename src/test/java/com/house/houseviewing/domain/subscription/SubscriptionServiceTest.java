@@ -2,7 +2,7 @@ package com.house.houseviewing.domain.subscription;
 
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
-import com.house.houseviewing.domain.subscription.model.SubscriptionPremiumRQ;
+import com.house.houseviewing.domain.subscription.dto.request.SubscriptionPremiumRequest;
 import com.house.houseviewing.domain.subscription.repository.SubscriptionRepository;
 import com.house.houseviewing.domain.subscription.service.SubscriptionService;
 import com.house.houseviewing.domain.user.entity.UserEntity;
@@ -11,7 +11,6 @@ import com.house.houseviewing.fixture.SubscriptionFixture;
 import com.house.houseviewing.fixture.UserFixture;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -44,7 +43,7 @@ class SubscriptionServiceTest {
             // given
             UserEntity user = UserFixture.createDefault().id(1L).build();
             SubscriptionEntity subscription = SubscriptionFixture.createDefault(user).id(1L).build();
-            SubscriptionPremiumRQ request = SubscriptionFixture.createPremium(subscription).build();
+            SubscriptionPremiumRequest request = SubscriptionFixture.createPremium(subscription).build();
             given(userRepository.findById(anyLong()))
                     .willReturn(Optional.of(user));
             // when
@@ -59,7 +58,7 @@ class SubscriptionServiceTest {
             // given
             UserEntity user = UserFixture.createDefault().id(1L).build();
             SubscriptionEntity subscription = SubscriptionFixture.createDefault(user).id(1L).build();
-            SubscriptionPremiumRQ request = SubscriptionFixture.createPremium(subscription).build();
+            SubscriptionPremiumRequest request = SubscriptionFixture.createPremium(subscription).build();
             given(userRepository.findById(anyLong()))
                     .willReturn(Optional.empty());
             // when

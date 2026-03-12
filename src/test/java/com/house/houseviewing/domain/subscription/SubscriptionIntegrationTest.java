@@ -2,14 +2,13 @@ package com.house.houseviewing.domain.subscription;
 
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
-import com.house.houseviewing.domain.subscription.model.SubscriptionPremiumRQ;
+import com.house.houseviewing.domain.subscription.dto.request.SubscriptionPremiumRequest;
 import com.house.houseviewing.domain.subscription.repository.SubscriptionRepository;
 import com.house.houseviewing.domain.subscription.service.SubscriptionService;
 import com.house.houseviewing.domain.user.entity.UserEntity;
-import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
+import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;
 import com.house.houseviewing.domain.user.service.UserService;
 import com.house.houseviewing.fixture.UserFixture;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +43,7 @@ public class SubscriptionIntegrationTest {
         // given
         UserEntity user = getUserEntity();
         SubscriptionEntity subscription = user.getSubscription();
-        SubscriptionPremiumRQ request = SubscriptionPremiumRQ.builder()
+        SubscriptionPremiumRequest request = SubscriptionPremiumRequest.builder()
                 .userId(user.getId())
                 .build();
         // when
@@ -56,7 +55,7 @@ public class SubscriptionIntegrationTest {
 
     private UserEntity getUserEntity() {
         UserEntity build = UserFixture.createDefault().build();
-        UserRegisterRQ build1 = UserFixture.createRegister(build).build();
+        UserRegisterRequest build1 = UserFixture.createRegister(build).build();
         UserEntity register = userService.register(build1);
         return register;
     }

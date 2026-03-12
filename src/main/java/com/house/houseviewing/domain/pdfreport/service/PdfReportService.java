@@ -1,7 +1,7 @@
 package com.house.houseviewing.domain.pdfreport.service;
 
 import com.house.houseviewing.domain.pdfreport.entity.PdfReportEntity;
-import com.house.houseviewing.domain.pdfreport.model.register.PdfReportRegisterRS;
+import com.house.houseviewing.domain.pdfreport.dto.response.PdfReportRegisterResponse;
 import com.house.houseviewing.domain.pdfreport.repository.PdfReportRepository;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.domain.registrysnapshot.repository.RegistrySnapshotRepository;
@@ -20,7 +20,7 @@ public class PdfReportService {
     private final RegistrySnapshotRepository registrySnapshotRepository;
 
     @Transactional
-    public Long register(PdfReportRegisterRS response){
+    public Long register(PdfReportRegisterResponse response){
 
         RegistrySnapshotEntity registrySnapshot = registrySnapshotRepository.findById(response.getSnapshotId())
                 .orElseThrow(() -> new AppException(ExceptionCode.SNAPSHOT_NOT_FOUND));

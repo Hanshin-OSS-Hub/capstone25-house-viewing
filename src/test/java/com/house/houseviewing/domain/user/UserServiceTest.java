@@ -1,10 +1,10 @@
 package com.house.houseviewing.domain.user;
 
-import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
-import com.house.houseviewing.global.security.model.UserLoginRQ;
-import com.house.houseviewing.domain.user.model.password.reset.UserResetPasswordRQ;
-import com.house.houseviewing.domain.user.model.password.verify.UserVerifyPasswordRQ;
-import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
+import com.house.houseviewing.domain.user.dto.request.UserFindIdRequest;
+import com.house.houseviewing.domain.common.auth.dto.UserLoginRQ;
+import com.house.houseviewing.domain.user.dto.request.UserResetPasswordRequest;
+import com.house.houseviewing.domain.user.dto.request.UserVerifyPasswordRequest;
+import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;
 import com.house.houseviewing.fixture.UserFixture;
 import com.house.houseviewing.domain.user.service.UserService;
 import com.house.houseviewing.domain.user.entity.UserEntity;
@@ -40,7 +40,7 @@ class UserServiceTest {
         void 성공(){
             // given
             UserEntity build = UserFixture.createDefault().build();
-            UserRegisterRQ build1 = UserFixture.createRegister(build).build();
+            UserRegisterRequest build1 = UserFixture.createRegister(build).build();
             given(userRepository.existsByEmail(anyString()))
                     .willReturn(false);
             given(userRepository.existsByLoginId(anyString()))
@@ -59,7 +59,7 @@ class UserServiceTest {
         void 아이디_중복_예외_발생(){
             // given
             UserEntity build = UserFixture.createDefault().build();
-            UserRegisterRQ request = UserFixture.createRegister(build).build();
+            UserRegisterRequest request = UserFixture.createRegister(build).build();
 
             given(userRepository.existsByLoginId(anyString()))
                     .willReturn(true);
@@ -76,7 +76,7 @@ class UserServiceTest {
         void 이메일_중복_예외_발생(){
             // given
             UserEntity build = UserFixture.createDefault().build();
-            UserRegisterRQ build1 = UserFixture.createRegister(build).build();
+            UserRegisterRequest build1 = UserFixture.createRegister(build).build();
 
             given(userRepository.existsByEmail(anyString()))
                     .willReturn(true);
@@ -132,7 +132,7 @@ class UserServiceTest {
         void 성공(){
             // given
             UserEntity user = UserFixture.createDefault().build();
-            UserFindIdRQ request = UserFixture.createFindId(user).build();
+            UserFindIdRequest request = UserFixture.createFindId(user).build();
             given(userRepository.findByEmailAndName(anyString(), anyString()))
                     .willReturn(Optional.of(user));
             // when
@@ -146,7 +146,7 @@ class UserServiceTest {
         void 아이디_찾기_실패_에외_발생(){
             // given
             UserEntity build = UserFixture.createDefault().build();
-            UserFindIdRQ build1 = UserFixture.createFindId(build).build();
+            UserFindIdRequest build1 = UserFixture.createFindId(build).build();
             given(userRepository.findByEmailAndName(anyString(), anyString()))
                     .willReturn(Optional.empty());
             // when
@@ -167,7 +167,7 @@ class UserServiceTest {
         void 권한_성공(){
             // given
             UserEntity user = UserFixture.createDefault().build();
-            UserVerifyPasswordRQ request = UserFixture.createVerifyPassword(user).build();
+            UserVerifyPasswordRequest request = UserFixture.createVerifyPassword(user).build();
             given(userRepository.findByEmailAndNameAndLoginId(anyString(), anyString() ,anyString()))
                     .willReturn(Optional.of(user));
             // when
@@ -181,7 +181,7 @@ class UserServiceTest {
         void 비밀번호_권한_에외_발생(){
             // given
             UserEntity build = UserFixture.createDefault().build();
-            UserVerifyPasswordRQ build1 = UserFixture.createVerifyPassword(build).build();
+            UserVerifyPasswordRequest build1 = UserFixture.createVerifyPassword(build).build();
             given(userRepository.findByEmailAndNameAndLoginId(anyString(), anyString(), anyString()))
                     .willReturn(Optional.empty());
             // when
@@ -200,7 +200,7 @@ class UserServiceTest {
                     .id(1L)
                     .build();
 
-            UserResetPasswordRQ request = UserFixture.createResetPassword(user, "okok0635!", "okok0635!").build();
+            UserResetPasswordRequest request = UserFixture.createResetPassword(user, "okok0635!", "okok0635!").build();
             given(userRepository.findById(1L))
                     .willReturn(Optional.of(user));
             // when
@@ -214,7 +214,7 @@ class UserServiceTest {
         void 비밀번호_변경_예외_발생(){
             // given
             UserEntity build = UserFixture.createDefault().build();
-            UserResetPasswordRQ build1 = UserFixture.createResetPassword(build, "okok0635!", "okok0635").build();
+            UserResetPasswordRequest build1 = UserFixture.createResetPassword(build, "okok0635!", "okok0635").build();
             // when
             // then
             assertThatThrownBy(() -> userService.passwordReset(build1))

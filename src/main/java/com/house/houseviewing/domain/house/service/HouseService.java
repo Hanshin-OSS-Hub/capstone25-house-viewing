@@ -3,7 +3,7 @@ package com.house.houseviewing.domain.house.service;
 import com.house.houseviewing.domain.common.Address;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.user.enums.MonitoringStatus;
-import com.house.houseviewing.domain.house.model.register.HouseRegisterRQ;
+import com.house.houseviewing.domain.house.dto.request.HouseRegisterRequest;
 import com.house.houseviewing.domain.house.repository.HouseRepository;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.repository.UserRepository;
@@ -23,7 +23,7 @@ public class HouseService {
     private final KakaoAddress kakaoAddress;
 
     @Transactional
-    public HouseEntity register(Long userId, HouseRegisterRQ request){
+    public HouseEntity register(Long userId, HouseRegisterRequest request){
 
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));

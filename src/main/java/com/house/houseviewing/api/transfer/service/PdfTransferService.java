@@ -1,7 +1,6 @@
 package com.house.houseviewing.api.transfer.service;
 
-import com.house.houseviewing.api.upload.service.PdfUploadService;
-import com.house.houseviewing.domain.pdfreport.model.register.PdfReportRegisterRS;
+import com.house.houseviewing.domain.pdfreport.dto.response.PdfReportRegisterResponse;
 import com.house.houseviewing.domain.pdfreport.service.PdfReportService;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.domain.registrysnapshot.repository.RegistrySnapshotRepository;
@@ -14,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -45,7 +43,7 @@ public class PdfTransferService {
 
             try {
                 Files.write(Paths.get(pdfPath), pdfBytes);
-                PdfReportRegisterRS response = PdfReportRegisterRS.builder()
+                PdfReportRegisterResponse response = PdfReportRegisterResponse.builder()
                         .snapshotId(registrySnapshotId)
                         .pdfName(pdfName)
                         .pdfPath(pdfPath)

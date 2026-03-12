@@ -2,15 +2,16 @@ package com.house.houseviewing.domain.user.service;
 
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
+import com.house.houseviewing.domain.user.dto.response.UserMeResponse;
 import com.house.houseviewing.global.security.CustomUserDetails;
-import com.house.houseviewing.global.security.model.UserLoginRS;
+import com.house.houseviewing.domain.common.auth.dto.UserLoginRS;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
-import com.house.houseviewing.domain.user.model.findid.UserFindIdRQ;
-import com.house.houseviewing.domain.user.model.password.reset.UserResetPasswordRQ;
-import com.house.houseviewing.domain.user.model.password.verify.UserVerifyPasswordRQ;
-import com.house.houseviewing.global.security.model.UserLoginRQ;
-import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
+import com.house.houseviewing.domain.user.dto.request.UserFindIdRequest;
+import com.house.houseviewing.domain.user.dto.request.UserResetPasswordRequest;
+import com.house.houseviewing.domain.user.dto.request.UserVerifyPasswordRequest;
+import com.house.houseviewing.domain.common.auth.dto.UserLoginRQ;
+import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.repository.UserRepository;
 import com.house.houseviewing.global.security.JwtTokenProvider;
@@ -34,7 +35,7 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
 
     @Transactional
-    public UserEntity register(UserRegisterRQ request){
+    public UserEntity register(UserRegisterRequest request){
 
         if(userRepository.existsByLoginId(request.getLoginId())){
             throw new AppException(ExceptionCode.DUPLICATE_LOGIN_ID);
@@ -82,20 +83,38 @@ public class UserService {
         return new UserLoginRS(token);
     }
 
-    public String findLoginId(UserFindIdRQ request){
+    public UserMeResponse me(Long userId){
+        UserEntity user = userRepository.findById(userId)
+                .orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
+
+        SubscriptionInfo subscription = SubscriptionInfo.builder()
+                .planType(user.getSubscription().getPlanType().name())
+                .expiredAt(user.getSubscription().getEndedAt())
+                .build();
+
+        return UserMeResponse.builder()
+                .name(user.getName())
+                .email(user.getEmail())
+                .loginId(user.getLoginId())
+                .subscriptionInfo(subscription)
+                .houses(user.getHouses())
+                .build();
+    }
+
+    public String findLoginId(UserFindIdRequest request){
         UserEntity user = userRepository.findByEmailAndName(request.getEmail(), request.getName())
                 .orElseThrow(() -> new AppException(ExceptionCode.FIND_LOGIN_ID_FAILED));
         return user.getLoginId();
     }
 
-    public boolean passwordVerify(UserVerifyPasswordRQ request){
+    public boolean passwordVerify(UserVerifyPasswordRequest request){
         UserEntity user = userRepository.findByEmailAndNameAndLoginId(request.getEmail(), request.getName(), request.getLoginId())
                 .orElseThrow(() -> new AppException(ExceptionCode.VERIFY_PASSWORD_FAILED));
         return true;
     }
 
     @Transactional
-    public boolean passwordReset(Long userId, UserResetPasswordRQ request){
+    public boolean passwordReset(Long userId, UserResetPasswordRequest request){
         if(!request.getNewPassword().equals(request.getConfirmPassword())){
             throw new AppException(ExceptionCode.MISMATCH_PASSWORD);
         }

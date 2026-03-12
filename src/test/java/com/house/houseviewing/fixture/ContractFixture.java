@@ -2,7 +2,7 @@ package com.house.houseviewing.fixture;
 
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
 import com.house.houseviewing.domain.contract.enums.ContractType;
-import com.house.houseviewing.domain.contract.model.ContractRegisterRQ;
+import com.house.houseviewing.domain.contract.dto.request.ContractRegisterRequest;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 
 import java.time.LocalDate;
@@ -20,8 +20,8 @@ public class ContractFixture {
                 .confirmDate(LocalDate.of(2026, 03, 07));
     }
 
-    public static ContractRegisterRQ.ContractRegisterRQBuilder createRegister(ContractEntity contract){
-        return ContractRegisterRQ.builder()
+    public static ContractRegisterRequest.ContractRegisterRQBuilder createRegister(ContractEntity contract){
+        return ContractRegisterRequest.builder()
                 .houseId(contract.getHouseEntity().getId())
                 .contractType(contract.getContractType())
                 .deposit(contract.getDeposit())

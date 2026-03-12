@@ -1,11 +1,9 @@
 package com.house.houseviewing.fixture;
 
 import com.house.houseviewing.domain.house.entity.HouseEntity;
-import com.house.houseviewing.domain.house.model.register.HouseRegisterRQ;
+import com.house.houseviewing.domain.house.dto.request.HouseRegisterRequest;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.enums.MonitoringStatus;
-
-import java.util.ArrayList;
 
 public class HouseFixture {
 
@@ -17,8 +15,8 @@ public class HouseFixture {
                 .address(AddressFixture.createAddress().build());
     }
 
-    public static HouseRegisterRQ.HouseRegisterRQBuilder createRegister(HouseEntity house){
-        return HouseRegisterRQ.builder()
+    public static HouseRegisterRequest.HouseRegisterRQBuilder createRegister(HouseEntity house){
+        return HouseRegisterRequest.builder()
                 .nickname(house.getNickname())
                 .userId(house.getUserEntity().getId())
                 .originAddress("서울시 강남구");

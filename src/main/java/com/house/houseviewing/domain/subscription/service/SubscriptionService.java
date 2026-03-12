@@ -2,7 +2,7 @@ package com.house.houseviewing.domain.subscription.service;
 
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
-import com.house.houseviewing.domain.subscription.model.SubscriptionPremiumRQ;
+import com.house.houseviewing.domain.subscription.dto.request.SubscriptionPremiumRequest;
 import com.house.houseviewing.domain.subscription.repository.SubscriptionRepository;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.repository.UserRepository;
@@ -21,7 +21,7 @@ public class SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
 
     @Transactional
-    public SubscriptionEntity premium(SubscriptionPremiumRQ request){
+    public SubscriptionEntity premium(SubscriptionPremiumRequest request){
 
         UserEntity user = userRepository.findById(request.getUserId()).orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
 

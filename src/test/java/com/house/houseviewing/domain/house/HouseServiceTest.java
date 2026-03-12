@@ -1,7 +1,7 @@
 package com.house.houseviewing.domain.house;
 
 import com.house.houseviewing.domain.house.entity.HouseEntity;
-import com.house.houseviewing.domain.house.model.register.HouseRegisterRQ;
+import com.house.houseviewing.domain.house.dto.request.HouseRegisterRequest;
 import com.house.houseviewing.domain.house.repository.HouseRepository;
 import com.house.houseviewing.domain.house.service.HouseService;
 import com.house.houseviewing.domain.user.entity.UserEntity;
@@ -46,7 +46,7 @@ class HouseServiceTest {
             UserEntity user = UserFixture.createDefault()
                     .id(1L).build();
             HouseEntity house = HouseFixture.createDefault(user).build();
-            HouseRegisterRQ request = HouseFixture.createRegister(house)
+            HouseRegisterRequest request = HouseFixture.createRegister(house)
                     .userId(1L).build();
             given(userRepository.findById(anyLong()))
                     .willReturn(Optional.of(user));
@@ -66,7 +66,7 @@ class HouseServiceTest {
             UserEntity user = UserFixture.createDefault()
                     .id(1L).build();
             HouseEntity house = HouseFixture.createDefault(user).build();
-            HouseRegisterRQ request = HouseFixture.createRegister(house)
+            HouseRegisterRequest request = HouseFixture.createRegister(house)
                     .userId(1L).build();
             given(userRepository.findById(anyLong()))
                     .willReturn(Optional.empty());

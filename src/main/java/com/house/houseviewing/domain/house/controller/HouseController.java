@@ -1,8 +1,8 @@
 package com.house.houseviewing.domain.house.controller;
 
 import com.house.houseviewing.domain.house.entity.HouseEntity;
-import com.house.houseviewing.domain.house.model.register.HouseRegisterRQ;
-import com.house.houseviewing.domain.house.model.register.HouseRegisterRS;
+import com.house.houseviewing.domain.house.dto.request.HouseRegisterRequest;
+import com.house.houseviewing.domain.house.dto.response.HouseRegisterResponse;
 import com.house.houseviewing.domain.house.service.HouseService;
 import com.house.houseviewing.global.security.CustomUserDetails;
 import jakarta.validation.Valid;
@@ -20,11 +20,11 @@ public class HouseController {
     private final HouseService houseService;
 
     @PostMapping("/register")
-    public ResponseEntity<HouseRegisterRS> register(
+    public ResponseEntity<HouseRegisterResponse> register(
             @AuthenticationPrincipal CustomUserDetails userDetails,
-            @Valid @RequestBody HouseRegisterRQ request){
+            @Valid @RequestBody HouseRegisterRequest request){
         HouseEntity house = houseService.register(userDetails.getUserId(), request);
-        HouseRegisterRS result = HouseRegisterRS.builder()
+        HouseRegisterResponse result = HouseRegisterResponse.builder()
                 .houseId(house.getId())
                 .address(house.getAddress())
                 .build();

@@ -1,24 +1,21 @@
 package com.house.houseviewing.domain.house;
 
 import com.house.houseviewing.domain.house.entity.HouseEntity;
-import com.house.houseviewing.domain.house.model.register.HouseRegisterRQ;
+import com.house.houseviewing.domain.house.dto.request.HouseRegisterRequest;
 import com.house.houseviewing.domain.house.repository.HouseRepository;
 import com.house.houseviewing.domain.house.service.HouseService;
 import com.house.houseviewing.domain.user.entity.UserEntity;
-import com.house.houseviewing.domain.user.model.register.UserRegisterRQ;
+import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;
 import com.house.houseviewing.domain.user.service.UserService;
 import com.house.houseviewing.fixture.HouseFixture;
 import com.house.houseviewing.fixture.UserFixture;
 import com.house.houseviewing.global.external.kakao.service.KakaoAddress;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -59,7 +56,7 @@ public class HouseServiceIntegrationTest {
 
     private HouseEntity getHouseEntity(UserEntity user) {
         HouseEntity house = HouseFixture.createDefault(user).build();
-        HouseRegisterRQ request = HouseFixture.createRegister(house).build();
+        HouseRegisterRequest request = HouseFixture.createRegister(house).build();
         HouseEntity register = houseService.register(request);
         return register;
 
@@ -67,7 +64,7 @@ public class HouseServiceIntegrationTest {
 
     private UserEntity getUserEntity() {
         UserEntity user = UserFixture.createDefault().build();
-        UserRegisterRQ requestUser = UserFixture.createRegister(user).build();
+        UserRegisterRequest requestUser = UserFixture.createRegister(user).build();
         UserEntity register = userService.register(requestUser);
         return register;
     }

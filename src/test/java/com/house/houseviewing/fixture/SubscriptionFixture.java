@@ -2,10 +2,8 @@ package com.house.houseviewing.fixture;
 
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
-import com.house.houseviewing.domain.subscription.model.SubscriptionPremiumRQ;
+import com.house.houseviewing.domain.subscription.dto.request.SubscriptionPremiumRequest;
 import com.house.houseviewing.domain.user.entity.UserEntity;
-
-import java.time.LocalDateTime;
 
 public class SubscriptionFixture {
 
@@ -15,8 +13,8 @@ public class SubscriptionFixture {
                 .planType(PlanType.FREE);
     }
 
-    public static SubscriptionPremiumRQ.SubscriptionPremiumRQBuilder createPremium(SubscriptionEntity subscription){
-        return SubscriptionPremiumRQ.builder()
+    public static SubscriptionPremiumRequest.SubscriptionPremiumRQBuilder createPremium(SubscriptionEntity subscription){
+        return SubscriptionPremiumRequest.builder()
                 .userId(subscription.getUser().getId());
     }
 }

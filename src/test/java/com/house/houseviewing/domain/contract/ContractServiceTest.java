@@ -1,7 +1,7 @@
 package com.house.houseviewing.domain.contract;
 
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
-import com.house.houseviewing.domain.contract.model.ContractRegisterRQ;
+import com.house.houseviewing.domain.contract.dto.request.ContractRegisterRequest;
 import com.house.houseviewing.domain.contract.repository.ContractRepository;
 import com.house.houseviewing.domain.contract.service.ContractService;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
@@ -12,7 +12,6 @@ import com.house.houseviewing.fixture.HouseFixture;
 import com.house.houseviewing.fixture.UserFixture;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -46,7 +45,7 @@ public class ContractServiceTest {
             UserEntity user = UserFixture.createDefault().build();
             HouseEntity house = HouseFixture.createDefault(user).id(1L).build();
             ContractEntity contract = ContractFixture.createDefault(house).build();
-            ContractRegisterRQ request = ContractFixture.createRegister(contract).build();
+            ContractRegisterRequest request = ContractFixture.createRegister(contract).build();
             given(houseRepository.findById(1L))
                     .willReturn(Optional.of(house));
             given(contractRepository.save(any()))
@@ -64,7 +63,7 @@ public class ContractServiceTest {
             UserEntity user = UserFixture.createDefault().build();
             HouseEntity house = HouseFixture.createDefault(user).id(1L).build();
             ContractEntity contract = ContractFixture.createDefault(house).build();
-            ContractRegisterRQ request = ContractFixture.createRegister(contract).build();
+            ContractRegisterRequest request = ContractFixture.createRegister(contract).build();
             given(houseRepository.findById(1L))
                     .willReturn(Optional.empty());
             // when
