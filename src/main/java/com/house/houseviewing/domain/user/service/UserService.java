@@ -63,7 +63,7 @@ public class UserService {
         CustomUserDetails userDetails = (CustomUserDetails) authenticate.getPrincipal();
         String token = jwtTokenProvider.createToken(userDetails.getUserId(), userDetails.getUsername());
 
-        return new UserLoginResponse(token);
+        return UserLoginResponse.from(token);
     }
 
     public UserMeResponse me(Long userId){
@@ -89,7 +89,7 @@ public class UserService {
     @Transactional
     public void passwordReset(Long userId, UserResetPasswordRequest request){
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
-        String encode = passwordEncoder.encode(request.getConfirmPassword());
+        String encode = passwordEncoder.encode(request.getNewPassword());
         user.updatePassword(encode);
     }
 
@@ -98,7 +98,7 @@ public class UserService {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
 
-        userRepository.deleteById(userId);
+        userRepository.delete(user);
     }
 
     private void duplicateUser(UserRegisterRequest request) {
@@ -110,7 +110,7 @@ public class UserService {
         }
     }
 
-    private static SubscriptionEntity defaultSubscription(UserEntity user) {
+    private SubscriptionEntity defaultSubscription(UserEntity user) {
         return SubscriptionEntity.builder()
                 .user(user)
                 .planType(PlanType.FREE)
