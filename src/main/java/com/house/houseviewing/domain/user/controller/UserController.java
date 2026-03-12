@@ -56,11 +56,11 @@ public class UserController {
     }
 
     @PatchMapping("/password/reset")
-    public ResponseEntity<Boolean> resetPassword(
+    public ResponseEntity<Void> resetPassword(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody UserResetPasswordRequest request){
-        boolean result = userService.passwordReset(userDetails.getUserId(), request);
-        return ResponseEntity.ok(result);
+        userService.passwordReset(userDetails.getUserId(), request);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/me")

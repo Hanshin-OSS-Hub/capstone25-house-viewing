@@ -87,16 +87,10 @@ public class UserService {
     }
 
     @Transactional
-    public boolean passwordReset(Long userId, UserResetPasswordRequest request){
-        if(!request.getNewPassword().equals(request.getConfirmPassword())){
-            throw new AppException(ExceptionCode.MISMATCH_PASSWORD);
-        }
+    public void passwordReset(Long userId, UserResetPasswordRequest request){
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
-
         String encode = passwordEncoder.encode(request.getConfirmPassword());
         user.updatePassword(encode);
-
-        return true;
     }
 
     @Transactional

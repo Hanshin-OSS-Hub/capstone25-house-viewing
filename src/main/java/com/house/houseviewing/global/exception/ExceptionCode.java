@@ -28,8 +28,7 @@ public enum ExceptionCode {
     // VP
     FIND_LOGIN_ID_FAILED("VP001",HttpStatus.BAD_REQUEST, "이메일 또는 아이디가 틀렸습니다."),
     VERIFY_PASSWORD_FAILED("VP002", HttpStatus.BAD_REQUEST, "유효하지 않은 파일입니다."),
-    MISMATCH_PASSWORD("VP003", HttpStatus.BAD_REQUEST, "입력하신 정보가 틀렸습니다."),
-    VERIFY_FILE_FAILED("VP004", HttpStatus.BAD_REQUEST, "유효하지 않은 파일입니다"),
+    VERIFY_FILE_FAILED("VP003", HttpStatus.BAD_REQUEST, "유효하지 않은 파일입니다"),
 
     // ER
     FILE_SAVE_FAILED("ER001", HttpStatus.BAD_REQUEST, "파일 저장에 실패했습니다."),

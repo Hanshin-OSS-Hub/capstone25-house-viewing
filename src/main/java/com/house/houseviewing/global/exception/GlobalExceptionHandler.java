@@ -19,4 +19,6 @@ public class GlobalExceptionHandler {
         log.info("message = "+code.getMessage());
         return ResponseEntity.status(code.getStatus()).body(errorRS);
     }
+
+
 }
