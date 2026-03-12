@@ -2,6 +2,7 @@ package com.house.houseviewing.domain.user.service;
 
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
+import com.house.houseviewing.domain.user.dto.response.UserFindIdResponse;
 import com.house.houseviewing.domain.user.dto.response.UserMeResponse;
 import com.house.houseviewing.domain.user.dto.response.UserRegisterResponse;
 import com.house.houseviewing.global.security.CustomUserDetails;
@@ -72,10 +73,11 @@ public class UserService {
         return UserMeResponse.from(user);
     }
 
-    public String findLoginId(UserFindIdRequest request){
+    public UserFindIdResponse findLoginId(UserFindIdRequest request){
         UserEntity user = userRepository.findByEmailAndName(request.getEmail(), request.getName())
                 .orElseThrow(() -> new AppException(ExceptionCode.FIND_LOGIN_ID_FAILED));
-        return user.getLoginId();
+
+        return UserFindIdResponse.from(user);
     }
 
     public boolean passwordVerify(UserVerifyPasswordRequest request){

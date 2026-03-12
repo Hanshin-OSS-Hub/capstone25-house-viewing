@@ -45,9 +45,8 @@ public class UserController {
 
     @PostMapping("/find-id")
     public ResponseEntity<UserFindIdResponse> findLoginId(@Valid @RequestBody UserFindIdRequest request){
-        String loginId = userService.findLoginId(request);
-        UserFindIdResponse result = new UserFindIdResponse(loginId);
-        return ResponseEntity.ok().body(result);
+        UserFindIdResponse result = userService.findLoginId(request);
+        return ResponseEntity.ok(result);
     }
 
     @PostMapping("/password/verify")
