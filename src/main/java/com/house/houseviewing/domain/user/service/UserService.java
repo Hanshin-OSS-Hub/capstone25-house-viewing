@@ -69,6 +69,7 @@ public class UserService {
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
 
+        return UserMeResponse.from(user);
     }
 
     public String findLoginId(UserFindIdRequest request){
