@@ -23,18 +23,20 @@ public enum ExceptionCode {
     UNAUTHORIZED("AU001", HttpStatus.UNAUTHORIZED, "인증이 필요합니다."),
     INVALID_TOKEN("AU002", HttpStatus.UNAUTHORIZED, "유효하지 않거나 만료된 토큰입니다."),
     FORBIDDEN("AU003", HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
+    LOGIN_FAILED("AU004",HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 일치하지 않습니다."),
 
     // VP
-    LOGIN_FAILED("VP001",HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 일치하지 않습니다."),
-    FIND_LOGIN_ID_FAILED("VP002",HttpStatus.BAD_REQUEST, "이메일 또는 아이디가 틀렸습니다."),
-    VERIFY_PASSWORD_FAILED("VP003", HttpStatus.BAD_REQUEST, "입력하신 정보가 틀렸습니다."),
-    MISMATCH_PASSWORD("VP004", HttpStatus.BAD_REQUEST, "입력하신 정보가 틀렸습니다."),
-    VERIFY_FILE_FAILED("VP005", HttpStatus.BAD_REQUEST, "유효하지 않은 파일입니다"),
-    FILE_SAVE_FAILED("VP006", HttpStatus.BAD_REQUEST, "파일이 저장되지 않았습니다."),
+    FIND_LOGIN_ID_FAILED("VP001",HttpStatus.BAD_REQUEST, "이메일 또는 아이디가 틀렸습니다."),
+    VERIFY_PASSWORD_FAILED("VP002", HttpStatus.BAD_REQUEST, "유효하지 않은 파일입니다."),
+    MISMATCH_PASSWORD("VP003", HttpStatus.BAD_REQUEST, "입력하신 정보가 틀렸습니다."),
+    VERIFY_FILE_FAILED("VP004", HttpStatus.BAD_REQUEST, "유효하지 않은 파일입니다"),
+
+    // ER
+    FILE_SAVE_FAILED("ER001", HttpStatus.BAD_REQUEST, "파일 저장에 실패했습니다."),
 
     // NF
     USER_NOT_FOUND("NF001", HttpStatus.NOT_FOUND, "해당 사용자는 존재하지 않습니다."),
-    ADDRESS_NOT_FOUND("NF002", HttpStatus.BAD_REQUEST, "주소를 다시 확인해주세요."),
+    ADDRESS_NOT_FOUND("NF002", HttpStatus.NOT_FOUND, "주소를 다시 확인해주세요."),
     HOUSE_NOT_FOUND("NF003", HttpStatus.NOT_FOUND, "해당 집은 등록되지 않았습니다."),
     CONTRACT_NOT_FOUND("NF004", HttpStatus.NOT_FOUND, "해당 계약은 등록되지 않았습니다"),
     SNAPSHOT_NOT_FOUND("NF005", HttpStatus.NOT_FOUND, "해당 스냅샷을 찾을 수 없습니다."),
@@ -43,7 +45,8 @@ public enum ExceptionCode {
     //DB
     DUPLICATE_LOGIN_ID("DB001",HttpStatus.CONFLICT, "이미 사용 중인 아이디입니다."),
     DUPLICATE_EMAIL("DB002", HttpStatus.CONFLICT, "이미 사용 중인 이메일입니다."),
-    ALREADY_REGISTERED_CONTRACT("DB003", HttpStatus.CONFLICT, "이미 등록된 계약이 있습니다.");
+    DUPLICATE_RESOURCE("DB003", HttpStatus.CONFLICT, "이미 사용 중입니다."),
+    ALREADY_REGISTERED_CONTRACT("DB004", HttpStatus.CONFLICT, "이미 등록된 계약이 있습니다.");
 
     private final String code;
     private final HttpStatus status;

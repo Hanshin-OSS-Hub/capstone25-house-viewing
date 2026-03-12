@@ -2,6 +2,7 @@ package com.house.houseviewing.domain.user.service;
 
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
+import com.house.houseviewing.domain.subscription.repository.SubscriptionRepository;
 import com.house.houseviewing.domain.user.dto.response.UserMeResponse;
 import com.house.houseviewing.global.security.CustomUserDetails;
 import com.house.houseviewing.domain.common.auth.dto.UserLoginRS;
@@ -36,37 +37,36 @@ public class UserService {
 
     @Transactional
     public UserEntity register(UserRegisterRequest request){
+        duplicateUser(request);
 
+        try{
+            String password = passwordEncoder.encode(request.getPassword());
+
+            UserEntity user = request.toEntity(password);
+            SubscriptionEntity subscription = defaultSubscription(user);
+
+            user.updateSubscription(subscription);
+
+            return userRepository.save(user);
+        } catch (DataIntegrityViolationException e){
+            throw new AppException(ExceptionCode.DUPLICATE_RESOURCE);
+        }
+    }
+
+    private void duplicateUser(UserRegisterRequest request) {
         if(userRepository.existsByLoginId(request.getLoginId())){
             throw new AppException(ExceptionCode.DUPLICATE_LOGIN_ID);
         }
         if(userRepository.existsByEmail(request.getEmail())){
             throw new AppException(ExceptionCode.DUPLICATE_EMAIL);
         }
+    }
 
-        try{
-            String password = passwordEncoder.encode(request.getPassword());
-
-            UserEntity userEntity = UserEntity.builder()
-                    .name(request.getName())
-                    .loginId(request.getLoginId())
-                    .email(request.getEmail())
-                    .password(password)
-                    .build();
-
-            SubscriptionEntity subscription = SubscriptionEntity.builder()
-                    .user(userEntity)
-                    .planType(PlanType.FREE)
-                    .build();
-
-            userEntity.updateSubscription(subscription);
-
-            UserEntity saved = userRepository.save(userEntity);
-
-            return saved;
-        } catch (DataIntegrityViolationException e){
-            throw new AppException(ExceptionCode.DUPLICATE_LOGIN_ID);
-        }
+    private static SubscriptionEntity defaultSubscription(UserEntity user) {
+        return SubscriptionEntity.builder()
+                .user(user)
+                .planType(PlanType.FREE)
+                .build();
     }
 
     public UserLoginRS login(UserLoginRQ request){
