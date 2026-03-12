@@ -4,7 +4,7 @@ import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.dto.request.UserFindIdRequest;
-import com.house.houseviewing.domain.common.auth.dto.UserLoginRQ;
+import com.house.houseviewing.domain.common.auth.dto.UserLoginRequest;
 import com.house.houseviewing.domain.user.dto.request.UserResetPasswordRequest;
 import com.house.houseviewing.domain.user.dto.request.UserVerifyPasswordRequest;
 import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;
@@ -35,8 +35,8 @@ public class UserFixture {
                 .password(user.getPassword());
     }
 
-    public static UserLoginRQ.UserLoginRQBuilder createLogin(UserEntity user){
-        return UserLoginRQ.builder()
+    public static UserLoginRequest.UserLoginRQBuilder createLogin(UserEntity user){
+        return UserLoginRequest.builder()
                 .loginId(user.getLoginId())
                 .password(user.getPassword());
     }

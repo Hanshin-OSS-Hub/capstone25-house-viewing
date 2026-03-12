@@ -1,7 +1,7 @@
 package com.house.houseviewing.domain.user;
 
 import com.house.houseviewing.domain.user.dto.request.UserFindIdRequest;
-import com.house.houseviewing.domain.common.auth.dto.UserLoginRQ;
+import com.house.houseviewing.domain.common.auth.dto.UserLoginRequest;
 import com.house.houseviewing.domain.user.dto.request.UserResetPasswordRequest;
 import com.house.houseviewing.domain.user.dto.request.UserVerifyPasswordRequest;
 import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;
@@ -97,7 +97,7 @@ class UserServiceTest {
         void 성공(){
             // given
             UserEntity user = UserFixture.createDefault().build();
-            UserLoginRQ request = UserFixture.createLogin(user).build();
+            UserLoginRequest request = UserFixture.createLogin(user).build();
             given(userRepository.findByLoginIdAndPassword(anyString(), anyString()))
                     .willReturn(Optional.of(user));
             // when
@@ -111,7 +111,7 @@ class UserServiceTest {
         void 로그인_실패_예외_발생(){
             // given
             UserEntity build = UserFixture.createDefault().build();
-            UserLoginRQ build1 = UserFixture.createLogin(build).build();
+            UserLoginRequest build1 = UserFixture.createLogin(build).build();
             given(userRepository.findByLoginIdAndPassword(anyString(), anyString()))
                     .willReturn(Optional.empty());
             // when

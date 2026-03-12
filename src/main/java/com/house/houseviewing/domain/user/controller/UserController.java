@@ -1,13 +1,11 @@
 package com.house.houseviewing.domain.user.controller;
 
-import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.dto.response.UserMeResponse;
 import com.house.houseviewing.domain.user.dto.request.UserFindIdRequest;
 import com.house.houseviewing.domain.user.dto.response.UserFindIdResponse;
-import com.house.houseviewing.domain.user.repository.UserRepository;
 import com.house.houseviewing.global.security.CustomUserDetails;
-import com.house.houseviewing.domain.common.auth.dto.UserLoginRQ;
-import com.house.houseviewing.domain.common.auth.dto.UserLoginRS;
+import com.house.houseviewing.domain.common.auth.dto.UserLoginRequest;
+import com.house.houseviewing.domain.common.auth.dto.UserLoginResponse;
 import com.house.houseviewing.domain.user.dto.request.UserResetPasswordRequest;
 import com.house.houseviewing.domain.user.dto.request.UserVerifyPasswordRequest;
 import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;
@@ -29,14 +27,13 @@ public class UserController {
 
     @PostMapping("/register")
     public ResponseEntity<UserRegisterResponse> register(@Valid @RequestBody UserRegisterRequest request){
-        UserEntity register = userService.register(request);
-        UserRegisterResponse result = new UserRegisterResponse(register.getId());
+        UserRegisterResponse result = userService.register(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<UserLoginRS> login(@Valid @RequestBody UserLoginRQ request){
-        UserLoginRS result = userService.login(request);
+    public ResponseEntity<UserLoginResponse> login(@Valid @RequestBody UserLoginRequest request){
+        UserLoginResponse result = userService.login(request);
         return ResponseEntity.ok().body(result);
     }
 

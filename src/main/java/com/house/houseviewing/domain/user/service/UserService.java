@@ -3,14 +3,15 @@ package com.house.houseviewing.domain.user.service;
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
 import com.house.houseviewing.domain.user.dto.response.UserMeResponse;
+import com.house.houseviewing.domain.user.dto.response.UserRegisterResponse;
 import com.house.houseviewing.global.security.CustomUserDetails;
-import com.house.houseviewing.domain.common.auth.dto.UserLoginRS;
+import com.house.houseviewing.domain.common.auth.dto.UserLoginResponse;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.domain.user.dto.request.UserFindIdRequest;
 import com.house.houseviewing.domain.user.dto.request.UserResetPasswordRequest;
 import com.house.houseviewing.domain.user.dto.request.UserVerifyPasswordRequest;
-import com.house.houseviewing.domain.common.auth.dto.UserLoginRQ;
+import com.house.houseviewing.domain.common.auth.dto.UserLoginRequest;
 import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.repository.UserRepository;
@@ -35,7 +36,7 @@ public class UserService {
     private final AuthenticationManager authenticationManager;
 
     @Transactional
-    public UserEntity register(UserRegisterRequest request){
+    public UserRegisterResponse register(UserRegisterRequest request){
         duplicateUser(request);
 
         try{
@@ -45,43 +46,29 @@ public class UserService {
             SubscriptionEntity subscription = defaultSubscription(user);
 
             user.updateSubscription(subscription);
-
-            return userRepository.save(user);
+            UserEntity savedUser = userRepository.save(user);
+            return new UserRegisterResponse(savedUser.getId());
         } catch (DataIntegrityViolationException e){
             throw new AppException(ExceptionCode.DUPLICATE_RESOURCE);
         }
     }
 
-    public UserLoginRS login(UserLoginRQ request){
+    public UserLoginResponse login(UserLoginRequest request){
         Authentication authenticate = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getLoginId(),
                         request.getPassword()
-                )
-        );
+                ));
         CustomUserDetails userDetails = (CustomUserDetails) authenticate.getPrincipal();
-
         String token = jwtTokenProvider.createToken(userDetails.getUserId(), userDetails.getUsername());
 
-        return new UserLoginRS(token);
+        return new UserLoginResponse(token);
     }
 
     public UserMeResponse me(Long userId){
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
 
-        SubscriptionInfo subscription = SubscriptionInfo.builder()
-                .planType(user.getSubscription().getPlanType().name())
-                .expiredAt(user.getSubscription().getEndedAt())
-                .build();
-
-        return UserMeResponse.builder()
-                .name(user.getName())
-                .email(user.getEmail())
-                .loginId(user.getLoginId())
-                .subscriptionInfo(subscription)
-                .houses(user.getHouses())
-                .build();
     }
 
     public String findLoginId(UserFindIdRequest request){
