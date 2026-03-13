@@ -26,7 +26,12 @@ public class SecurityConfig {
             "/users/register",
             "/users/login",
             "/users/find-id",
-            "/users/password/verify"
+            "/users/password/verify",
+
+            // swagger
+            "/v3/api-docs/**",
+            "/swagger-ui/**",
+            "/swagger-ui.html"
     };
 
     @Bean
