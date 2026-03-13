@@ -1,5 +1,6 @@
 package com.house.houseviewing.domain.house.controller;
 
+import com.house.houseviewing.domain.house.dto.response.HouseMeResponse;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.house.dto.request.HouseRegisterRequest;
 import com.house.houseviewing.domain.house.dto.response.HouseRegisterResponse;
@@ -11,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -29,6 +32,12 @@ public class HouseController {
                 .address(house.getAddress())
                 .build();
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<HouseMeResponse>> getHouse(@AuthenticationPrincipal CustomUserDetails userDetails){
+        List<HouseMeResponse> house = houseService.getHouse(userDetails.getUserId());
+        return ResponseEntity.ok(house);
     }
 
     @DeleteMapping("/{houseId}")

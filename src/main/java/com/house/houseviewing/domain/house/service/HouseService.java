@@ -1,6 +1,7 @@
 package com.house.houseviewing.domain.house.service;
 
 import com.house.houseviewing.domain.common.Address;
+import com.house.houseviewing.domain.house.dto.response.HouseMeResponse;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.user.enums.MonitoringStatus;
 import com.house.houseviewing.domain.house.dto.request.HouseRegisterRequest;
@@ -13,6 +14,8 @@ import com.house.houseviewing.global.external.kakao.service.KakaoAddress;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -54,5 +57,13 @@ public class HouseService {
         }
 
         houseRepository.deleteById(saved.getId());
+    }
+
+    public List<HouseMeResponse> getHouse(Long userId){
+        List<HouseEntity> houses = houseRepository.findByUserEntityId(userId);
+
+        return houses.stream()
+                .map(HouseMeResponse::from)
+                .toList();
     }
 }
