@@ -1,6 +1,8 @@
 package com.house.houseviewing.domain.house.service;
 
 import com.house.houseviewing.domain.common.Address;
+import com.house.houseviewing.domain.house.dto.request.HouseEditRequest;
+import com.house.houseviewing.domain.house.dto.response.HouseEditResponse;
 import com.house.houseviewing.domain.house.dto.response.HouseMeResponse;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.user.enums.MonitoringStatus;
@@ -65,5 +67,20 @@ public class HouseService {
         return houses.stream()
                 .map(HouseMeResponse::from)
                 .toList();
+    }
+
+    @Transactional
+    public HouseEditResponse editHouse(Long userId, Long houseId, HouseEditRequest request){
+        HouseEntity house = houseRepository.findByUserEntityIdAndId(userId, houseId)
+                .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
+        if(request.getNickname() != null) {
+            house.updateNickname(request.getNickname());
+        }
+        if(request.getAddress() != null) {
+            Address address = kakaoAddress.parsingAddress(request.getAddress());
+            house.updateAddress(address);
+        }
+
+        return HouseEditResponse.from(house);
     }
 }

@@ -72,4 +72,6 @@ public class HouseEntity extends BaseTimeEntity {
     public void updateMonitoringStatus(MonitoringStatus monitoringStatus){
         this.monitoringStatus = monitoringStatus;
     }
+    public void updateAddress(Address address) {this.address = address;}
+    public void updateNickname(String nickname) {this.nickname = nickname;}
 }

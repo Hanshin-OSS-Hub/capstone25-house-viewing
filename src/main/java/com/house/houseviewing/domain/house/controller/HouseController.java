@@ -1,5 +1,7 @@
 package com.house.houseviewing.domain.house.controller;
 
+import com.house.houseviewing.domain.house.dto.request.HouseEditRequest;
+import com.house.houseviewing.domain.house.dto.response.HouseEditResponse;
 import com.house.houseviewing.domain.house.dto.response.HouseMeResponse;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.house.dto.request.HouseRegisterRequest;
@@ -38,6 +40,15 @@ public class HouseController {
     public ResponseEntity<List<HouseMeResponse>> getHouse(@AuthenticationPrincipal CustomUserDetails userDetails){
         List<HouseMeResponse> house = houseService.getHouse(userDetails.getUserId());
         return ResponseEntity.ok(house);
+    }
+
+    @PatchMapping("/{houseId}")
+    public ResponseEntity<HouseEditResponse> editHouse(
+            @PathVariable Long houseId,
+            @Valid @RequestBody HouseEditRequest request,
+            @AuthenticationPrincipal CustomUserDetails userDetails){
+        HouseEditResponse result = houseService.editHouse(userDetails.getUserId(), houseId, request);
+        return ResponseEntity.ok(result);
     }
 
     @DeleteMapping("/{houseId}")
