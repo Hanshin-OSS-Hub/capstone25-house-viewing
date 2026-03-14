@@ -1,0 +1,30 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual Environment
+.venv/
+
+# JSON 결과 파일
+final_result.json
+result_layout.json
+result_structured.json
+snapshot.json
+risk_report.json
+
+# 업로드 파일
+uploads/
+pdf_pages/
+
+# IDE
+.idea/
+
+# 환경 변수
+.env
+
+# 제외할 테스트 파일
+Capstone_콘솔출력용빼기.py
+cccc.py
+
+# 테스트 PDF
+등기부등본.pdf
