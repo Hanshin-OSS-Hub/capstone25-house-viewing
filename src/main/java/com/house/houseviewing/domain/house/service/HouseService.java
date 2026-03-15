@@ -1,10 +1,15 @@
 package com.house.houseviewing.domain.house.service;
 
 import com.house.houseviewing.domain.common.Address;
+import com.house.houseviewing.domain.contract.entity.ContractEntity;
+import com.house.houseviewing.domain.contract.repository.ContractRepository;
 import com.house.houseviewing.domain.house.dto.request.HouseEditRequest;
 import com.house.houseviewing.domain.house.dto.response.HouseEditResponse;
+import com.house.houseviewing.domain.house.dto.response.HouseMeResponse;
 import com.house.houseviewing.domain.house.dto.response.HousesResponse;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
+import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
+import com.house.houseviewing.domain.registrysnapshot.repository.RegistrySnapshotRepository;
 import com.house.houseviewing.domain.user.enums.MonitoringStatus;
 import com.house.houseviewing.domain.house.dto.request.HouseRegisterRequest;
 import com.house.houseviewing.domain.house.repository.HouseRepository;
@@ -21,11 +26,14 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class HouseService {
 
     private final UserRepository userRepository;
     private final HouseRepository houseRepository;
     private final KakaoAddress kakaoAddress;
+    private final ContractRepository contractRepository;
+    private final RegistrySnapshotRepository registrySnapshotRepository;
 
     @Transactional
     public HouseEntity register(Long userId, HouseRegisterRequest request){
@@ -56,12 +64,22 @@ public class HouseService {
         houseRepository.deleteById(saved.getId());
     }
 
-    public List<HousesResponse> getHouse(Long userId){
+    public List<HousesResponse> getHouses(Long userId){
         List<HouseEntity> houses = houseRepository.findByUserEntityId(userId);
 
         return houses.stream()
                 .map(HousesResponse::from)
                 .toList();
+    }
+
+    public HouseMeResponse getHouse(Long userId, Long houseId){
+        HouseEntity house = houseRepository.findByUserEntityIdAndId(userId, houseId)
+                .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
+        ContractEntity contract = contractRepository.findTopByHouseEntityIdOrderByCreatedAtDesc(house.getId())
+                .orElseThrow(() -> new AppException(ExceptionCode.CONTRACT_NOT_FOUND));
+        RegistrySnapshotEntity snapshot = registrySnapshotRepository.findTopByHouseEntityIdOrderByCreatedAtDesc(house.getId())
+                .orElseThrow(() -> new AppException(ExceptionCode.SNAPSHOT_NOT_FOUND));
+        return HouseMeResponse.from(house, contract, snapshot);
     }
 
     @Transactional

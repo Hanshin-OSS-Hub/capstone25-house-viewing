@@ -34,7 +34,7 @@ public class HouseServiceIntegrationTest {
     void 집_등록(){
         // given
         UserEntity user = getUserEntity();
-        HouseEntity house = getHouseEntity(user);
+        HouseEntity house = getHousesEntity(user);
         // when
         user.addHouse(house);
         house.addUser(user);
@@ -47,14 +47,14 @@ public class HouseServiceIntegrationTest {
     void 집_삭제(){
         // given
         UserEntity user = getUserEntity();
-        HouseEntity house = getHouseEntity(user);
+        HouseEntity house = getHousesEntity(user);
         // when
         houseService.delete(house.getId());
         // then
         assertThat(houseRepository.findById(house.getId())).isEmpty();
     }
 
-    private HouseEntity getHouseEntity(UserEntity user) {
+    private HouseEntity getHousesEntity(UserEntity user) {
         HouseEntity house = HouseFixture.createDefault(user).build();
         HouseRegisterRequest request = HouseFixture.createRegister(house).build();
         HouseEntity register = houseService.register(request);
