@@ -34,8 +34,4 @@ public class PdfReportEntity extends BaseTimeEntity {
         this.pdfName = pdfName;
         this.pdfPath = pdfPath;
     }
-
-    public void addRegistrySnapshot(RegistrySnapshotEntity registrySnapshot){
-        this.registrySnapshot = registrySnapshot;
-    }
 }

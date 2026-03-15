@@ -3,7 +3,7 @@ package com.house.houseviewing.domain.registrysnapshot.entity;
 import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.pdfreport.entity.PdfReportEntity;
-import com.house.houseviewing.domain.registrysnapshot.enums.RiskLevel;
+import com.house.houseviewing.domain.common.RiskLevel;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -44,10 +44,6 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private boolean isChanged; // 변동 여부
 
-    public void addHouse(HouseEntity house){
-        this.houseEntity = house;
-    }
-
     @Builder
     public RegistrySnapshotEntity(Long id, HouseEntity houseEntity, PdfReportEntity pdfReport, String snapshotUrl, String originalFileName, String rawData, Integer ltvScore, RiskLevel riskLevel, boolean isChanged) {
         this.id = id;
@@ -59,10 +55,5 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
         this.ltvScore = ltvScore;
         this.riskLevel = riskLevel;
         this.isChanged = isChanged;
-    }
-
-    public void addPdfReport(PdfReportEntity pdfReport){
-        this.pdfReport = pdfReport;
-        pdfReport.addRegistrySnapshot(this);
     }
 }
