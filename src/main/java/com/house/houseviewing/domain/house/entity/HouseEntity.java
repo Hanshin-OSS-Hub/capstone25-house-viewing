@@ -45,10 +45,6 @@ public class HouseEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private MonitoringStatus monitoringStatus;
 
-    public void addUser(UserEntity user){
-        this.userEntity = user;
-    }
-
     public void addContract(ContractEntity contract){
         checkContract(contract);
         contracts.add(contract);

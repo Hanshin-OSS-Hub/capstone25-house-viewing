@@ -35,17 +35,12 @@ public class HouseService {
 
         Address address = kakaoAddress.parsingAddress(request.getOriginAddress());
 
-        HouseEntity house = HouseEntity.builder()
-                .nickname(request.getNickname())
-                .address(address)
-                .monitoringStatus(MonitoringStatus.OFFLINE)
-                .build();
+        HouseEntity house = request.toEntity(user, address, MonitoringStatus.OFFLINE);
         HouseEntity savedHouse = houseRepository.save(house);
         if(user.isPremium()){
             savedHouse.updateMonitoringStatus(MonitoringStatus.LIVE);
         }
         user.addHouse(savedHouse);
-        house.addUser(user);
         return savedHouse;
     }
 
@@ -73,6 +68,12 @@ public class HouseService {
     public HouseEditResponse editHouse(Long userId, Long houseId, HouseEditRequest request){
         HouseEntity house = houseRepository.findByUserEntityIdAndId(userId, houseId)
                 .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
+        editRequest(request, house);
+
+        return HouseEditResponse.from(house);
+    }
+
+    private void editRequest(HouseEditRequest request, HouseEntity house) {
         if(request.getNickname() != null) {
             house.updateNickname(request.getNickname());
         }
@@ -80,7 +81,5 @@ public class HouseService {
             Address address = kakaoAddress.parsingAddress(request.getAddress());
             house.updateAddress(address);
         }
-
-        return HouseEditResponse.from(house);
     }
 }
