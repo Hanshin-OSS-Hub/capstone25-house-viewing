@@ -24,6 +24,7 @@ public class HouseRegisterRequest {
     public HouseEntity toEntity(UserEntity user, Address address, MonitoringStatus monitoringStatus){
         return HouseEntity.builder()
                 .userEntity(user)
+                .nickname(nickname)
                 .address(address)
                 .monitoringStatus(MonitoringStatus.OFFLINE)
                 .build();

@@ -27,6 +27,7 @@ public class SecurityConfig {
             "/users/login",
             "/users/find-id",
             "/users/password/verify",
+            "/users/password/reset",
 
             // swagger
             "/v3/api-docs/**",
