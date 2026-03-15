@@ -8,7 +8,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor @Builder
-public class HouseMeResponse {
+public class HousesResponse {
 
     private Long houseId;
 
@@ -20,7 +20,7 @@ public class HouseMeResponse {
 
     private MonitoringStatus monitoringStatus;
 
-    public static HouseMeResponse from(HouseEntity house){
+    public static HousesResponse from(HouseEntity house){
 
          Integer ltvScore = null;
 
@@ -30,7 +30,7 @@ public class HouseMeResponse {
                     .getLtvScore();
         }
 
-        return HouseMeResponse.builder()
+        return HousesResponse.builder()
                 .houseId(house.getId())
                 .nickname(house.getNickname())
                 .address(house.getAddress().getAddressName())

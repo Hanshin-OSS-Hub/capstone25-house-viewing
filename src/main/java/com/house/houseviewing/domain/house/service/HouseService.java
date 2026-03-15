@@ -3,7 +3,7 @@ package com.house.houseviewing.domain.house.service;
 import com.house.houseviewing.domain.common.Address;
 import com.house.houseviewing.domain.house.dto.request.HouseEditRequest;
 import com.house.houseviewing.domain.house.dto.response.HouseEditResponse;
-import com.house.houseviewing.domain.house.dto.response.HouseMeResponse;
+import com.house.houseviewing.domain.house.dto.response.HousesResponse;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.user.enums.MonitoringStatus;
 import com.house.houseviewing.domain.house.dto.request.HouseRegisterRequest;
@@ -56,11 +56,11 @@ public class HouseService {
         houseRepository.deleteById(saved.getId());
     }
 
-    public List<HouseMeResponse> getHouse(Long userId){
+    public List<HousesResponse> getHouse(Long userId){
         List<HouseEntity> houses = houseRepository.findByUserEntityId(userId);
 
         return houses.stream()
-                .map(HouseMeResponse::from)
+                .map(HousesResponse::from)
                 .toList();
     }
 

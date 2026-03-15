@@ -2,7 +2,7 @@ package com.house.houseviewing.domain.house.controller;
 
 import com.house.houseviewing.domain.house.dto.request.HouseEditRequest;
 import com.house.houseviewing.domain.house.dto.response.HouseEditResponse;
-import com.house.houseviewing.domain.house.dto.response.HouseMeResponse;
+import com.house.houseviewing.domain.house.dto.response.HousesResponse;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.house.dto.request.HouseRegisterRequest;
 import com.house.houseviewing.domain.house.dto.response.HouseRegisterResponse;
@@ -37,8 +37,8 @@ public class HouseController {
     }
 
     @GetMapping
-    public ResponseEntity<List<HouseMeResponse>> getHouse(@AuthenticationPrincipal CustomUserDetails userDetails){
-        List<HouseMeResponse> house = houseService.getHouse(userDetails.getUserId());
+    public ResponseEntity<List<HousesResponse>> getHouse(@AuthenticationPrincipal CustomUserDetails userDetails){
+        List<HousesResponse> house = houseService.getHouse(userDetails.getUserId());
         return ResponseEntity.ok(house);
     }
 
