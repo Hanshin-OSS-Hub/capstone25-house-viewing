@@ -21,12 +21,11 @@ public class HouseRegisterRequest {
     @NotBlank(message = "주소 입력은 필수입니다.")
     private String originAddress;
 
-    public HouseEntity toEntity(UserEntity user, Address address, MonitoringStatus monitoringStatus){
+    public HouseEntity toEntity(Address address, MonitoringStatus monitoringStatus){
         return HouseEntity.builder()
-                .user(user)
                 .nickname(nickname)
                 .address(address)
-                .monitoringStatus(MonitoringStatus.OFFLINE)
+                .monitoringStatus(monitoringStatus)
                 .build();
     }
 }

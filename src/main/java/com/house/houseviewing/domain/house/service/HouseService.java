@@ -43,13 +43,13 @@ public class HouseService {
 
         Address address = kakaoAddress.parsingAddress(request.getOriginAddress());
 
-        HouseEntity house = request.toEntity(user, address, MonitoringStatus.OFFLINE);
-        HouseEntity savedHouse = houseRepository.save(house);
+        HouseEntity house = request.toEntity(address, MonitoringStatus.OFFLINE);
         if(user.isPremium()){
-            savedHouse.updateMonitoringStatus(MonitoringStatus.LIVE);
+            house.updateMonitoringStatus(MonitoringStatus.LIVE);
         }
-        user.addHouse(savedHouse);
-        return savedHouse;
+        user.addHouse(house);
+
+        return houseRepository.save(house);
     }
 
     @Transactional
