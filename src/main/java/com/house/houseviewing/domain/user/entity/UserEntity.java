@@ -32,10 +32,6 @@ public class UserEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private String password;
 
-    public void updatePassword(String password){
-        this.password = password;
-    }
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HouseEntity> houses = new ArrayList<>();
 
@@ -43,22 +39,25 @@ public class UserEntity extends BaseTimeEntity {
     private SubscriptionEntity subscription;
 
     @Builder
-    public UserEntity(String name, String email, String loginId, String password, SubscriptionEntity subscription) {
+    public UserEntity(String name, String email, String loginId, String password) {
         this.name = name;
         this.email = email;
         this.loginId = loginId;
         this.password = password;
-        this.subscription = subscription;
     }
 
     public void addHouse(HouseEntity house){
         houses.add(house);
+        house.addUser(this);
     }
 
-    public void updateSubscription(SubscriptionEntity subscription){
+    public void addSubscription(SubscriptionEntity subscription){
         this.subscription = subscription;
         subscription.addUser(this);
     }
+
+    public void updateSubscription(SubscriptionEntity subscription){this.subscription = subscription;}
+    public void updatePassword(String password){this.password = password;}
 
     public boolean isPremium() {
         return this.getSubscription().getPlanType() == PlanType.PREMIUM && this.getSubscription() != null;

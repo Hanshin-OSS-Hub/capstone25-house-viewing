@@ -42,12 +42,12 @@ public class UserService {
 
         try{
             String password = passwordEncoder.encode(request.getPassword());
-
             UserEntity user = request.toEntity(password);
-            SubscriptionEntity subscription = defaultSubscription(user);
+            SubscriptionEntity subscription = defaultSubscription();
 
-            user.updateSubscription(subscription);
+            user.addSubscription(subscription);
             UserEntity savedUser = userRepository.save(user);
+
             return new UserRegisterResponse(savedUser.getId());
         } catch (DataIntegrityViolationException e){
             throw new AppException(ExceptionCode.DUPLICATE_RESOURCE);
@@ -110,9 +110,8 @@ public class UserService {
         }
     }
 
-    private SubscriptionEntity defaultSubscription(UserEntity user) {
+    private SubscriptionEntity defaultSubscription() {
         return SubscriptionEntity.builder()
-                .user(user)
                 .planType(PlanType.FREE)
                 .build();
     }

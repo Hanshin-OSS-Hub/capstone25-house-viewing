@@ -73,4 +73,8 @@ public class HouseEntity extends BaseTimeEntity {
     }
     public void updateAddress(Address address) {this.address = address;}
     public void updateNickname(String nickname) {this.nickname = nickname;}
+
+    public void addUser(UserEntity user) {
+        this.user = user;
+    }
 }
