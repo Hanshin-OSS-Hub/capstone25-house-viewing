@@ -37,6 +37,8 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private Integer ltvScore; // ltv 값
 
+    private String mainReason;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RiskLevel riskLevel;
@@ -45,14 +47,14 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
     private boolean isChanged; // 변동 여부
 
     @Builder
-    public RegistrySnapshotEntity(Long id, HouseEntity houseEntity, PdfReportEntity pdfReport, String snapshotUrl, String originalFileName, String rawData, Integer ltvScore, RiskLevel riskLevel, boolean isChanged) {
-        this.id = id;
+    public RegistrySnapshotEntity(HouseEntity houseEntity, PdfReportEntity pdfReport, String snapshotUrl, String originalFileName, String rawData, Integer ltvScore, String mainReason, RiskLevel riskLevel, boolean isChanged) {
         this.houseEntity = houseEntity;
         this.pdfReport = pdfReport;
         this.snapshotUrl = snapshotUrl;
         this.originalFileName = originalFileName;
         this.rawData = rawData;
         this.ltvScore = ltvScore;
+        this.mainReason = mainReason;
         this.riskLevel = riskLevel;
         this.isChanged = isChanged;
     }

@@ -1,11 +1,18 @@
 package com.house.houseviewing.domain.registrysnapshot.service;
 
+import com.house.houseviewing.domain.registrysnapshot.dto.response.SnapshotResultResponse;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.domain.registrysnapshot.repository.RegistrySnapshotRepository;
+import com.house.houseviewing.domain.user.entity.UserEntity;
+import com.house.houseviewing.domain.user.repository.UserRepository;
+import com.house.houseviewing.global.exception.AppException;
+import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.infrastructure.python.model.analysis.PythonAnalysisRS;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
@@ -25,5 +32,13 @@ public class RegistrySnapshotService {
                 .build();
         RegistrySnapshotEntity savedEntity = registrySnapshotRepository.save(snapshotEntity);
         return savedEntity.getId();
+    }
+
+    public List<SnapshotResultResponse> getSnapshots(Long userId){
+        List<RegistrySnapshotEntity> snapshots = registrySnapshotRepository.findByHouseEntityUserEntityId(userId);
+
+        return snapshots.stream()
+                .map(SnapshotResultResponse::from)
+                .toList();
     }
 }
