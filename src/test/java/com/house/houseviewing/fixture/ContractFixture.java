@@ -22,7 +22,7 @@ public class ContractFixture {
 
     public static ContractRegisterRequest.ContractRegisterRQBuilder createRegister(ContractEntity contract){
         return ContractRegisterRequest.builder()
-                .houseId(contract.getHouseEntity().getId())
+                .houseId(contract.getHouse().getId())
                 .contractType(contract.getContractType())
                 .deposit(contract.getDeposit())
                 .monthlyAmount(contract.getMonthlyAmount())

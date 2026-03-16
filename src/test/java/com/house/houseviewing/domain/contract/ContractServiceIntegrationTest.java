@@ -43,7 +43,7 @@ public class ContractServiceIntegrationTest {
         // when
         ContractEntity contract = getContract(house);
         // then
-        assertThat(contract.getHouseEntity().getId()).isEqualTo(house.getId());
+        assertThat(contract.getHouse().getId()).isEqualTo(house.getId());
 
     }
 

@@ -7,7 +7,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "contracts")
@@ -21,7 +20,7 @@ public class ContractEntity extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "house_id")
-    private HouseEntity houseEntity;
+    private HouseEntity house;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -42,9 +41,9 @@ public class ContractEntity extends BaseTimeEntity {
     private LocalDate confirmDate;
 
     @Builder
-    public ContractEntity(Long id, HouseEntity houseEntity, ContractType contractType, Long deposit, Long monthlyAmount, Long maintenanceFee, LocalDate moveDate, LocalDate confirmDate) {
+    public ContractEntity(Long id, HouseEntity house, ContractType contractType, Long deposit, Long monthlyAmount, Long maintenanceFee, LocalDate moveDate, LocalDate confirmDate) {
         this.id = id;
-        this.houseEntity = houseEntity;
+        this.house = house;
         this.contractType = contractType;
         this.deposit = deposit;
         this.monthlyAmount = monthlyAmount;
@@ -54,6 +53,6 @@ public class ContractEntity extends BaseTimeEntity {
     }
 
     public void addHouse(HouseEntity house){
-        this.houseEntity = house;
+        this.house = house;
     }
 }

@@ -26,7 +26,7 @@ public class ContractService {
                 .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
 
         ContractEntity contract = ContractEntity.builder()
-                .houseEntity(houseRepository.findById(request.getHouseId()).get())
+                .house(houseRepository.findById(request.getHouseId()).get())
                 .contractType(request.getContractType())
                 .deposit(request.getDeposit())
                 .monthlyAmount(request.getMonthlyAmount())

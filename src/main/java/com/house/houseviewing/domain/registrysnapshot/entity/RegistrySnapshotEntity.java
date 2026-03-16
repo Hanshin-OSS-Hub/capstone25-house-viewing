@@ -19,7 +19,7 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "house_id")
-    private HouseEntity houseEntity;
+    private HouseEntity house;
 
     @OneToOne
     @JoinColumn(name = "pdfreport_id")
@@ -47,8 +47,8 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
     private boolean isChanged; // 변동 여부
 
     @Builder
-    public RegistrySnapshotEntity(HouseEntity houseEntity, PdfReportEntity pdfReport, String snapshotUrl, String originalFileName, String rawData, Integer ltvScore, String mainReason, RiskLevel riskLevel, boolean isChanged) {
-        this.houseEntity = houseEntity;
+    public RegistrySnapshotEntity(HouseEntity house, PdfReportEntity pdfReport, String snapshotUrl, String originalFileName, String rawData, Integer ltvScore, String mainReason, RiskLevel riskLevel, boolean isChanged) {
+        this.house = house;
         this.pdfReport = pdfReport;
         this.snapshotUrl = snapshotUrl;
         this.originalFileName = originalFileName;
@@ -57,5 +57,9 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
         this.mainReason = mainReason;
         this.riskLevel = riskLevel;
         this.isChanged = isChanged;
+    }
+
+    public void addHouse(HouseEntity houseEntity) {
+        this.house = houseEntity;
     }
 }

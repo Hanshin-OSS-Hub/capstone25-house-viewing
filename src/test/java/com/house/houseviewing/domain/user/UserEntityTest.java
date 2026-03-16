@@ -27,7 +27,7 @@ public class UserEntityTest {
         // then
         assertThat(user.getHouses()).contains(house);
         assertThat(user.getHouses()).hasSize(1);
-        assertThat(house.getUserEntity()).isEqualTo(user);
+        assertThat(house.getUser()).isEqualTo(user);
     }
 
     @Test

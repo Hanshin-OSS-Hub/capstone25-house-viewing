@@ -7,5 +7,5 @@ import java.util.Optional;
 
 public interface ContractRepository extends JpaRepository<ContractEntity, Long> {
 
-    Optional<ContractEntity> findTopByHouseEntityIdOrderByCreatedAtDesc(Long houseId);
+    Optional<ContractEntity> findTopByHouseIdOrderByCreatedAtDesc(Long houseId);
 }

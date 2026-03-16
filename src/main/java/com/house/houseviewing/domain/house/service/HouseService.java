@@ -57,7 +57,7 @@ public class HouseService {
         HouseEntity saved = houseRepository.findById(houseId)
                 .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
 
-        if(!saved.getUserEntity().getId().equals(userId)){
+        if(!saved.getUser().getId().equals(userId)){
             throw new AppException(ExceptionCode.FORBIDDEN);
         }
 
@@ -65,7 +65,7 @@ public class HouseService {
     }
 
     public List<HousesResponse> getHouses(Long userId){
-        List<HouseEntity> houses = houseRepository.findByUserEntityId(userId);
+        List<HouseEntity> houses = houseRepository.findByUserId(userId);
 
         return houses.stream()
                 .map(HousesResponse::from)
@@ -73,18 +73,18 @@ public class HouseService {
     }
 
     public HouseMeResponse getHouse(Long userId, Long houseId){
-        HouseEntity house = houseRepository.findByUserEntityIdAndId(userId, houseId)
+        HouseEntity house = houseRepository.findByUserIdAndId(userId, houseId)
                 .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
-        ContractEntity contract = contractRepository.findTopByHouseEntityIdOrderByCreatedAtDesc(house.getId())
+        ContractEntity contract = contractRepository.findTopByHouseIdOrderByCreatedAtDesc(house.getId())
                 .orElseThrow(() -> new AppException(ExceptionCode.CONTRACT_NOT_FOUND));
-        RegistrySnapshotEntity snapshot = registrySnapshotRepository.findTopByHouseEntityIdOrderByCreatedAtDesc(house.getId())
+        RegistrySnapshotEntity snapshot = registrySnapshotRepository.findTopByHouseIdOrderByCreatedAtDesc(house.getId())
                 .orElseThrow(() -> new AppException(ExceptionCode.SNAPSHOT_NOT_FOUND));
         return HouseMeResponse.from(house, contract, snapshot);
     }
 
     @Transactional
     public HouseEditResponse editHouse(Long userId, Long houseId, HouseEditRequest request){
-        HouseEntity house = houseRepository.findByUserEntityIdAndId(userId, houseId)
+        HouseEntity house = houseRepository.findByUserIdAndId(userId, houseId)
                 .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
         editRequest(request, house);
 

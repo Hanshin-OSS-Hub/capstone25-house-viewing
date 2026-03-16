@@ -28,7 +28,7 @@ public class HouseEntityTest {
         // then
         assertThat(house.getContracts()).contains(contract);
         assertThat(house.getContracts()).hasSize(1);
-        assertThat(contract.getHouseEntity()).isEqualTo(house);
+        assertThat(contract.getHouse()).isEqualTo(house);
     }
 
     @Test

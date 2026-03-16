@@ -18,7 +18,7 @@ public class HouseFixture {
     public static HouseRegisterRequest.HouseRegisterRQBuilder createRegister(HouseEntity house){
         return HouseRegisterRequest.builder()
                 .nickname(house.getNickname())
-                .userId(house.getUserEntity().getId())
+                .userId(house.getUser().getId())
                 .originAddress("서울시 강남구");
     }
 }

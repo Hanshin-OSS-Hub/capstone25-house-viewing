@@ -20,7 +20,7 @@ public class ContractController {
     @PostMapping("/register")
     public ResponseEntity<ContractRegisterResponse> join(@Valid @RequestBody ContractRegisterRequest request){
         ContractEntity contract = contractService.register(request);
-        ContractRegisterResponse register = new ContractRegisterResponse(contract.getHouseEntity().getId(), contract.getId());
+        ContractRegisterResponse register = new ContractRegisterResponse(contract.getHouse().getId(), contract.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(register);
     }
 

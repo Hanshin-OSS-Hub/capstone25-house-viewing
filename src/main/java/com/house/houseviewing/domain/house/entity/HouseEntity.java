@@ -4,7 +4,6 @@ import com.house.houseviewing.domain.common.Address;
 import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
-import com.house.houseviewing.domain.subscription.enums.PlanType;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.enums.MonitoringStatus;
 import com.house.houseviewing.global.exception.AppException;
@@ -27,12 +26,12 @@ public class HouseEntity extends BaseTimeEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private UserEntity userEntity;
+    private UserEntity user;
 
-    @OneToMany(mappedBy = "houseEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "house", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ContractEntity> contracts = new ArrayList<>();
 
-    @OneToMany(mappedBy = "houseEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "house", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RegistrySnapshotEntity> registrySnapshots = new ArrayList<>();
 
     @Column(nullable = false)
@@ -47,14 +46,18 @@ public class HouseEntity extends BaseTimeEntity {
 
     public void addContract(ContractEntity contract){
         checkContract(contract);
-        contracts.add(contract);
+        this.contracts.add(contract);
         contract.addHouse(this);
     }
 
+    public void addRegistrySnapshot(RegistrySnapshotEntity registrySnapshot){
+        this.registrySnapshots.add(registrySnapshot);
+        registrySnapshot.addHouse(this);
+    }
+
     @Builder
-    public HouseEntity(Long id, UserEntity userEntity, String nickname, Address address, MonitoringStatus monitoringStatus) {
-        this.id = id;
-        this.userEntity = userEntity;
+    public HouseEntity(UserEntity user, String nickname, Address address, MonitoringStatus monitoringStatus) {
+        this.user = user;
         this.nickname = nickname;
         this.address = address;
         this.monitoringStatus = monitoringStatus;

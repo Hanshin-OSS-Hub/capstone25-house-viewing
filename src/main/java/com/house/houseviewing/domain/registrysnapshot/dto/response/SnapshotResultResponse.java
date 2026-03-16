@@ -23,7 +23,7 @@ public class SnapshotResultResponse {
     private RiskLevel riskLevel;
 
     public static SnapshotResultResponse from(RegistrySnapshotEntity snapshot){
-        HouseEntity house = snapshot.getHouseEntity();
+        HouseEntity house = snapshot.getHouse();
         return SnapshotResultResponse.builder()
                 .nickname(house.getNickname())
                 .address(house.getAddress().getAddressName())
