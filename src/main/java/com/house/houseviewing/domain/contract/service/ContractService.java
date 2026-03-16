@@ -21,23 +21,11 @@ public class ContractService {
 
     @Transactional
     public ContractEntity register(ContractRegisterRequest request){
-
         HouseEntity house = houseRepository.findById(request.getHouseId())
                 .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
-
-        ContractEntity contract = ContractEntity.builder()
-                .house(houseRepository.findById(request.getHouseId()).get())
-                .contractType(request.getContractType())
-                .deposit(request.getDeposit())
-                .monthlyAmount(request.getMonthlyAmount())
-                .maintenanceFee(request.getMaintenanceFee())
-                .moveDate(request.getMoveDate())
-                .confirmDate(request.getConfirmDate())
-                .build();
-
-        ContractEntity saved = contractRepository.save(contract);
-
-        return saved;
+        ContractEntity contract = request.toEntity();
+        house.addContract(contract);
+        return contractRepository.save(contract);
     }
 
     @Transactional

@@ -1,6 +1,7 @@
 package com.house.houseviewing.domain.contract.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.house.houseviewing.domain.contract.entity.ContractEntity;
 import com.house.houseviewing.domain.contract.enums.ContractType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;
@@ -41,12 +42,14 @@ public class ContractRegisterRequest {
     @NotNull(message = "확정일자를 입력해주세요.")
     private LocalDate confirmDate;
 
-    public ContractRegisterRequest(ContractType contractType, Long deposit, Long monthlyAmount, Long maintenanceFee, LocalDate moveDate, LocalDate confirmDate) {
-        this.contractType = contractType;
-        this.deposit = deposit;
-        this.monthlyAmount = monthlyAmount;
-        this.maintenanceFee = maintenanceFee;
-        this.moveDate = moveDate;
-        this.confirmDate = confirmDate;
+    public ContractEntity toEntity(){
+        return ContractEntity.builder()
+                .contractType(contractType)
+                .deposit(deposit)
+                .monthlyAmount(monthlyAmount)
+                .maintenanceFee(maintenanceFee)
+                .moveDate(moveDate)
+                .confirmDate(confirmDate)
+                .build();
     }
 }
