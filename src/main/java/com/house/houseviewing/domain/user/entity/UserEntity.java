@@ -36,15 +36,14 @@ public class UserEntity extends BaseTimeEntity {
         this.password = password;
     }
 
-    @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HouseEntity> houses = new ArrayList<>();
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private SubscriptionEntity subscription;
 
     @Builder
-    public UserEntity(Long id, String name, String email, String loginId, String password, SubscriptionEntity subscription) {
-        this.id = id;
+    public UserEntity(String name, String email, String loginId, String password, SubscriptionEntity subscription) {
         this.name = name;
         this.email = email;
         this.loginId = loginId;
