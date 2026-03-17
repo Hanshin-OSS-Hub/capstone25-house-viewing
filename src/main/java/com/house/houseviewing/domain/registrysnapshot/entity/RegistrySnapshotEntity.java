@@ -47,17 +47,6 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
     private boolean isChanged; // 변동 여부
 
     @Builder
-    public RegistrySnapshotEntity(HouseEntity house, PdfReportEntity pdfReport, String snapshotUrl, String originalFileName, String rawData, Integer ltvScore, String mainReason, RiskLevel riskLevel, boolean isChanged) {
-        this.house = house;
-        this.pdfReport = pdfReport;
-        this.snapshotUrl = snapshotUrl;
-        this.originalFileName = originalFileName;
-        this.rawData = rawData;
-        this.ltvScore = ltvScore;
-        this.mainReason = mainReason;
-        this.riskLevel = riskLevel;
-        this.isChanged = isChanged;
-    }
 
     public void addHouse(HouseEntity houseEntity) {
         this.house = houseEntity;
