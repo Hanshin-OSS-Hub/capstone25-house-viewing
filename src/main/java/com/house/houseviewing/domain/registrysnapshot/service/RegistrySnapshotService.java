@@ -20,11 +20,9 @@ public class RegistrySnapshotService {
     @Transactional
     public Long register(PythonAnalysisRS response, String originFileName, String path){
         RegistrySnapshotEntity snapshotEntity = RegistrySnapshotEntity.builder()
-                .originalFileName(originFileName)
+                .snapshotName(originFileName)
                 .snapshotUrl(path)
-                .rawData(response.getRawData())
-                .ltvScore(response.getLtvScore())
-                .isChanged(false)
+                .snapshotSizeBytes()
                 .build();
         RegistrySnapshotEntity savedEntity = registrySnapshotRepository.save(snapshotEntity);
         return savedEntity.getId();

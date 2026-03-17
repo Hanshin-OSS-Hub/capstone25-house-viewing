@@ -2,7 +2,6 @@ package com.house.houseviewing.domain.registrysnapshot.entity;
 
 import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
-import com.house.houseviewing.domain.pdfreport.entity.PdfReportEntity;
 import com.house.houseviewing.domain.common.RiskLevel;
 import jakarta.persistence.*;
 import lombok.*;
@@ -21,32 +20,21 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
     @JoinColumn(name = "house_id")
     private HouseEntity house;
 
-    @OneToOne
-    @JoinColumn(name = "pdfreport_id")
-    private PdfReportEntity pdfReport;
-
     @Column(nullable = false)
     private String snapshotUrl; // 새 등기부 PDF 경로
 
     @Column(nullable = false)
-    private String originalFileName; // 파일 이름
-
-    @Column(columnDefinition = "json")
-    private String rawData; // 등기부 json
+    private String snapshotName; // 파일 이름
 
     @Column(nullable = false)
-    private Integer ltvScore; // ltv 값
-
-    private String mainReason;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private RiskLevel riskLevel;
-
-    @Column(nullable = false)
-    private boolean isChanged; // 변동 여부
+    private Long snapshotSizeBytes;
 
     @Builder
+    public RegistrySnapshotEntity(String snapshotUrl, String snapshotName, Long snapshotSizeBytes) {
+        this.snapshotUrl = snapshotUrl;
+        this.snapshotName = snapshotName;
+        this.snapshotSizeBytes = snapshotSizeBytes;
+    }
 
     public void addHouse(HouseEntity houseEntity) {
         this.house = houseEntity;
