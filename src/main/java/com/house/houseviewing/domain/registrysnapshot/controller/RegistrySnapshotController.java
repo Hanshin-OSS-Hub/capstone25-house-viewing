@@ -19,10 +19,11 @@ public class RegistrySnapshotController {
     private final RegistrySnapshotService registrySnapshotService;
 
     @PostMapping("/register/{houseId}")
-    public ResponseEntity<Void> register(
+    public ResponseEntity<Long> register(
             @PathVariable Long houseId,
             @RequestPart("file") MultipartFile snapshot){
         Long register = registrySnapshotService.register(houseId, snapshot);
+        return ResponseEntity.ok(register);
     }
 
     @GetMapping
