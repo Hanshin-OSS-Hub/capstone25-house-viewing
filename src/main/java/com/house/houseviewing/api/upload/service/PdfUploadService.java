@@ -8,10 +8,12 @@ import com.house.houseviewing.infrastructure.python.PythonEngineClient;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -26,15 +28,16 @@ public class PdfUploadService {
     private final String uploadPath = "S3 PATH";
 
     public void upload(MultipartFile file){
-        String originFileName = file.getOriginalFilename();
-        String s3FileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
-        String fullPath = uploadPath + s3FileName;
+        String snapshotName = file.getOriginalFilename();
+        Long snapshotSizeBytes = file.getSize();
+        String s3FileName = UUID.randomUUID() + "_" + snapshotName;
+        String snapshotUrl = uploadPath + s3FileName;
 
         try{
-            file.transferTo(new File(fullPath)); // 등기부 저장
+            file.transferTo(new File(snapshotUrl)); // 등기부 저장
 
             pythonEngineClient.sendPdf(file).subscribe(response -> {
-                Long register = registrySnapshotService.register(response, originFileName, fullPath);
+                Long register = registrySnapshotService.register(response, snapshotName, snapshotUrl);
                 pdfTransferService.transfer(register);
             });
         } catch (IOException e){

@@ -6,10 +6,8 @@ import com.house.houseviewing.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -19,6 +17,13 @@ import java.util.List;
 public class RegistrySnapshotController {
 
     private final RegistrySnapshotService registrySnapshotService;
+
+    @PostMapping("/register/{houseId}")
+    public ResponseEntity<Void> register(
+            @PathVariable Long houseId,
+            @RequestPart("file") MultipartFile snapshot){
+        Long register = registrySnapshotService.register(houseId, snapshot);
+    }
 
     @GetMapping
     public ResponseEntity<List<SnapshotResultResponse>> getResults(
