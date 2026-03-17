@@ -3,8 +3,12 @@ package com.house.houseviewing.domain.registrysnapshot.entity;
 import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.common.RiskLevel;
+import com.house.houseviewing.domain.registryanalysis.entity.RegistryAnalysisEntity;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "registrysnapshots")
@@ -19,6 +23,9 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "house_id")
     private HouseEntity house;
+
+    @OneToMany(mappedBy = "snapshot")
+    private List<RegistryAnalysisEntity> analysis = new ArrayList<>();
 
     @Column(nullable = false)
     private String snapshotUrl; // 새 등기부 PDF 경로
@@ -39,4 +46,5 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
     public void addHouse(HouseEntity houseEntity) {
         this.house = houseEntity;
     }
+    public void addAnalysis(RegistryAnalysisEntity analysis){ this.analysis.add(analysis); }
 }

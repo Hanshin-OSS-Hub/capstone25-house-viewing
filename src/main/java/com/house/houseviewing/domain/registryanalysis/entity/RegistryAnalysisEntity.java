@@ -57,4 +57,9 @@ public class RegistryAnalysisEntity extends BaseTimeEntity {
         this.contract = contract;
         contract.addRegistryAnalysis(this);
     }
+
+    public void addRegistrySnapshot(RegistrySnapshotEntity registrySnapshot){
+        this.snapshot = registrySnapshot;
+        registrySnapshot.addAnalysis(this);
+    }
 }

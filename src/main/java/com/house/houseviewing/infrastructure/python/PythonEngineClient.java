@@ -1,6 +1,6 @@
 package com.house.houseviewing.infrastructure.python;
 
-import com.house.houseviewing.infrastructure.python.model.analysis.PythonAnalysisRS;
+import com.house.houseviewing.global.file.dto.SnapshotAnalysisResult;
 import com.house.houseviewing.infrastructure.python.model.pdf.PythonPdfRQ;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
@@ -20,7 +20,7 @@ public class PythonEngineClient {
         this.pythonWebClient = pythonWebClient;
     }
 
-    public Mono<PythonAnalysisRS> sendPdf(MultipartFile file){
+    public Mono<SnapshotAnalysisResult> sendPdf(MultipartFile file){
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("file", file.getResource())
                 .filename(file.getOriginalFilename());
@@ -30,7 +30,7 @@ public class PythonEngineClient {
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(builder.build()))
                 .retrieve()
-                .bodyToMono(PythonAnalysisRS.class);
+                .bodyToMono(SnapshotAnalysisResult.class);
     }
 
     public Mono<byte[]> sendRawDataAndReceivePdf(PythonPdfRQ request){

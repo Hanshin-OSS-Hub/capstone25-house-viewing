@@ -3,6 +3,7 @@ package com.house.houseviewing.domain.registrysnapshot.service;
 import com.house.houseviewing.api.upload.service.PdfUploadService;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.house.repository.HouseRepository;
+import com.house.houseviewing.domain.registryanalysis.service.RegistryAnalysisService;
 import com.house.houseviewing.domain.registrysnapshot.dto.response.SnapshotResultResponse;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.domain.registrysnapshot.repository.RegistrySnapshotRepository;
@@ -26,6 +27,7 @@ public class RegistrySnapshotService {
     private final HouseRepository houseRepository;
     private final RegistrySnapshotRepository registrySnapshotRepository;
     private final SnapshotExtractService snapshotExtractService;
+    private final RegistryAnalysisService registryAnalysisService;
 
     @Transactional
     public Long register(Long houseId, MultipartFile snapshot){
@@ -35,6 +37,7 @@ public class RegistrySnapshotService {
         RegistrySnapshotEntity registrySnapshot = snapshotExtractService.register(snapshot);
         house.addRegistrySnapshot(registrySnapshot);
         RegistrySnapshotEntity saved = registrySnapshotRepository.save(registrySnapshot);
+        Long register = registryAnalysisService.register(snapshot, saved);
 
         return saved.getId();
     }
