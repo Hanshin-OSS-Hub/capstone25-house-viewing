@@ -2,12 +2,14 @@ package com.house.houseviewing.global.file.service;
 
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
-import com.house.houseviewing.global.file.dto.SnapshotUploadResponse;
+import com.house.houseviewing.global.file.dto.SnapshotUploadResult;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -15,8 +17,8 @@ public class SnapshotUploadService {
 
     private final String uploadPath = "S3 PATH";
 
-    public SnapshotUploadResponse upload(MultipartFile snapshot){
-        String snapshotName = snapshot.getOriginalFilename();
+    public SnapshotUploadResult upload(MultipartFile snapshot){
+        String snapshotName = StringUtils.cleanPath(Objects.requireNonNull(snapshot.getOriginalFilename()));
         String savedFileName = UUID.randomUUID() + "_" + snapshotName;
         Long snapshotSizeBytes = snapshot.getSize();
         String fullPath = uploadPath + savedFileName;
@@ -28,7 +30,7 @@ public class SnapshotUploadService {
             throw new AppException(ExceptionCode.FILE_SAVE_FAILED);
         }
 
-        return SnapshotUploadResponse.builder()
+        return SnapshotUploadResult.builder()
                 .snapshotName(snapshotName)
                 .snapshotUrl(fullPath)
                 .snapshotSizeBytes(snapshotSizeBytes)

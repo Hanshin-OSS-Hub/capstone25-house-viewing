@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 
 @Getter @AllArgsConstructor
 @Builder @NoArgsConstructor
-public class SnapshotUploadResponse {
+public class SnapshotUploadResult {
 
     private String snapshotName;
 
