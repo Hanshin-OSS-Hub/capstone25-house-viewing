@@ -7,6 +7,7 @@ import com.house.houseviewing.domain.registryanalysis.enums.AnalysisType;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
@@ -42,6 +43,15 @@ public class RegistryAnalysisEntity extends BaseTimeEntity {
 
     @Column(nullable = false)
     private Integer ltvScore;
+
+    @Builder
+    public RegistryAnalysisEntity(AnalysisType analysisType, RiskLevel riskLevel, String rawData, String mainReason, Integer ltvScore) {
+        this.analysisType = analysisType;
+        this.riskLevel = riskLevel;
+        this.rawData = rawData;
+        this.mainReason = mainReason;
+        this.ltvScore = ltvScore;
+    }
 
     public void addContract(ContractEntity contract){
         this.contract = contract;
