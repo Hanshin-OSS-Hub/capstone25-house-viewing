@@ -1,4 +1,50 @@
 package com.house.houseviewing.domain.registryanalysis.entity;
 
-public class RegistryAnalysisEntity {
+import com.house.houseviewing.domain.common.BaseTimeEntity;
+import com.house.houseviewing.domain.common.RiskLevel;
+import com.house.houseviewing.domain.contract.entity.ContractEntity;
+import com.house.houseviewing.domain.registryanalysis.enums.AnalysisType;
+import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "houses")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class RegistryAnalysisEntity extends BaseTimeEntity {
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "registryanalysis_id")
+    private Long id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "registrysnapshot_id")
+    private RegistrySnapshotEntity snapshot;
+
+    @OneToOne
+    @JoinColumn(name = "contract_id", unique = true)
+    private ContractEntity contract;
+
+    @Column(nullable = false)
+    private AnalysisType analysisType;
+
+    @Column(nullable = false)
+    private RiskLevel riskLevel;
+
+    @Column(columnDefinition = "json", nullable = false)
+    private String rawData;
+
+    @Column(nullable = false)
+    private String mainReason;
+
+    @Column(nullable = false)
+    private Integer ltvScore;
+
+    public void addContract(ContractEntity contract){
+        this.contract = contract;
+        contract.addRegistryAnalysis(this);
+    }
 }
