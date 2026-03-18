@@ -64,11 +64,6 @@ class MainActivity : AppCompatActivity() {
                     null,
                     androidx.navigation.navOptions { launchSingleTop = true }
                 )
-                R.id.nav_ar_check -> navController.navigate(
-                    R.id.nav_ar_check,
-                    null,
-                    androidx.navigation.navOptions { launchSingleTop = true }
-                )
                 R.id.nav_my -> navController.navigate(
                     R.id.nav_my,
                     null,
@@ -115,11 +110,13 @@ class MainActivity : AppCompatActivity() {
         if (sourceIntent.getBooleanExtra(EXTRA_SHOW_ANALYSIS_LOADING, false)) {
             val source = sourceIntent.getStringExtra(EXTRA_ANALYSIS_SOURCE)
                 ?: com.capstone.houseviewingapp.analysis.AnalysisFlow.SOURCE_MANUAL
+            val houseNickname = sourceIntent.getStringExtra(com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_HOUSE_NICKNAME)
 
             navController.navigate(
                 R.id.nav_analysis_loading,
                 androidx.core.os.bundleOf(
-                    com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_ANALYSIS_SOURCE to source
+                    com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_ANALYSIS_SOURCE to source,
+                    com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_HOUSE_NICKNAME to (houseNickname ?: "")
                 )
             )
             binding.navigationBar.menu.findItem(R.id.nav_analysis)?.isChecked = true
