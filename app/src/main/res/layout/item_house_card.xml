@@ -90,7 +90,7 @@
             android:includeFontPadding="false"
             android:layout_marginTop="4dp"
             />
-        
+
         <TextView
             android:id="@+id/safeLabel"
             android:layout_width="wrap_content"
