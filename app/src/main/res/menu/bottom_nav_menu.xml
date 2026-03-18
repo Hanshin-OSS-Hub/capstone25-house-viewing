@@ -10,11 +10,6 @@
         android:title="분석"
         />
     <item
-        android:id="@+id/nav_ar_check"
-        android:icon="@drawable/baseline_manage_search_24"
-        android:title="AR 진단"
-        />
-    <item
         android:id="@+id/nav_my"
         android:icon="@drawable/round_person_24"
         android:title="내 정보"
