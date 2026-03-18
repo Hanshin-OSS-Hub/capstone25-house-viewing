@@ -26,6 +26,43 @@ class SignUpActivity : AppCompatActivity() {
         binding.backButton.setOnClickListener {
             finish()
         }
+
+        // 약관 체크박스 동기화: 전체 동의 ↔ 개별 동의
+        var isSyncingAgreementState = false
+        fun syncAllCheckboxFromIndividuals() {
+            if (isSyncingAgreementState) return
+            isSyncingAgreementState = true
+            binding.allCheckBox.isChecked =
+                binding.termOfServieceCheckBox.isChecked && binding.infoCheckBox.isChecked
+            isSyncingAgreementState = false
+        }
+
+        binding.allCheckBox.setOnCheckedChangeListener { _, isChecked ->
+            if (isSyncingAgreementState) return@setOnCheckedChangeListener
+            isSyncingAgreementState = true
+            binding.termOfServieceCheckBox.isChecked = isChecked
+            binding.infoCheckBox.isChecked = isChecked
+            isSyncingAgreementState = false
+        }
+
+        binding.termOfServieceCheckBox.setOnCheckedChangeListener { _, _ ->
+            syncAllCheckboxFromIndividuals()
+        }
+        binding.infoCheckBox.setOnCheckedChangeListener { _, _ ->
+            syncAllCheckboxFromIndividuals()
+        }
+
+        binding.termTextView.setOnClickListener {
+            AgreementDialogFragment
+                .newInstance(R.string.terms_title, R.string.terms_content)
+                .show(supportFragmentManager, "TermsDialog")
+        }
+        binding.infoTextView.setOnClickListener {
+            AgreementDialogFragment
+                .newInstance(R.string.privacy_title, R.string.privacy_content)
+                .show(supportFragmentManager, "PrivacyDialog")
+        }
+
         binding.confirmButton.setOnClickListener {
             val intent = Intent(this, LoginActivity::class.java)
             startActivity(intent)
