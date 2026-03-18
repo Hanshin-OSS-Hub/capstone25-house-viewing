@@ -13,6 +13,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.HouseViewingApp">
         <activity
+            android:name=".my.ProfileEditActivity"
+            android:exported="false" />
+        <activity
             android:name=".registration.HouseRegistrationActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
