@@ -1,20 +1,7 @@
 """
-부동산 권리 분석 PDF 생성 마이크로서비스
-FastAPI 진입점
+부동산 권리 분석 PDF 생성 마이크로서비스 — FastAPI 진입점
 
-실행:
-    uvicorn main:app --reload --port 8000
-
-엔드포인트:
-    POST /engine/analyze       - 등기부 분석 → AnalysisResult JSON
-    POST /engine/generate-pdf  - 분석 JSON → PDF 바이너리
-    GET  /health               - 헬스체크
-    GET  /docs                 - Swagger UI
-
-응답 헤더 (타이밍):
-    X-Process-Time      : 요청 전체 처리 시간 (초)
-    X-Gemini-Time       : Gemini API 호출 시간 (초, generate-pdf만)
-    X-PDF-Convert-Time  : wkhtmltopdf 변환 시간 (초, generate-pdf만)
+실행: uvicorn main:app --reload --port 8000
 """
 import time
 from fastapi import FastAPI, Request
@@ -42,7 +29,6 @@ async def add_process_time_header(request: Request, call_next) -> Response:
     return response
 
 
-# /engine 하위 엔드포인트 등록
 app.include_router(engine_router)
 
 
