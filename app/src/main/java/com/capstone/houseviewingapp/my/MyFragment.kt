@@ -1,12 +1,12 @@
 package com.capstone.houseviewingapp.my
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.capstone.houseviewingapp.R
-import com.capstone.houseviewingapp.databinding.FragmentHouseInfoStep2Binding
 import com.capstone.houseviewingapp.databinding.FragmentMyBinding
 
 class MyFragment : Fragment(R.layout.fragment_my) {
@@ -24,7 +24,10 @@ class MyFragment : Fragment(R.layout.fragment_my) {
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        
+
+        binding.profileEditCardView.setOnClickListener {
+            startActivity(Intent(requireContext(), ProfileEditActivity::class.java))
+        }
     }
     
     override fun onDestroyView() {
