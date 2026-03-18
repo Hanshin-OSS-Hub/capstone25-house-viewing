@@ -12,8 +12,19 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.databinding.FragmentHouseInfoStep3Binding
+import androidx.core.widget.addTextChangedListener
 
 class HouseInfoStep3Fragment : Fragment(R.layout.fragment_house_info_step3) {
+    companion object {
+        private const val ARG_QUICK_DIAGNOSIS = "arg_quick_diagnosis"
+        fun newInstance(isQuickDiagnosisMode: Boolean): HouseInfoStep3Fragment {
+            return HouseInfoStep3Fragment().apply {
+                arguments =
+                    Bundle().apply { putBoolean(ARG_QUICK_DIAGNOSIS, isQuickDiagnosisMode) }
+            }
+        }
+    }
+
     private var _binding: FragmentHouseInfoStep3Binding? = null
     private val binding get() = _binding!!
 
@@ -40,6 +51,12 @@ class HouseInfoStep3Fragment : Fragment(R.layout.fragment_house_info_step3) {
         savedInstanceState: Bundle?
     ): View {
         _binding = FragmentHouseInfoStep3Binding.inflate(inflater, container, false)
+        val isQuickDiagnosis = arguments?.getBoolean(ARG_QUICK_DIAGNOSIS, false) ?: false
+        // 1회 무료 진단(빠른 진단)일 때만 닉네임 등록 영역 표시. 주택 등록 info1→info2→info3 플로우에서는 숨김
+        binding.step3NicknameAreaWrapper.visibility =
+            if (isQuickDiagnosis) View.VISIBLE else View.GONE
+        binding.quickDiagnosisNicknameContainer.visibility =
+            if (isQuickDiagnosis) View.VISIBLE else View.GONE
         return binding.root
     }
 
@@ -54,6 +71,7 @@ class HouseInfoStep3Fragment : Fragment(R.layout.fragment_house_info_step3) {
             selectedFileUri = null
             renderSelectedFileState()
         }
+        binding.quickNicknameEditText.addTextChangedListener { validateAndUpdateNextButton() }
         renderSelectedFileState()
     }
 
@@ -63,7 +81,21 @@ class HouseInfoStep3Fragment : Fragment(R.layout.fragment_house_info_step3) {
     }
 
     // NOTE : 선택된 PDF 파일의 URI 문자열을 반환하는 함수 (없으면 null)
-    fun getSelectedFileUriString() : String? = selectedFileUri?.toString()
+    fun getSelectedFileUriString(): String? = selectedFileUri?.toString()
+
+    fun getNicknameOrNull(): String? {
+        if (arguments?.getBoolean(ARG_QUICK_DIAGNOSIS, false) != true) return null
+        return binding.quickNicknameEditText.text?.toString()?.trim()?.takeIf { it.isNotBlank() }
+    }
+
+    private fun validateAndUpdateNextButton() {
+        val hasFile = selectedFileUri != null
+        val isQuick = arguments?.getBoolean(ARG_QUICK_DIAGNOSIS, false) ?: false
+        val nicknameOk =
+            !isQuick || binding.quickNicknameEditText.text?.toString()?.trim().orEmpty()
+                .isNotBlank()
+        (activity as? HouseRegistrationActivity)?.setNextButtonEnabled(hasFile && nicknameOk)
+    }
 
     //TODO : 나중에 백엔드와 연동할 때, getSelectedFileUriString() 대신, selectedFileUri를 서버에 업로드하고, 서버에서 반환된 URL을 저장하도록 수정 필요
 
@@ -74,7 +106,7 @@ class HouseInfoStep3Fragment : Fragment(R.layout.fragment_house_info_step3) {
         binding.emptyFileTextView.visibility = if (hasFile) View.GONE else View.VISIBLE
         binding.attachedFileItem.root.visibility = if (hasFile) View.VISIBLE else View.GONE
 
-        if(hasFile) {
+        if (hasFile) {
             val uri = selectedFileUri!!
             val fileName = getDisplayName(uri) ?: "문서.pdf"
             val fileSize = getFileSizeText(uri)
@@ -83,7 +115,7 @@ class HouseInfoStep3Fragment : Fragment(R.layout.fragment_house_info_step3) {
             binding.attachedFileItem.fileDescTextView.text = "$fileSize  ·  분석 준비 완료"
 
         }
-        (activity as? HouseRegistrationActivity)?.setNextButtonEnabled(hasFile) // 다음 버튼 활성화
+        validateAndUpdateNextButton()
 
     }
 
@@ -128,7 +160,6 @@ class HouseInfoStep3Fragment : Fragment(R.layout.fragment_house_info_step3) {
         val mb = kb / 1024.0
         return if (mb >= 1) String.format("%.1f MB", mb) else String.format("%.0f KB", kb)
     }
-
 
 
     override fun onDestroyView() {
