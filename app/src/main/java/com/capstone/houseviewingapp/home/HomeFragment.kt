@@ -7,7 +7,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.data.local.HouseLocalStore
 import com.capstone.houseviewingapp.databinding.FragmentHomeBinding
@@ -37,6 +39,36 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        parentFragmentManager.setFragmentResultListener(
+            EditHouseBottomSheetFragment.RESULT_KEY,
+            viewLifecycleOwner
+        ) { _, result ->
+            val houseId = result.getLong(EditHouseBottomSheetFragment.RESULT_HOUSE_ID, -1L)
+            val newName = result.getString(EditHouseBottomSheetFragment.RESULT_HOME_NAME).orEmpty()
+            val newAddress = result.getString(EditHouseBottomSheetFragment.RESULT_ADDRESS).orEmpty()
+            if (houseId <= 0L || newName.isBlank()) return@setFragmentResultListener
+
+            val detail = HouseLocalStore.getHouseDetail(requireContext(), houseId) ?: return@setFragmentResultListener
+            val normalizedAddress = newAddress.trim()
+            val currentOrigin = detail.originAddress.trim()
+
+            val (updatedOriginAddress, updatedDetailAddress) = when {
+                normalizedAddress.isBlank() -> detail.originAddress to detail.detailAddress
+                currentOrigin.isNotBlank() && normalizedAddress.startsWith(currentOrigin) -> {
+                    currentOrigin to normalizedAddress.removePrefix(currentOrigin).trim()
+                }
+                else -> normalizedAddress to ""
+            }
+
+            val updated = detail.copy(
+                homeName = newName,
+                originAddress = updatedOriginAddress,
+                detailAddress = updatedDetailAddress
+            )
+            HouseLocalStore.updateHouseDetailById(requireContext(), houseId, updated)
+            loadAndShowCards()
+        }
+
         loadAndShowCards()
 
         //NOTE: 빈 화면에서는 버튼 클릭 시에만 집 등록
@@ -58,25 +90,38 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
 
     // NOTE : 카드 로드. 화면 갱심 함수
     private fun loadAndShowCards() {
-        val items = HouseLocalStore.getHouses(requireContext())
+        val storedItems = HouseLocalStore.getHouses(requireContext())
+        val items = storedItems
         binding.viewpager.adapter = HouseCardAdapter(
             items,
-            // TODO : 수정 기능 구현 시 onEdit 람다 추가 예정
-//            onEdit = { item, index ->
-//                val intent = Intent(requireContext(), HouseRegistrationActivity::class.java)
-//                intent.putExtra(HouseRegistrationActivity.EXTRA_EDIT_INDEX, index)
-//                registerLauncher.launch(intent)
-//            },
-           onDelete = { _, index ->
+            onDelete = { _, index ->
                 HouseLocalStore.removeHouse(requireContext(), index)
                 loadAndShowCards()
+            },
+            onEdit = { item, _ ->
+                val houseId = item.houseId ?: return@HouseCardAdapter
+                val detail = HouseLocalStore.getHouseDetail(requireContext(), houseId) ?: return@HouseCardAdapter
+                EditHouseBottomSheetFragment
+                    .newInstance(
+                        houseId = houseId,
+                        homeName = detail.homeName,
+                        address = detail.fullAddress()
+                    )
+                    .show(parentFragmentManager, EditHouseBottomSheetFragment.TAG)
             },
             onAddClick = {
                 val intent = Intent(requireContext(), HouseRegistrationActivity::class.java)
                 registerLauncher.launch(intent)
+            },
+            onCardClick = { item ->
+                val houseId = item.houseId ?: return@HouseCardAdapter
+                findNavController().navigate(
+                    R.id.action_nav_home_to_nav_house_detail,
+                    bundleOf("houseId" to houseId)
+                )
             }
         )
-        updateEmptyState(items)
+        updateEmptyState(storedItems)
     }
 
     // NOTE : 카드 목록이 비어있는지 여부에 따라 빈 화면과 카드 뷰의 표시 상태를 업데이트하는 함수
@@ -88,6 +133,11 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
             binding.viewpager.visibility = View.VISIBLE
             binding.emptylayout.root.visibility = View.GONE
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (_binding != null) loadAndShowCards()
     }
 
     override fun onDestroyView() {
