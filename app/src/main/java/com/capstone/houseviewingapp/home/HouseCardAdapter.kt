@@ -1,7 +1,11 @@
 package com.capstone.houseviewingapp.home
 
+import android.graphics.Color
+import android.graphics.drawable.ColorDrawable
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
+import android.widget.PopupWindow
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.capstone.houseviewingapp.R
@@ -11,8 +15,10 @@ import com.capstone.houseviewingapp.databinding.ItemHouseCardBinding
 class HouseCardAdapter(
     private val items: List<HouseCardItem>,
     private val onDelete: (HouseCardItem, Int) -> Unit,
-    // TODO : 수정 기능 구현 시 onEdit: (HouseCardItem, Int) -> Unit 추가 예정
-    private val onAddClick: () -> Unit
+    private val onEdit: (HouseCardItem, Int) -> Unit,
+    private val onAddClick: () -> Unit,
+    private val onCardClick: (HouseCardItem) -> Unit
+
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
 
@@ -64,7 +70,6 @@ class HouseCardAdapter(
                     homeNameText.text = item.homeName
                     addressText.text = item.address
                     progressBar.max = 100
-
                     val ltv = item.ltv
                     if (ltv == null) {
                         ltvpercentTextView.text = "--"
@@ -89,30 +94,50 @@ class HouseCardAdapter(
                         percentText.setTextColor(c)
                         progressBar.setIndicatorColor(c)
                     }
-                    moreButton.setOnClickListener {
-                        val wrappedContext = android.view.ContextThemeWrapper(it.context, R.style.Theme_PopupMenuOverlay)
-                        val popup = android.widget.PopupMenu(wrappedContext, it)
-                        popup.menuInflater.inflate(R.menu.menu_house_card, popup.menu)
-                        try {
-                            val mPopupField = android.widget.PopupMenu::class.java.getDeclaredField("mPopup")
-                            mPopupField.isAccessible = true
-                            val menuPopupHelper = mPopupField.get(popup)
-                            val getPopupMethod = menuPopupHelper?.javaClass?.getMethod("getPopup")
-                            val popupWindow = getPopupMethod?.invoke(menuPopupHelper) as? android.widget.PopupWindow
-                            popupWindow?.setBackgroundDrawable(androidx.core.content.ContextCompat.getDrawable(it.context, R.drawable.bg_popup_menu))
-                        } catch (_: Exception) { }
-                        popup.setOnMenuItemClickListener { menuItem ->
-                            when (menuItem.itemId) {
-                                R.id.action_delete -> {
-                                    onDelete(item, position)
-                                    true
-                                }
-                                else -> false
+                    moreButton.setOnClickListener { anchor ->
+                        val context = anchor.context
+                        val popupView = LayoutInflater.from(context)
+                            .inflate(R.layout.popup_house_card_action, null, false)
+
+                        popupView.measure(
+                            View.MeasureSpec.UNSPECIFIED,
+                            View.MeasureSpec.UNSPECIFIED
+                        )
+                        val popupWidth = popupView.measuredWidth
+
+                        val popupWindow = PopupWindow(
+                            popupView,
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
+                            true
+                        ).apply {
+                            isOutsideTouchable = true
+                            elevation = 0f
+                            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
+                        }
+
+                        popupView.findViewById<View>(R.id.actionEditRow).setOnClickListener {
+                            popupWindow.dismiss()
+                            val currentPos = holder.bindingAdapterPosition
+                            if (currentPos != RecyclerView.NO_POSITION) {
+                                onEdit(items[currentPos], currentPos)
                             }
                         }
-                        popup.show()
+
+                        popupView.findViewById<View>(R.id.actionDeleteRow).setOnClickListener {
+                            popupWindow.dismiss()
+                            val currentPos = holder.bindingAdapterPosition
+                            if (currentPos != RecyclerView.NO_POSITION) {
+                                onDelete(items[currentPos], currentPos)
+                            }
+                        }
+
+                        val xOff = anchor.width - popupWidth
+                        popupWindow.showAsDropDown(anchor, xOff, 10)
                     }
-                    homeCard.setOnClickListener { }
+                    homeCard.setOnClickListener {
+                        onCardClick(item)
+                    }
                 }
             }
         }
