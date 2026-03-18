@@ -7,8 +7,11 @@
     <fragment
         android:id="@+id/nav_home"
         android:name="com.capstone.houseviewingapp.home.HomeFragment"
-        android:label="홈"
-        />
+        android:label="홈">
+        <action
+            android:id="@+id/action_nav_home_to_nav_house_detail"
+            app:destination="@id/nav_house_detail" />
+    </fragment>
 
     <fragment
         android:id="@+id/nav_analysis"
@@ -30,5 +33,14 @@
         android:id="@+id/nav_my"
         android:name="com.capstone.houseviewingapp.my.MyFragment"
         />
+
+    <fragment
+        android:id="@+id/nav_house_detail"
+        android:name="com.capstone.houseviewingapp.home.HouseDetailFragment"
+        android:label="집 상세">
+        <argument
+            android:name="houseId"
+            app:argType="long" />
+    </fragment>
 
 </navigation>
