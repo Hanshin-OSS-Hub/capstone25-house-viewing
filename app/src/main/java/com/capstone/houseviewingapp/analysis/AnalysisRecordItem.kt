@@ -5,7 +5,7 @@ enum class RiskLevel { RED, AMBER, BLUE }
 enum class RecordSource {MANUAL, AUTO}
 
 data class AnalysisRecordItem(
-    val title: String,
+    val title: String, // TODO : 집 닉네임, 1회 진단 : 시간 등으로 변경 (2026.03.14 진단기록)
     val address: String,
     val riskSummary: String, // 주요 원인
     val level: RiskLevel,
