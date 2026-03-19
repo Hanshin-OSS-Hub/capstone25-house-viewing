@@ -3,6 +3,7 @@ package com.house.houseviewing.domain.registrysnapshot.controller;
 import com.house.houseviewing.application.registry.RegistryWorkflowService;
 import com.house.houseviewing.domain.registrysnapshot.dto.response.SnapshotResultResponse;
 import com.house.houseviewing.domain.registrysnapshot.service.RegistrySnapshotService;
+import com.house.houseviewing.global.file.pdf.dto.PdfDownloadResponse;
 import com.house.houseviewing.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,11 +22,12 @@ public class RegistrySnapshotController {
     private final RegistryWorkflowService registryWorkflowService;
 
     @PostMapping("/register/{houseId}")
-    public ResponseEntity<Long> register(
+    public ResponseEntity<PdfDownloadResponse> register(
             @PathVariable Long houseId,
             @RequestPart("file") MultipartFile snapshot){
-        Long register = registrySnapshotService.register(houseId, snapshot);
-        return ResponseEntity.ok(register);
+
+        PdfDownloadResponse result = registryWorkflowService.register(houseId, snapshot);
+        return ResponseEntity.ok(result);
     }
 
     @GetMapping

@@ -12,6 +12,7 @@ import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEnt
 import com.house.houseviewing.domain.registrysnapshot.repository.RegistrySnapshotRepository;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
+import com.house.houseviewing.global.file.pdf.dto.PdfDownloadResponse;
 import com.house.houseviewing.global.file.pdf.dto.PdfReportRequest;
 import com.house.houseviewing.global.file.pdf.dto.PdfUploadResult;
 import com.house.houseviewing.global.file.pdf.service.PdfReportTransferAndReceiveService;
@@ -38,27 +39,31 @@ public class RegistryWorkflowService {
 
 
     @Transactional
-    public void register(Long houseId, MultipartFile snapshot){
+    public PdfDownloadResponse register(Long houseId, MultipartFile snapshot){
         HouseEntity house = houseRepository.findById(houseId)
                 .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
         ContractEntity contract = contractRepository.findTopByHouseIdOrderByCreatedAtDesc(houseId)
                 .orElseThrow(() -> new AppException(ExceptionCode.CONTRACT_NOT_FOUND));
 
         RegistrySnapshotEntity snapshotEntity = snapshotExtractService.register(snapshot);
-        registrySnapshotRepository.save(snapshotEntity);
         house.addRegistrySnapshot(snapshotEntity);
+        registrySnapshotRepository.save(snapshotEntity);
 
         RegistryAnalysisEntity analyze = snapshotAnalysisService.analyze(snapshot);
-        registryAnalysisRepository.save(analyze);
         analyze.addRegistrySnapshot(snapshotEntity);
         analyze.addContract(contract);
+        registryAnalysisRepository.save(analyze);
 
         PdfReportRequest request = getPdfReportRequest(snapshotEntity, analyze, contract);
         PdfUploadResult uploadResult = pdfReportTransferAndReceiveService.transferAndReceive(request);
         PdfReportEntity pdfReport = getPdfReportEntity(uploadResult);
-        pdfReportRepository.save(pdfReport);
         pdfReport.addRegistryAnalysis(analyze);
+        pdfReportRepository.save(pdfReport);
 
+        return PdfDownloadResponse.builder()
+                .pdfReportId(pdfReport.getId())
+                .filePath(pdfReport.getPdfPath())
+                .build();
     }
 
     private static PdfReportEntity getPdfReportEntity(PdfUploadResult uploadResult) {
