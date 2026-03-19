@@ -16,6 +16,8 @@ public class PdfReportRequest {
 
     private Long registryAnalysisId;
 
+    private String snapshotName;
+
     private String rawData;
 
     private ContractType contractType;

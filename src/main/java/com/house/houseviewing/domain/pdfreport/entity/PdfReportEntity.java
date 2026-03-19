@@ -1,6 +1,7 @@
 package com.house.houseviewing.domain.pdfreport.entity;
 
 import com.house.houseviewing.domain.common.BaseTimeEntity;
+import com.house.houseviewing.domain.registryanalysis.entity.RegistryAnalysisEntity;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -18,8 +19,9 @@ public class PdfReportEntity extends BaseTimeEntity {
     @Column(name = "pdfreport_id")
     private Long id;
 
-    @OneToOne(mappedBy = "pdfReport", cascade = CascadeType.ALL, optional = false)
-    private RegistrySnapshotEntity registrySnapshot;
+    @OneToOne
+    @JoinColumn(name = "registryanalysis_id", unique = true)
+    private RegistryAnalysisEntity registryAnalysis;
 
     @Column(nullable = false)
     private String pdfKey;
@@ -39,5 +41,10 @@ public class PdfReportEntity extends BaseTimeEntity {
         this.pdfName = pdfName;
         this.pdfPath = pdfPath;
         this.pdfSizeBytes = pdfSizeBytes;
+    }
+
+    public void addRegistryAnalysis(RegistryAnalysisEntity registryAnalysis){
+        this.registryAnalysis = registryAnalysis;
+        registryAnalysis.addPdfReport(this);
     }
 }

@@ -3,6 +3,7 @@ package com.house.houseviewing.domain.registryanalysis.entity;
 import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.common.RiskLevel;
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
+import com.house.houseviewing.domain.pdfreport.entity.PdfReportEntity;
 import com.house.houseviewing.domain.registryanalysis.enums.AnalysisType;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import jakarta.persistence.*;
@@ -28,6 +29,9 @@ public class RegistryAnalysisEntity extends BaseTimeEntity {
     @OneToOne
     @JoinColumn(name = "contract_id", unique = true)
     private ContractEntity contract;
+
+    @OneToOne(mappedBy = "registryAnalysis")
+    private PdfReportEntity pdfReport;
 
     @Column(nullable = false)
     private AnalysisType analysisType;
@@ -62,4 +66,6 @@ public class RegistryAnalysisEntity extends BaseTimeEntity {
         this.snapshot = registrySnapshot;
         registrySnapshot.addAnalysis(this);
     }
+
+    public void addPdfReport(PdfReportEntity pdfReport) {this.pdfReport = pdfReport;}
 }
