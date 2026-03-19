@@ -1,10 +1,10 @@
-package com.house.houseviewing.global.file.service;
+package com.house.houseviewing.global.file.snapshot.service;
 
 import com.house.houseviewing.domain.registryanalysis.entity.RegistryAnalysisEntity;
 import com.house.houseviewing.domain.registryanalysis.enums.AnalysisType;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
-import com.house.houseviewing.global.file.dto.SnapshotAnalysisResult;
+import com.house.houseviewing.global.file.snapshot.dto.SnapshotAnalysisResult;
 import com.house.houseviewing.infrastructure.python.PythonEngineClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -1,4 +1,4 @@
-package com.house.houseviewing.global.file.dto;
+package com.house.houseviewing.global.file.snapshot.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -1,6 +1,5 @@
 package com.house.houseviewing.domain.registrysnapshot.service;
 
-import com.house.houseviewing.api.upload.service.PdfUploadService;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.house.repository.HouseRepository;
 import com.house.houseviewing.domain.registryanalysis.service.RegistryAnalysisService;
@@ -9,9 +8,7 @@ import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEnt
 import com.house.houseviewing.domain.registrysnapshot.repository.RegistrySnapshotRepository;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
-import com.house.houseviewing.global.file.service.SnapshotExtractService;
-import com.house.houseviewing.global.file.service.SnapshotUploadService;
-import com.house.houseviewing.infrastructure.python.model.analysis.PythonAnalysisRS;
+import com.house.houseviewing.global.file.snapshot.service.SnapshotExtractService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

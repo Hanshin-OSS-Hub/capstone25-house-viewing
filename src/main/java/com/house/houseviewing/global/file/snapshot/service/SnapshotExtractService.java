@@ -1,7 +1,7 @@
-package com.house.houseviewing.global.file.service;
+package com.house.houseviewing.global.file.snapshot.service;
 
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
-import com.house.houseviewing.global.file.dto.SnapshotUploadResult;
+import com.house.houseviewing.global.file.snapshot.dto.SnapshotUploadResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;

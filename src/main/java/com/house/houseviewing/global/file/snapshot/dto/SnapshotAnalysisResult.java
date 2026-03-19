@@ -1,4 +1,4 @@
-package com.house.houseviewing.global.file.dto;
+package com.house.houseviewing.global.file.snapshot.dto;
 
 import com.house.houseviewing.domain.common.RiskLevel;
 import com.house.houseviewing.domain.registryanalysis.enums.AnalysisType;

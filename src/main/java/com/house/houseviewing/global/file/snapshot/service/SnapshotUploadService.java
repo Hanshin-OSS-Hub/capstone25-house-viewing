@@ -1,8 +1,8 @@
-package com.house.houseviewing.global.file.service;
+package com.house.houseviewing.global.file.snapshot.service;
 
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
-import com.house.houseviewing.global.file.dto.SnapshotUploadResult;
+import com.house.houseviewing.global.file.snapshot.dto.SnapshotUploadResult;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;

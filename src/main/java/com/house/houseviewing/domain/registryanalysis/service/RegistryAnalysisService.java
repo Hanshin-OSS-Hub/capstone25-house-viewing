@@ -3,7 +3,7 @@ package com.house.houseviewing.domain.registryanalysis.service;
 import com.house.houseviewing.domain.registryanalysis.entity.RegistryAnalysisEntity;
 import com.house.houseviewing.domain.registryanalysis.repository.RegistryAnalysisRepository;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
-import com.house.houseviewing.global.file.service.SnapshotAnalysisService;
+import com.house.houseviewing.global.file.snapshot.service.SnapshotAnalysisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

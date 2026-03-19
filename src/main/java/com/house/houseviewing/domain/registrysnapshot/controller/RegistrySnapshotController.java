@@ -1,5 +1,6 @@
 package com.house.houseviewing.domain.registrysnapshot.controller;
 
+import com.house.houseviewing.application.registry.RegistryWorkflowService;
 import com.house.houseviewing.domain.registrysnapshot.dto.response.SnapshotResultResponse;
 import com.house.houseviewing.domain.registrysnapshot.service.RegistrySnapshotService;
 import com.house.houseviewing.global.security.CustomUserDetails;
@@ -17,6 +18,7 @@ import java.util.List;
 public class RegistrySnapshotController {
 
     private final RegistrySnapshotService registrySnapshotService;
+    private final RegistryWorkflowService registryWorkflowService;
 
     @PostMapping("/register/{houseId}")
     public ResponseEntity<Long> register(

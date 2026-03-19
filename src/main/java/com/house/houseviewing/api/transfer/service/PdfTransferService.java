@@ -37,7 +37,7 @@ public class PdfTransferService {
                 .rawData(rawData)
                 .build();
 
-        pythonEngineClient.sendRawDataAndReceivePdf(request).subscribe(pdfBytes -> {
+        pythonEngineClient.sendDataAndReceivePdf(request).subscribe(pdfBytes -> {
             String pdfName = "REPORT_" + UUID.randomUUID() + ".pdf";
             String pdfPath = "S3경로" + pdfName;
 

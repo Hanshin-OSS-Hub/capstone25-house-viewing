@@ -27,7 +27,6 @@ public class PdfReportService {
         PdfReportEntity pdfReport = PdfReportEntity.builder()
                 .pdfName(response.getPdfName())
                 .pdfPath(response.getPdfPath())
-                .registrySnapshot(registrySnapshot)
                 .build();
         PdfReportEntity save = pdfReportRepository.save(pdfReport);
         return save.getId();

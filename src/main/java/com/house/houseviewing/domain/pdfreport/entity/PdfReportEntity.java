@@ -22,16 +22,22 @@ public class PdfReportEntity extends BaseTimeEntity {
     private RegistrySnapshotEntity registrySnapshot;
 
     @Column(nullable = false)
+    private String pdfKey;
+
+    @Column(nullable = false)
     private String pdfName;
 
     @Column(nullable = false)
     private String pdfPath;
 
+    @Column(nullable = false)
+    private Long pdfSizeBytes;
+
     @Builder
-    public PdfReportEntity(Long id, RegistrySnapshotEntity registrySnapshot, String pdfName, String pdfPath) {
-        this.id = id;
-        this.registrySnapshot = registrySnapshot;
+    public PdfReportEntity(String pdfKey, String pdfName, String pdfPath, Long pdfSizeBytes) {
+        this.pdfKey = pdfKey;
         this.pdfName = pdfName;
         this.pdfPath = pdfPath;
+        this.pdfSizeBytes = pdfSizeBytes;
     }
 }
