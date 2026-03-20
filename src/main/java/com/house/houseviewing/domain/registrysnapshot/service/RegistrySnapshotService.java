@@ -38,7 +38,7 @@ public class RegistrySnapshotService {
 
     @Transactional
     public RegistrySnapshotEntity preRegister(PreContractDiagnosisRequest request, MultipartFile snapshot){
-
+        RegistrySnapshotEntity registrySnapshot = snapshotExtractService.register(snapshot);
     }
 
     public List<SnapshotResultResponse> getSnapshots(Long userId){

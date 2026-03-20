@@ -1,10 +1,10 @@
 package com.house.houseviewing.domain.registryanalysis.entity;
 
 import com.house.houseviewing.domain.common.BaseTimeEntity;
+import com.house.houseviewing.domain.common.DiagnosisType;
 import com.house.houseviewing.domain.common.RiskLevel;
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
 import com.house.houseviewing.domain.pdfreport.entity.PdfReportEntity;
-import com.house.houseviewing.domain.registryanalysis.enums.AnalysisType;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -33,9 +33,11 @@ public class RegistryAnalysisEntity extends BaseTimeEntity {
     @OneToOne(mappedBy = "registryAnalysis")
     private PdfReportEntity pdfReport;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private AnalysisType analysisType;
+    private DiagnosisType diagnosisType;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RiskLevel riskLevel;
 
@@ -49,8 +51,8 @@ public class RegistryAnalysisEntity extends BaseTimeEntity {
     private Integer ltvScore;
 
     @Builder
-    public RegistryAnalysisEntity(AnalysisType analysisType, RiskLevel riskLevel, String rawData, String mainReason, Integer ltvScore) {
-        this.analysisType = analysisType;
+    public RegistryAnalysisEntity(DiagnosisType diagnosisType, RiskLevel riskLevel, String rawData, String mainReason, Integer ltvScore) {
+        this.diagnosisType = diagnosisType;
         this.riskLevel = riskLevel;
         this.rawData = rawData;
         this.mainReason = mainReason;

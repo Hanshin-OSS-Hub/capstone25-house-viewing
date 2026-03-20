@@ -1,8 +1,8 @@
 package com.house.houseviewing.domain.registrysnapshot.entity;
 
 import com.house.houseviewing.domain.common.BaseTimeEntity;
+import com.house.houseviewing.domain.common.DiagnosisType;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
-import com.house.houseviewing.domain.common.RiskLevel;
 import com.house.houseviewing.domain.registryanalysis.entity.RegistryAnalysisEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,6 +27,10 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
     @OneToMany(mappedBy = "snapshot")
     private List<RegistryAnalysisEntity> analysis = new ArrayList<>();
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private DiagnosisType diagnosisType;
+
     @Column(nullable = false)
     private String snapshotUrl; // 새 등기부 PDF 경로
 
@@ -37,7 +41,8 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
     private Long snapshotSizeBytes;
 
     @Builder
-    public RegistrySnapshotEntity(String snapshotUrl, String snapshotName, Long snapshotSizeBytes) {
+    public RegistrySnapshotEntity(DiagnosisType diagnosisType, String snapshotUrl, String snapshotName, Long snapshotSizeBytes) {
+        this.diagnosisType = diagnosisType;
         this.snapshotUrl = snapshotUrl;
         this.snapshotName = snapshotName;
         this.snapshotSizeBytes = snapshotSizeBytes;

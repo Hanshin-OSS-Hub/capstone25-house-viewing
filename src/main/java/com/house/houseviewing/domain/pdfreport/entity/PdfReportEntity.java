@@ -1,6 +1,7 @@
 package com.house.houseviewing.domain.pdfreport.entity;
 
 import com.house.houseviewing.domain.common.BaseTimeEntity;
+import com.house.houseviewing.domain.common.DiagnosisType;
 import com.house.houseviewing.domain.registryanalysis.entity.RegistryAnalysisEntity;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import jakarta.persistence.*;
@@ -23,6 +24,10 @@ public class PdfReportEntity extends BaseTimeEntity {
     @JoinColumn(name = "registryanalysis_id", unique = true)
     private RegistryAnalysisEntity registryAnalysis;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private DiagnosisType diagnosisType;
+
     @Column(nullable = false)
     private String pdfKey;
 
@@ -36,7 +41,8 @@ public class PdfReportEntity extends BaseTimeEntity {
     private Long pdfSizeBytes;
 
     @Builder
-    public PdfReportEntity(String pdfKey, String pdfName, String pdfPath, Long pdfSizeBytes) {
+    public PdfReportEntity(DiagnosisType diagnosisType, String pdfKey, String pdfName, String pdfPath, Long pdfSizeBytes) {
+        this.diagnosisType = diagnosisType;
         this.pdfKey = pdfKey;
         this.pdfName = pdfName;
         this.pdfPath = pdfPath;
