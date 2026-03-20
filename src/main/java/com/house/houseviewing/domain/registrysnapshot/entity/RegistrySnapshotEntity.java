@@ -21,7 +21,7 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "house_id", nullable = true)
+    @JoinColumn(name = "house_id")
     private HouseEntity house;
 
     @OneToMany(mappedBy = "snapshot")
@@ -30,9 +30,6 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private DiagnosisType diagnosisType;
-
-    @Column(nullable = true)
-    private String preNickname;
 
     @Column(nullable = false)
     private String snapshotUrl; // 새 등기부 PDF 경로
@@ -44,15 +41,13 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
     private Long snapshotSizeBytes;
 
     @Builder
-    public RegistrySnapshotEntity(DiagnosisType diagnosisType, String preNickname, String snapshotUrl, String snapshotName, Long snapshotSizeBytes) {
+    public RegistrySnapshotEntity(DiagnosisType diagnosisType, String snapshotUrl, String snapshotName, Long snapshotSizeBytes) {
         this.diagnosisType = diagnosisType;
-        this.preNickname = preNickname;
         this.snapshotUrl = snapshotUrl;
         this.snapshotName = snapshotName;
         this.snapshotSizeBytes = snapshotSizeBytes;
     }
 
-    public void updatePreNickname(String preNickname) { this.preNickname = preNickname; }
     public void updateDiagnosisType(DiagnosisType diagnosisType) {this.diagnosisType = diagnosisType;}
     public void addHouse(HouseEntity houseEntity) {
         this.house = houseEntity;

@@ -41,8 +41,7 @@ public class PdfReportEntity extends BaseTimeEntity {
     private Long pdfSizeBytes;
 
     @Builder
-    public PdfReportEntity(DiagnosisType diagnosisType, String pdfKey, String pdfName, String pdfPath, Long pdfSizeBytes) {
-        this.diagnosisType = diagnosisType;
+    public PdfReportEntity(String pdfKey, String pdfName, String pdfPath, Long pdfSizeBytes) {
         this.pdfKey = pdfKey;
         this.pdfName = pdfName;
         this.pdfPath = pdfPath;
@@ -53,4 +52,6 @@ public class PdfReportEntity extends BaseTimeEntity {
         this.registryAnalysis = registryAnalysis;
         registryAnalysis.addPdfReport(this);
     }
+
+    public void updateDiagnosisType(DiagnosisType diagnosisType){this.diagnosisType = diagnosisType;}
 }

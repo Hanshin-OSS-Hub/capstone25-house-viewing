@@ -37,6 +37,8 @@ public class RegistryAnalysisEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private DiagnosisType diagnosisType;
 
+    private String preNickname;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private RiskLevel riskLevel;
@@ -51,8 +53,7 @@ public class RegistryAnalysisEntity extends BaseTimeEntity {
     private Integer ltvScore;
 
     @Builder
-    public RegistryAnalysisEntity(DiagnosisType diagnosisType, RiskLevel riskLevel, String rawData, String mainReason, Integer ltvScore) {
-        this.diagnosisType = diagnosisType;
+    public RegistryAnalysisEntity(RiskLevel riskLevel, String rawData, String mainReason, Integer ltvScore) {
         this.riskLevel = riskLevel;
         this.rawData = rawData;
         this.mainReason = mainReason;
@@ -69,5 +70,7 @@ public class RegistryAnalysisEntity extends BaseTimeEntity {
         registrySnapshot.addAnalysis(this);
     }
 
+    public void updatePreNickname(String preNickname) {this.preNickname = preNickname;}
+    public void updateDiagnosisType(DiagnosisType diagnosisType) {this.diagnosisType = diagnosisType;}
     public void addPdfReport(PdfReportEntity pdfReport) {this.pdfReport = pdfReport;}
 }

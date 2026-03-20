@@ -1,9 +1,11 @@
 package com.house.houseviewing.domain.registryanalysis.service;
 
+import com.house.houseviewing.domain.common.DiagnosisType;
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
 import com.house.houseviewing.domain.contract.repository.ContractRepository;
 import com.house.houseviewing.domain.registryanalysis.entity.RegistryAnalysisEntity;
 import com.house.houseviewing.domain.registryanalysis.repository.RegistryAnalysisRepository;
+import com.house.houseviewing.domain.registrysnapshot.dto.request.PreContractDiagnosisRequest;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
@@ -23,13 +25,22 @@ public class RegistryAnalysisService {
     private final SnapshotAnalysisService snapshotAnalysisService;
 
     @Transactional
-    public RegistryAnalysisEntity register(MultipartFile snapshot, RegistrySnapshotEntity registrySnapshot){
+    public RegistryAnalysisEntity postRegister(MultipartFile snapshot, RegistrySnapshotEntity registrySnapshot){
         Long houseId = registrySnapshot.getHouse().getId();
         ContractEntity contract = contractRepository.findTopByHouseIdOrderByCreatedAtDesc(houseId)
                 .orElseThrow(() -> new AppException(ExceptionCode.CONTRACT_NOT_FOUND));
         RegistryAnalysisEntity analysis = snapshotAnalysisService.analyze(snapshot);
         analysis.addRegistrySnapshot(registrySnapshot);
         analysis.addContract(contract);
+        analysis.updateDiagnosisType(DiagnosisType.POSTCONTRACT);
         return registryAnalysisRepository.save(analysis);
+    }
+
+    @Transactional
+    public RegistryAnalysisEntity preRegister(PreContractDiagnosisRequest request, MultipartFile snapshot){
+        RegistryAnalysisEntity analyze = snapshotAnalysisService.analyze(snapshot);
+        analyze.updateDiagnosisType(DiagnosisType.PRECONTRACT);
+        analyze.updatePreNickname(request.getNickname());
+        return registryAnalysisRepository.save(analyze);
     }
 }

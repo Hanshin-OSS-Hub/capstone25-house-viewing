@@ -1,5 +1,6 @@
 package com.house.houseviewing.domain.pdfreport.service;
 
+import com.house.houseviewing.domain.common.DiagnosisType;
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
 import com.house.houseviewing.domain.contract.repository.ContractRepository;
 import com.house.houseviewing.domain.pdfreport.entity.PdfReportEntity;
@@ -27,15 +28,26 @@ public class PdfReportService {
     private final PdfReportTransferAndReceiveService pdfReportTransferAndReceiveService;
 
     @Transactional
-    public PdfReportEntity register(RegistrySnapshotEntity snapshotEntity, RegistryAnalysisEntity analyze){
+    public PdfReportEntity postRegister(RegistrySnapshotEntity snapshotEntity, RegistryAnalysisEntity analyze){
 
         Long contractId = analyze.getContract().getId();
         ContractEntity contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new AppException(ExceptionCode.CONTRACT_NOT_FOUND));
-        PdfReportRequest request = getPdfReportRequest(snapshotEntity, analyze, contract);
+        PdfReportRequest request = getPdfReportPostRequest(snapshotEntity, analyze, contract);
         PdfUploadResult uploadResult = pdfReportTransferAndReceiveService.transferAndReceive(request);
         PdfReportEntity pdfReport = getPdfReportEntity(uploadResult);
         pdfReport.addRegistryAnalysis(analyze);
+        pdfReport.updateDiagnosisType(DiagnosisType.POSTCONTRACT);
+
+        return pdfReportRepository.save(pdfReport);
+    }
+
+    @Transactional
+    public PdfReportEntity preRegister(RegistryAnalysisEntity analyze){
+        PdfReportRequest request = getPdfReportPreRequest(analyze);
+        PdfUploadResult uploadResult = pdfReportTransferAndReceiveService.transferAndReceive(request);
+        PdfReportEntity pdfReport = getPdfReportEntity(uploadResult);
+        pdfReport.updateDiagnosisType(DiagnosisType.PRECONTRACT);
 
         return pdfReportRepository.save(pdfReport);
     }
@@ -49,9 +61,9 @@ public class PdfReportService {
                 .build();
     }
 
-    private static PdfReportRequest getPdfReportRequest(RegistrySnapshotEntity snapshotEntity, RegistryAnalysisEntity analyze, ContractEntity contract) {
+    private static PdfReportRequest getPdfReportPostRequest(RegistrySnapshotEntity snapshotEntity, RegistryAnalysisEntity analyze, ContractEntity contract) {
         return PdfReportRequest.builder()
-                .registryAnalysisId(snapshotEntity.getId())
+                .registryAnalysisId(analyze.getId())
                 .snapshotName(snapshotEntity.getSnapshotName())
                 .rawData(analyze.getRawData())
                 .contractType(contract.getContractType())
@@ -60,6 +72,14 @@ public class PdfReportService {
                 .maintenanceFee(contract.getMaintenanceFee())
                 .moveDate(contract.getMoveDate())
                 .confirmDate(contract.getConfirmDate())
+                .build();
+    }
+
+    private static PdfReportRequest getPdfReportPreRequest(RegistryAnalysisEntity analyze) {
+        return PdfReportRequest.builder()
+                .registryAnalysisId(analyze.getId())
+                .snapshotName(analyze.getSnapshot().getSnapshotName())
+                .rawData(analyze.getRawData())
                 .build();
     }
 }

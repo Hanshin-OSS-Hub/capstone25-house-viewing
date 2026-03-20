@@ -25,10 +25,8 @@ public class RegistryWorkflowService {
     public PdfDownloadResponse executePostContractDiagnosis(Long houseId, MultipartFile snapshot){
 
         RegistrySnapshotEntity snapshotEntity = registrySnapshotService.postRegister(houseId, snapshot);
-
-        RegistryAnalysisEntity analyze = registryAnalysisService.register(snapshot, snapshotEntity);
-
-        PdfReportEntity pdfReport = pdfReportService.register(snapshotEntity, analyze);
+        RegistryAnalysisEntity analyze = registryAnalysisService.postRegister(snapshot, snapshotEntity);
+        PdfReportEntity pdfReport = pdfReportService.postRegister(snapshotEntity, analyze);
 
         return PdfDownloadResponse.builder()
                 .pdfReportId(pdfReport.getId())
@@ -37,7 +35,12 @@ public class RegistryWorkflowService {
     }
 
     public PdfDownloadResponse executePreContractDiagnosis(PreContractDiagnosisRequest request, MultipartFile snapshot){
-        RegistrySnapshotEntity snapshotEntity = registrySnapshotService.preRegister(request, snapshot);
+        RegistryAnalysisEntity analyze = registryAnalysisService.preRegister(request, snapshot);
+        PdfReportEntity pdfReport = pdfReportService.preRegister(analyze);
 
+        return PdfDownloadResponse.builder()
+                .pdfReportId(pdfReport.getId())
+                .filePath(pdfReport.getPdfPath())
+                .build();
     }
 }

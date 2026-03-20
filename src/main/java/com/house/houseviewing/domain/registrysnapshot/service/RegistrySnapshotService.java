@@ -38,15 +38,6 @@ public class RegistrySnapshotService {
         return registrySnapshotRepository.save(registrySnapshot);
     }
 
-    @Transactional
-    public RegistrySnapshotEntity preRegister(PreContractDiagnosisRequest request, MultipartFile snapshot){
-        RegistrySnapshotEntity registrySnapshot = snapshotExtractService.register(snapshot);
-        registrySnapshot.updateDiagnosisType(DiagnosisType.PRECONTRACT);
-        registrySnapshot.updatePreNickname(request.getNickname());
-
-        return registrySnapshotRepository.save(registrySnapshot);
-    }
-
     public List<SnapshotResultResponse> getSnapshots(Long userId){
         List<RegistrySnapshotEntity> snapshots = registrySnapshotRepository.findByHouseUserId(userId);
 
