@@ -21,7 +21,7 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "house_id")
+    @JoinColumn(name = "house_id", nullable = true)
     private HouseEntity house;
 
     @OneToMany(mappedBy = "snapshot")

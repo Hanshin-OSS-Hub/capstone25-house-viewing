@@ -1,6 +1,7 @@
 package com.house.houseviewing.domain.registrysnapshot.controller;
 
 import com.house.houseviewing.application.registry.RegistryWorkflowService;
+import com.house.houseviewing.domain.registrysnapshot.dto.request.PreContractDiagnosisRequest;
 import com.house.houseviewing.domain.registrysnapshot.dto.response.SnapshotResultResponse;
 import com.house.houseviewing.domain.registrysnapshot.service.RegistrySnapshotService;
 import com.house.houseviewing.global.file.pdf.dto.PdfDownloadResponse;
@@ -21,13 +22,21 @@ public class RegistrySnapshotController {
     private final RegistrySnapshotService registrySnapshotService;
     private final RegistryWorkflowService registryWorkflowService;
 
-    @PostMapping("/register/{houseId}")
-    public ResponseEntity<PdfDownloadResponse> register(
+    @PostMapping("/houses/{houseId}/post-contract-diagnoses")
+    public ResponseEntity<PdfDownloadResponse> diagnosePostContract(
             @PathVariable Long houseId,
             @RequestPart("file") MultipartFile snapshot){
 
-        PdfDownloadResponse result = registryWorkflowService.register(houseId, snapshot);
+        PdfDownloadResponse result = registryWorkflowService.executePostContractDiagnosis(houseId, snapshot);
         return ResponseEntity.ok(result);
+    }
+
+    @PostMapping("/pre-contract-diagnoses")
+    public ResponseEntity<PdfDownloadResponse> diagnosePreContract(
+            @RequestPart("data") PreContractDiagnosisRequest request,
+            @RequestPart("file") MultipartFile snapshot
+    ){
+        registryWorkflowService.executePreContractDiagnosis(request, snapshot);
     }
 
     @GetMapping

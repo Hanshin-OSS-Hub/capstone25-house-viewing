@@ -2,7 +2,7 @@ package com.house.houseviewing.domain.registrysnapshot.service;
 
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.house.repository.HouseRepository;
-import com.house.houseviewing.domain.registryanalysis.service.RegistryAnalysisService;
+import com.house.houseviewing.domain.registrysnapshot.dto.request.PreContractDiagnosisRequest;
 import com.house.houseviewing.domain.registrysnapshot.dto.response.SnapshotResultResponse;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.domain.registrysnapshot.repository.RegistrySnapshotRepository;
@@ -26,7 +26,7 @@ public class RegistrySnapshotService {
     private final SnapshotExtractService snapshotExtractService;
 
     @Transactional
-    public RegistrySnapshotEntity register(Long houseId, MultipartFile snapshot){
+    public RegistrySnapshotEntity postRegister(Long houseId, MultipartFile snapshot){
         HouseEntity house = houseRepository.findById(houseId)
                 .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
 
@@ -34,6 +34,11 @@ public class RegistrySnapshotService {
         house.addRegistrySnapshot(registrySnapshot);
 
         return registrySnapshotRepository.save(registrySnapshot);
+    }
+
+    @Transactional
+    public RegistrySnapshotEntity preRegister(PreContractDiagnosisRequest request, MultipartFile snapshot){
+
     }
 
     public List<SnapshotResultResponse> getSnapshots(Long userId){

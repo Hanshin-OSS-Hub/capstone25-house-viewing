@@ -4,6 +4,7 @@ import com.house.houseviewing.domain.pdfreport.entity.PdfReportEntity;
 import com.house.houseviewing.domain.pdfreport.service.PdfReportService;
 import com.house.houseviewing.domain.registryanalysis.entity.RegistryAnalysisEntity;
 import com.house.houseviewing.domain.registryanalysis.service.RegistryAnalysisService;
+import com.house.houseviewing.domain.registrysnapshot.dto.request.PreContractDiagnosisRequest;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.domain.registrysnapshot.service.RegistrySnapshotService;
 import com.house.houseviewing.global.file.pdf.dto.PdfDownloadResponse;
@@ -21,9 +22,9 @@ public class RegistryWorkflowService {
     private final RegistryAnalysisService registryAnalysisService;
     private final PdfReportService pdfReportService;
 
-    public PdfDownloadResponse register(Long houseId, MultipartFile snapshot){
+    public PdfDownloadResponse executePostContractDiagnosis(Long houseId, MultipartFile snapshot){
 
-        RegistrySnapshotEntity snapshotEntity = registrySnapshotService.register(houseId, snapshot);
+        RegistrySnapshotEntity snapshotEntity = registrySnapshotService.postRegister(houseId, snapshot);
 
         RegistryAnalysisEntity analyze = registryAnalysisService.register(snapshot, snapshotEntity);
 
@@ -33,5 +34,10 @@ public class RegistryWorkflowService {
                 .pdfReportId(pdfReport.getId())
                 .filePath(pdfReport.getPdfPath())
                 .build();
+    }
+
+    public PdfDownloadResponse executePreContractDiagnosis(PreContractDiagnosisRequest request, MultipartFile snapshot){
+        RegistrySnapshotEntity snapshotEntity = registrySnapshotService.preRegister(request, snapshot);
+
     }
 }
