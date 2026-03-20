@@ -24,19 +24,16 @@ public class RegistrySnapshotService {
     private final HouseRepository houseRepository;
     private final RegistrySnapshotRepository registrySnapshotRepository;
     private final SnapshotExtractService snapshotExtractService;
-    private final RegistryAnalysisService registryAnalysisService;
 
     @Transactional
-    public Long register(Long houseId, MultipartFile snapshot){
+    public RegistrySnapshotEntity register(Long houseId, MultipartFile snapshot){
         HouseEntity house = houseRepository.findById(houseId)
                 .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
 
         RegistrySnapshotEntity registrySnapshot = snapshotExtractService.register(snapshot);
         house.addRegistrySnapshot(registrySnapshot);
-        RegistrySnapshotEntity saved = registrySnapshotRepository.save(registrySnapshot);
-        Long register = registryAnalysisService.register(snapshot, saved);
 
-        return saved.getId();
+        return registrySnapshotRepository.save(registrySnapshot);
     }
 
     public List<SnapshotResultResponse> getSnapshots(Long userId){
