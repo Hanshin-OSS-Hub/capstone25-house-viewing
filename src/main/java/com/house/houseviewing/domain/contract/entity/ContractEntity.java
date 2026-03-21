@@ -26,7 +26,7 @@ public class ContractEntity extends BaseTimeEntity {
     private HouseEntity house;
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RegistryAnalysisEntity> registryAnalyses = new ArrayList<>();
+    private List<RegistryAnalysisEntity> analyses = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -60,6 +60,6 @@ public class ContractEntity extends BaseTimeEntity {
         this.house = house;
     }
     public void addRegistryAnalysis(RegistryAnalysisEntity registryAnalysis){
-        this.registryAnalysis.add(registryAnalysis);
+        this.analyses.add(registryAnalysis);
     }
 }
