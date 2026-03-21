@@ -1,12 +1,12 @@
 package com.house.houseviewing.application.registry;
 
-import com.house.houseviewing.domain.pdfreport.entity.PdfReportEntity;
-import com.house.houseviewing.domain.pdfreport.service.PdfReportService;
-import com.house.houseviewing.domain.registryanalysis.entity.RegistryAnalysisEntity;
-import com.house.houseviewing.domain.registryanalysis.service.RegistryAnalysisService;
-import com.house.houseviewing.domain.registrysnapshot.dto.request.PreContractDiagnosisRequest;
-import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
-import com.house.houseviewing.domain.registrysnapshot.service.RegistrySnapshotService;
+import com.house.houseviewing.domain.postcontractpdfreports.entity.PdfReportEntity;
+import com.house.houseviewing.domain.postcontractpdfreports.service.PdfReportService;
+import com.house.houseviewing.domain.postcontractanalyses.entity.RegistryAnalysisEntity;
+import com.house.houseviewing.domain.postcontractanalyses.service.RegistryAnalysisService;
+import com.house.houseviewing.domain.registrysnapshots.dto.request.PreContractDiagnosisRequest;
+import com.house.houseviewing.domain.registrysnapshots.entity.RegistrySnapshotEntity;
+import com.house.houseviewing.domain.registrysnapshots.service.RegistrySnapshotService;
 import com.house.houseviewing.global.file.pdf.dto.PdfDownloadResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

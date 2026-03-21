@@ -1,6 +1,5 @@
 package com.house.houseviewing.global.file.pdf.dto;
 
-import com.house.houseviewing.domain.pdfreport.entity.PdfReportEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

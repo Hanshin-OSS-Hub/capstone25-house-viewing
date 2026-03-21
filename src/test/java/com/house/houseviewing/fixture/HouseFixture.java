@@ -1,9 +1,9 @@
 package com.house.houseviewing.fixture;
 
-import com.house.houseviewing.domain.house.entity.HouseEntity;
-import com.house.houseviewing.domain.house.dto.request.HouseRegisterRequest;
-import com.house.houseviewing.domain.user.entity.UserEntity;
-import com.house.houseviewing.domain.user.enums.MonitoringStatus;
+import com.house.houseviewing.domain.houses.entity.HouseEntity;
+import com.house.houseviewing.domain.houses.dto.request.HouseRegisterRequest;
+import com.house.houseviewing.domain.users.entity.UserEntity;
+import com.house.houseviewing.domain.users.enums.MonitoringStatus;
 
 public class HouseFixture {
 

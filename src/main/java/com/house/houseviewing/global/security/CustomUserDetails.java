@@ -1,6 +1,6 @@
 package com.house.houseviewing.global.security;
 
-import com.house.houseviewing.domain.user.entity.UserEntity;
+import com.house.houseviewing.domain.users.entity.UserEntity;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;

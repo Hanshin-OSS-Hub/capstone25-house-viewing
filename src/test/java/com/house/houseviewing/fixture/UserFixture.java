@@ -1,13 +1,13 @@
 package com.house.houseviewing.fixture;
 
-import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
-import com.house.houseviewing.domain.subscription.enums.PlanType;
-import com.house.houseviewing.domain.user.entity.UserEntity;
-import com.house.houseviewing.domain.user.dto.request.UserFindIdRequest;
+import com.house.houseviewing.domain.subscriptions.entity.SubscriptionEntity;
+import com.house.houseviewing.domain.subscriptions.enums.PlanType;
+import com.house.houseviewing.domain.users.entity.UserEntity;
+import com.house.houseviewing.domain.users.dto.request.UserFindIdRequest;
 import com.house.houseviewing.domain.common.auth.dto.UserLoginRequest;
-import com.house.houseviewing.domain.user.dto.request.UserResetPasswordRequest;
-import com.house.houseviewing.domain.user.dto.request.UserVerifyPasswordRequest;
-import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;
+import com.house.houseviewing.domain.users.dto.request.UserResetPasswordRequest;
+import com.house.houseviewing.domain.users.dto.request.UserVerifyPasswordRequest;
+import com.house.houseviewing.domain.users.dto.request.UserRegisterRequest;
 import org.springframework.transaction.annotation.Transactional;
 
 @Transactional

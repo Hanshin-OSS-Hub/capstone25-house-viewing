@@ -1,6 +1,6 @@
 package com.house.houseviewing.global.file.snapshot.service;
 
-import com.house.houseviewing.domain.registryanalysis.entity.RegistryAnalysisEntity;
+import com.house.houseviewing.domain.postcontractanalyses.entity.RegistryAnalysisEntity;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.global.file.snapshot.dto.SnapshotAnalysisResult;

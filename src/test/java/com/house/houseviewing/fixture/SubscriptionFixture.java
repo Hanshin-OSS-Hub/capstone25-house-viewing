@@ -1,9 +1,9 @@
 package com.house.houseviewing.fixture;
 
-import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
-import com.house.houseviewing.domain.subscription.enums.PlanType;
-import com.house.houseviewing.domain.subscription.dto.request.SubscriptionPremiumRequest;
-import com.house.houseviewing.domain.user.entity.UserEntity;
+import com.house.houseviewing.domain.subscriptions.entity.SubscriptionEntity;
+import com.house.houseviewing.domain.subscriptions.enums.PlanType;
+import com.house.houseviewing.domain.subscriptions.dto.request.SubscriptionPremiumRequest;
+import com.house.houseviewing.domain.users.entity.UserEntity;
 
 public class SubscriptionFixture {
 
