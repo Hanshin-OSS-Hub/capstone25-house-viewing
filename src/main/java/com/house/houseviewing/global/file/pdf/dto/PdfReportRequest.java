@@ -1,6 +1,6 @@
 package com.house.houseviewing.global.file.pdf.dto;
 
-import com.house.houseviewing.domain.contracts.enums.ContractType;
+import com.house.houseviewing.domain.contract.enums.ContractType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

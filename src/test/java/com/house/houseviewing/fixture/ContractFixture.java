@@ -1,9 +1,9 @@
 package com.house.houseviewing.fixture;
 
-import com.house.houseviewing.domain.contracts.entity.ContractEntity;
-import com.house.houseviewing.domain.contracts.enums.ContractType;
-import com.house.houseviewing.domain.contracts.dto.request.ContractRegisterRequest;
-import com.house.houseviewing.domain.houses.entity.HouseEntity;
+import com.house.houseviewing.domain.contract.entity.ContractEntity;
+import com.house.houseviewing.domain.contract.enums.ContractType;
+import com.house.houseviewing.domain.contract.dto.request.ContractRegisterRequest;
+import com.house.houseviewing.domain.house.entity.HouseEntity;
 
 import java.time.LocalDate;
 

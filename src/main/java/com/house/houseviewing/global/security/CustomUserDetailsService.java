@@ -1,7 +1,7 @@
 package com.house.houseviewing.global.security;
 
-import com.house.houseviewing.domain.users.entity.UserEntity;
-import com.house.houseviewing.domain.users.repository.UserRepository;
+import com.house.houseviewing.domain.user.entity.UserEntity;
+import com.house.houseviewing.domain.user.repository.UserRepository;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
 import lombok.RequiredArgsConstructor;
