@@ -1,6 +1,5 @@
 package com.house.houseviewing.domain.report.postreport.service;
 
-import com.house.houseviewing.domain.common.DiagnosisType;
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
 import com.house.houseviewing.domain.contract.repository.ContractRepository;
 import com.house.houseviewing.domain.report.postreport.entity.PostReportEntity;

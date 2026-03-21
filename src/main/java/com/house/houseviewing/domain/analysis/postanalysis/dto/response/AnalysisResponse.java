@@ -1,6 +1,6 @@
 package com.house.houseviewing.domain.analysis.postanalysis.dto.response;
 
-import com.house.houseviewing.domain.common.DiagnosisType;
+import com.house.houseviewing.domain.common.RatePlan;
 import com.house.houseviewing.domain.common.RiskLevel;
 import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
 import lombok.AllArgsConstructor;
@@ -26,7 +26,7 @@ public class AnalysisResponse {
 
     public static AnalysisResponse from(PostAnalysisEntity registryAnalysis){
         String nickname;
-        if(registryAnalysis.getDiagnosisType() == DiagnosisType.PRECONTRACT){
+        if(registryAnalysis.getDiagnosisType() == RatePlan.PRECONTRACT){
             nickname = registryAnalysis.getPreNickname();
         }
         else{

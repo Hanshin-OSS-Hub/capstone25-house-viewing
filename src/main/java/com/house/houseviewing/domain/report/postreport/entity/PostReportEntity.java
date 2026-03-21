@@ -1,7 +1,6 @@
 package com.house.houseviewing.domain.report.postreport.entity;
 
 import com.house.houseviewing.domain.common.BaseTimeEntity;
-import com.house.houseviewing.domain.common.DiagnosisType;
 import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;

@@ -1,4 +1,55 @@
 package com.house.houseviewing.domain.analysis.preanalysis.entity;
 
-public class PreAnalysisEntity {
+import com.house.houseviewing.domain.common.BaseTimeEntity;
+import com.house.houseviewing.domain.common.RatePlan;
+import com.house.houseviewing.domain.common.RiskLevel;
+import com.house.houseviewing.domain.report.prereport.entity.PreReportEntity;
+import jakarta.persistence.*;
+import lombok.AccessLevel;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "preanalyses")
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+public class PreAnalysisEntity extends BaseTimeEntity {
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "analysis_id")
+    private Long id;
+
+    @OneToOne(mappedBy = "analysis")
+    private PreReportEntity preReportEntity;
+
+    @Enumerated(value = EnumType.STRING)
+    @Column(nullable = false)
+    private RatePlan ratePlan;
+
+    @Column(nullable = false)
+    private String nickname;
+
+    @Column(columnDefinition = "json", nullable = false)
+    private String rawData;
+
+    @Column(nullable = false)
+    private String mainReason;
+
+    @Enumerated(value = EnumType.STRING)
+    @Column(nullable = false)
+    private RiskLevel riskLevel;
+
+    @Column(nullable = false)
+    private Integer ltvScore;
+
+    @Builder
+    public PreAnalysisEntity(RatePlan ratePlan, String nickname, String rawData, String mainReason, RiskLevel riskLevel, Integer ltvScore) {
+        this.ratePlan = ratePlan;
+        this.nickname = nickname;
+        this.rawData = rawData;
+        this.mainReason = mainReason;
+        this.riskLevel = riskLevel;
+        this.ltvScore = ltvScore;
+    }
 }
