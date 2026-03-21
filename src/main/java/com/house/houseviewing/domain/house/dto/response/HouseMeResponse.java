@@ -2,6 +2,7 @@ package com.house.houseviewing.domain.house.dto.response;
 
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
+import com.house.houseviewing.domain.registryanalysis.entity.RegistryAnalysisEntity;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -30,7 +31,7 @@ public class HouseMeResponse {
 
     private Integer ltvScore;
 
-    public static HouseMeResponse from(HouseEntity house, ContractEntity contract, RegistrySnapshotEntity snapshot){
+    public static HouseMeResponse from(HouseEntity house, ContractEntity contract, RegistryAnalysisEntity analysis){
 
         return HouseMeResponse.builder()
                 .nickname(house.getNickname())
@@ -40,7 +41,7 @@ public class HouseMeResponse {
                 .maintenanceFee(contract.getMaintenanceFee())
                 .moveDate(contract.getMoveDate())
                 .confirmDate(contract.getConfirmDate())
-                .ltvScore(snapshot.getLtvScore())
+                .ltvScore(analysis.getLtvScore())
                 .build();
     }
 }
