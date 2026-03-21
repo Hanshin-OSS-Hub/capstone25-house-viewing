@@ -32,7 +32,7 @@ public class HouseEntity extends BaseTimeEntity {
     private List<ContractEntity> contracts = new ArrayList<>();
 
     @OneToMany(mappedBy = "house", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RegistrySnapshotEntity> registrySnapshots = new ArrayList<>();
+    private List<RegistrySnapshotEntity> snapshots = new ArrayList<>();
 
     @Column(nullable = false)
     private String nickname;
@@ -58,7 +58,7 @@ public class HouseEntity extends BaseTimeEntity {
     }
 
     public void addRegistrySnapshot(RegistrySnapshotEntity registrySnapshot){
-        this.registrySnapshots.add(registrySnapshot);
+        this.snapshots.add(registrySnapshot);
         registrySnapshot.addHouse(this);
     }
 
@@ -72,7 +72,6 @@ public class HouseEntity extends BaseTimeEntity {
     }
     public void updateAddress(Address address) {this.address = address;}
     public void updateNickname(String nickname) {this.nickname = nickname;}
-
     public void addUser(UserEntity user) {
         this.user = user;
     }
