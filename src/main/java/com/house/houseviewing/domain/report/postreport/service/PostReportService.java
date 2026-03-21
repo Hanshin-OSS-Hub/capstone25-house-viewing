@@ -35,7 +35,6 @@ public class PostReportService {
         PdfUploadResult uploadResult = pdfReportTransferAndReceiveService.transferAndReceive(request);
         PostReportEntity pdfReport = getPdfReportEntity(uploadResult);
         pdfReport.addRegistryAnalysis(analyze);
-        pdfReport.updateDiagnosisType(DiagnosisType.POSTCONTRACT);
 
         return postReportRepository.save(pdfReport);
     }
@@ -45,7 +44,6 @@ public class PostReportService {
         PdfReportRequest request = getPdfReportPreRequest(analyze);
         PdfUploadResult uploadResult = pdfReportTransferAndReceiveService.transferAndReceive(request);
         PostReportEntity pdfReport = getPdfReportEntity(uploadResult);
-        pdfReport.updateDiagnosisType(DiagnosisType.PRECONTRACT);
 
         return postReportRepository.save(pdfReport);
     }

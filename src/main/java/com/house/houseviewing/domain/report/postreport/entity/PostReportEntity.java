@@ -23,10 +23,6 @@ public class PostReportEntity extends BaseTimeEntity {
     @JoinColumn(name = "analysis_id", unique = true)
     private PostAnalysisEntity analysis;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private DiagnosisType diagnosisType;
-
     @Column(nullable = false)
     private String pdfKey;
 
@@ -48,9 +44,7 @@ public class PostReportEntity extends BaseTimeEntity {
     }
 
     public void addRegistryAnalysis(PostAnalysisEntity registryAnalysis){
-        this.registryAnalysis = registryAnalysis;
+        this.analysis = registryAnalysis;
         registryAnalysis.addPdfReport(this);
     }
-
-    public void updateDiagnosisType(DiagnosisType diagnosisType){this.diagnosisType = diagnosisType;}
 }
