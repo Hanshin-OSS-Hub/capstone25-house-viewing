@@ -20,7 +20,7 @@ public class PreAnalysisEntity extends BaseTimeEntity {
     @Column(name = "analysis_id")
     private Long id;
 
-    @OneToOne(mappedBy = "analysis")
+    @OneToOne(mappedBy = "analysis", cascade = CascadeType.ALL, orphanRemoval = true)
     private PreReportEntity preReportEntity;
 
     @Enumerated(value = EnumType.STRING)
@@ -51,5 +51,9 @@ public class PreAnalysisEntity extends BaseTimeEntity {
         this.mainReason = mainReason;
         this.riskLevel = riskLevel;
         this.ltvScore = ltvScore;
+    }
+
+    public void addReport(PreReportEntity report){
+        this.preReportEntity = report;
     }
 }
