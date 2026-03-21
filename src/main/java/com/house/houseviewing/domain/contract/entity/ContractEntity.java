@@ -3,7 +3,7 @@ package com.house.houseviewing.domain.contract.entity;
 import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.contract.enums.ContractType;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
-import com.house.houseviewing.domain.postanalysis.entity.RegistryAnalysisEntity;
+import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,7 +26,7 @@ public class ContractEntity extends BaseTimeEntity {
     private HouseEntity house;
 
     @OneToMany(mappedBy = "contract", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RegistryAnalysisEntity> analyses = new ArrayList<>();
+    private List<PostAnalysisEntity> analyses = new ArrayList<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -59,7 +59,7 @@ public class ContractEntity extends BaseTimeEntity {
     public void addHouse(HouseEntity house){
         this.house = house;
     }
-    public void addRegistryAnalysis(RegistryAnalysisEntity registryAnalysis){
+    public void addRegistryAnalysis(PostAnalysisEntity registryAnalysis){
         this.analyses.add(registryAnalysis);
     }
 }

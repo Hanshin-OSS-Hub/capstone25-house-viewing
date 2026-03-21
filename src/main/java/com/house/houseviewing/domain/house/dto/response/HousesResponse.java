@@ -1,7 +1,7 @@
 package com.house.houseviewing.domain.house.dto.response;
 
 import com.house.houseviewing.domain.house.entity.HouseEntity;
-import com.house.houseviewing.domain.postanalysis.entity.RegistryAnalysisEntity;
+import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.domain.user.enums.MonitoringStatus;
 import lombok.AllArgsConstructor;
@@ -29,8 +29,8 @@ public class HousesResponse {
         if (!house.getSnapshots().isEmpty()){
             RegistrySnapshotEntity snapshot = house.getSnapshots()
                     .get(house.getSnapshots().size() - 1);
-            if(!snapshot.getAnalysis().isEmpty()){
-                RegistryAnalysisEntity analysis = snapshot.getAnalysis().get(snapshot.getAnalysis().size() - 1);
+            if(!snapshot.getAnalyses().isEmpty()){
+                PostAnalysisEntity analysis = snapshot.getAnalyses().get(snapshot.getAnalyses().size() - 1);
 
                 ltvScore = analysis.getLtvScore();
             }

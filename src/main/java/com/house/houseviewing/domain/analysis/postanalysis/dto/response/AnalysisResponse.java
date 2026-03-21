@@ -1,8 +1,8 @@
-package com.house.houseviewing.domain.postanalysis.dto.response;
+package com.house.houseviewing.domain.analysis.postanalysis.dto.response;
 
 import com.house.houseviewing.domain.common.DiagnosisType;
 import com.house.houseviewing.domain.common.RiskLevel;
-import com.house.houseviewing.domain.postanalysis.entity.RegistryAnalysisEntity;
+import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -24,7 +24,7 @@ public class AnalysisResponse {
 
     private Integer ltvScore;
 
-    public static AnalysisResponse from(RegistryAnalysisEntity registryAnalysis){
+    public static AnalysisResponse from(PostAnalysisEntity registryAnalysis){
         String nickname;
         if(registryAnalysis.getDiagnosisType() == DiagnosisType.PRECONTRACT){
             nickname = registryAnalysis.getPreNickname();

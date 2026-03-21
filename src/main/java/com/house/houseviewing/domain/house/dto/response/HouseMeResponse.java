@@ -1,7 +1,7 @@
 package com.house.houseviewing.domain.house.dto.response;
 
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
-import com.house.houseviewing.domain.postanalysis.entity.RegistryAnalysisEntity;
+import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -29,7 +29,7 @@ public class HouseMeResponse {
 
     private Integer ltvScore;
 
-    public static HouseMeResponse from(ContractEntity contract, RegistryAnalysisEntity analysis){
+    public static HouseMeResponse from(ContractEntity contract, PostAnalysisEntity analysis){
 
         return HouseMeResponse.builder()
                 .nickname(contract.getHouse().getNickname())

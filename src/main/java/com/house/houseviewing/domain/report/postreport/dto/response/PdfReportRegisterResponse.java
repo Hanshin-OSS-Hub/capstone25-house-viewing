@@ -1,4 +1,4 @@
-package com.house.houseviewing.domain.postreport.dto.response;
+package com.house.houseviewing.domain.report.postreport.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

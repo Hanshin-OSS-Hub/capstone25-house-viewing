@@ -1,9 +1,9 @@
 package com.house.houseviewing.application.registry;
 
-import com.house.houseviewing.domain.postreport.entity.PdfReportEntity;
-import com.house.houseviewing.domain.postreport.service.PdfReportService;
-import com.house.houseviewing.domain.postanalysis.entity.RegistryAnalysisEntity;
-import com.house.houseviewing.domain.postanalysis.service.RegistryAnalysisService;
+import com.house.houseviewing.domain.report.postreport.entity.PostReportEntity;
+import com.house.houseviewing.domain.report.postreport.service.PostReportService;
+import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
+import com.house.houseviewing.domain.analysis.postanalysis.service.PostAnalysisService;
 import com.house.houseviewing.domain.registrysnapshot.dto.request.PreContractDiagnosisRequest;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.domain.registrysnapshot.service.RegistrySnapshotService;
@@ -19,14 +19,14 @@ import org.springframework.web.multipart.MultipartFile;
 public class RegistryWorkflowService {
 
     private final RegistrySnapshotService registrySnapshotService;
-    private final RegistryAnalysisService registryAnalysisService;
-    private final PdfReportService pdfReportService;
+    private final PostAnalysisService postAnalysisService;
+    private final PostReportService postReportService;
 
     public PdfDownloadResponse executePostContractDiagnosis(Long houseId, MultipartFile snapshot){
 
-        RegistrySnapshotEntity snapshotEntity = registrySnapshotService.postRegister(houseId, snapshot);
-        RegistryAnalysisEntity analyze = registryAnalysisService.postRegister(snapshot, snapshotEntity);
-        PdfReportEntity pdfReport = pdfReportService.postRegister(snapshotEntity, analyze);
+        RegistrySnapshotEntity snapshotEntity = registrySnapshotService.register(houseId, snapshot);
+        PostAnalysisEntity analyze = postAnalysisService.postRegister(snapshot, snapshotEntity);
+        PostReportEntity pdfReport = postReportService.postRegister(snapshotEntity, analyze);
 
         return PdfDownloadResponse.builder()
                 .pdfReportId(pdfReport.getId())
@@ -35,8 +35,8 @@ public class RegistryWorkflowService {
     }
 
     public PdfDownloadResponse executePreContractDiagnosis(PreContractDiagnosisRequest request, MultipartFile snapshot){
-        RegistryAnalysisEntity analyze = registryAnalysisService.preRegister(request, snapshot);
-        PdfReportEntity pdfReport = pdfReportService.preRegister(analyze);
+        PostAnalysisEntity analyze = postAnalysisService.preRegister(request, snapshot);
+        PostReportEntity pdfReport = postReportService.preRegister(analyze);
 
         return PdfDownloadResponse.builder()
                 .pdfReportId(pdfReport.getId())

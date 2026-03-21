@@ -1,9 +1,8 @@
 package com.house.houseviewing.domain.registrysnapshot.entity;
 
 import com.house.houseviewing.domain.common.BaseTimeEntity;
-import com.house.houseviewing.domain.common.DiagnosisType;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
-import com.house.houseviewing.domain.postanalysis.entity.RegistryAnalysisEntity;
+import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,7 +16,7 @@ import java.util.List;
 public class RegistrySnapshotEntity extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "registrysnapshot_id")
+    @Column(name = "snapshot_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -25,11 +24,7 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
     private HouseEntity house;
 
     @OneToMany(mappedBy = "snapshot")
-    private List<RegistryAnalysisEntity> analysis = new ArrayList<>();
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private DiagnosisType diagnosisType;
+    private List<PostAnalysisEntity> analyses = new ArrayList<>();
 
     @Column(nullable = false)
     private String snapshotUrl; // 새 등기부 PDF 경로
@@ -41,16 +36,14 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
     private Long snapshotSizeBytes;
 
     @Builder
-    public RegistrySnapshotEntity(DiagnosisType diagnosisType, String snapshotUrl, String snapshotName, Long snapshotSizeBytes) {
-        this.diagnosisType = diagnosisType;
+    public RegistrySnapshotEntity(String snapshotUrl, String snapshotName, Long snapshotSizeBytes) {
         this.snapshotUrl = snapshotUrl;
         this.snapshotName = snapshotName;
         this.snapshotSizeBytes = snapshotSizeBytes;
     }
 
-    public void updateDiagnosisType(DiagnosisType diagnosisType) {this.diagnosisType = diagnosisType;}
     public void addHouse(HouseEntity houseEntity) {
         this.house = houseEntity;
     }
-    public void addAnalysis(RegistryAnalysisEntity analysis){ this.analysis.add(analysis); }
+    public void addAnalysis(PostAnalysisEntity analysis){ this.analyses.add(analysis); }
 }

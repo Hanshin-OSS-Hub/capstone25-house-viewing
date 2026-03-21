@@ -1,6 +1,6 @@
 package com.house.houseviewing.global.file.snapshot.service;
 
-import com.house.houseviewing.domain.postanalysis.entity.RegistryAnalysisEntity;
+import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.global.file.snapshot.dto.SnapshotAnalysisResult;
@@ -15,7 +15,7 @@ public class SnapshotAnalysisService {
 
     private final PythonEngineClient pythonEngineClient;
 
-    public RegistryAnalysisEntity analyze(MultipartFile snapshot){
+    public PostAnalysisEntity analyze(MultipartFile snapshot){
 
         try{
             SnapshotAnalysisResult result = pythonEngineClient.sendPdf(snapshot).block();
@@ -24,7 +24,7 @@ public class SnapshotAnalysisService {
                 throw new AppException(ExceptionCode.ANALYSIS_FAILED);
             }
 
-            return RegistryAnalysisEntity.builder()
+            return PostAnalysisEntity.builder()
                     .rawData(result.getRawData())
                     .mainReason(result.getMainReason())
                     .ltvScore(result.getLtvScore())

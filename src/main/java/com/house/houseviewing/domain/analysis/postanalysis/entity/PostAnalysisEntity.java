@@ -1,10 +1,9 @@
-package com.house.houseviewing.domain.postanalysis.entity;
+package com.house.houseviewing.domain.analysis.postanalysis.entity;
 
 import com.house.houseviewing.domain.common.BaseTimeEntity;
-import com.house.houseviewing.domain.common.DiagnosisType;
 import com.house.houseviewing.domain.common.RiskLevel;
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
-import com.house.houseviewing.domain.postreport.entity.PdfReportEntity;
+import com.house.houseviewing.domain.report.postreport.entity.PostReportEntity;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
@@ -16,28 +15,22 @@ import lombok.NoArgsConstructor;
 @Table(name = "houses")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class RegistryAnalysisEntity extends BaseTimeEntity {
+public class PostAnalysisEntity extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "registryanalysis_id")
+    @Column(name = "analysis_id")
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "registrysnapshot_id")
+    @JoinColumn(name = "snapshot_id")
     private RegistrySnapshotEntity snapshot;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contract_id", unique = true)
     private ContractEntity contract;
 
-    @OneToOne(mappedBy = "registryAnalysis")
-    private PdfReportEntity pdfReport;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private DiagnosisType diagnosisType;
-
-    private String preNickname;
+    @OneToOne(mappedBy = "analysis")
+    private PostReportEntity pdfReport;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -53,7 +46,7 @@ public class RegistryAnalysisEntity extends BaseTimeEntity {
     private Integer ltvScore;
 
     @Builder
-    public RegistryAnalysisEntity(RiskLevel riskLevel, String rawData, String mainReason, Integer ltvScore) {
+    public PostAnalysisEntity(RiskLevel riskLevel, String rawData, String mainReason, Integer ltvScore) {
         this.riskLevel = riskLevel;
         this.rawData = rawData;
         this.mainReason = mainReason;
@@ -70,7 +63,5 @@ public class RegistryAnalysisEntity extends BaseTimeEntity {
         registrySnapshot.addAnalysis(this);
     }
 
-    public void updatePreNickname(String preNickname) {this.preNickname = preNickname;}
-    public void updateDiagnosisType(DiagnosisType diagnosisType) {this.diagnosisType = diagnosisType;}
-    public void addPdfReport(PdfReportEntity pdfReport) {this.pdfReport = pdfReport;}
+    public void addPdfReport(PostReportEntity pdfReport) {this.pdfReport = pdfReport;}
 }

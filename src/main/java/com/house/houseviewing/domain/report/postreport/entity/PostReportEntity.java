@@ -1,8 +1,8 @@
-package com.house.houseviewing.domain.postreport.entity;
+package com.house.houseviewing.domain.report.postreport.entity;
 
 import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.common.DiagnosisType;
-import com.house.houseviewing.domain.postanalysis.entity.RegistryAnalysisEntity;
+import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -13,15 +13,15 @@ import lombok.NoArgsConstructor;
 @Table(name = "pdfreports")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class PdfReportEntity extends BaseTimeEntity {
+public class PostReportEntity extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "pdfreport_id")
+    @Column(name = "report_id")
     private Long id;
 
     @OneToOne
-    @JoinColumn(name = "registryanalysis_id", unique = true)
-    private RegistryAnalysisEntity registryAnalysis;
+    @JoinColumn(name = "analysis_id", unique = true)
+    private PostAnalysisEntity analysis;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -40,14 +40,14 @@ public class PdfReportEntity extends BaseTimeEntity {
     private Long pdfSizeBytes;
 
     @Builder
-    public PdfReportEntity(String pdfKey, String pdfName, String pdfPath, Long pdfSizeBytes) {
+    public PostReportEntity(String pdfKey, String pdfName, String pdfPath, Long pdfSizeBytes) {
         this.pdfKey = pdfKey;
         this.pdfName = pdfName;
         this.pdfPath = pdfPath;
         this.pdfSizeBytes = pdfSizeBytes;
     }
 
-    public void addRegistryAnalysis(RegistryAnalysisEntity registryAnalysis){
+    public void addRegistryAnalysis(PostAnalysisEntity registryAnalysis){
         this.registryAnalysis = registryAnalysis;
         registryAnalysis.addPdfReport(this);
     }

@@ -1,6 +1,5 @@
 package com.house.houseviewing.domain.registrysnapshot.service;
 
-import com.house.houseviewing.domain.common.DiagnosisType;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.house.repository.HouseRepository;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
@@ -13,8 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
-
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -25,12 +22,11 @@ public class RegistrySnapshotService {
     private final SnapshotExtractService snapshotExtractService;
 
     @Transactional
-    public RegistrySnapshotEntity postRegister(Long houseId, MultipartFile snapshot){
+    public RegistrySnapshotEntity register(Long houseId, MultipartFile snapshot){
         HouseEntity house = houseRepository.findById(houseId)
                 .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
 
         RegistrySnapshotEntity registrySnapshot = snapshotExtractService.register(snapshot);
-        registrySnapshot.updateDiagnosisType(DiagnosisType.POSTCONTRACT);
         house.addRegistrySnapshot(registrySnapshot);
 
         return registrySnapshotRepository.save(registrySnapshot);
