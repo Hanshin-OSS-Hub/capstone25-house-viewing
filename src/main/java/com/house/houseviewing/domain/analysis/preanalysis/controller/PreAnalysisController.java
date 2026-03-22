@@ -1,7 +1,6 @@
 package com.house.houseviewing.domain.analysis.preanalysis.controller;
 
-import com.house.houseviewing.application.registry.RegistryWorkflowService;
-import com.house.houseviewing.domain.analysis.preanalysis.service.PreAnalysisService;
+import com.house.houseviewing.application.registry.AnalysisWorkflowService;
 import com.house.houseviewing.domain.registrysnapshot.dto.request.PreContractDiagnosisRequest;
 import com.house.houseviewing.global.file.pdf.dto.PdfDownloadResponse;
 import com.house.houseviewing.global.security.CustomUserDetails;
@@ -19,7 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class PreAnalysisController {
 
-    private final RegistryWorkflowService registryWorkflowService;
+    private final AnalysisWorkflowService analysisWorkflowService;
 
     @PostMapping("/pre-contract-diganoses")
     public ResponseEntity<PdfDownloadResponse> diagnosePreContract(
@@ -27,7 +26,7 @@ public class PreAnalysisController {
             @RequestPart("file") MultipartFile snapshot,
             @RequestPart("data") PreContractDiagnosisRequest request){
 
-        PdfDownloadResponse result = registryWorkflowService.executePreContractDiagnosis(userDetails.getUserId(), request, snapshot);
+        PdfDownloadResponse result = analysisWorkflowService.executePreContractDiagnosis(userDetails.getUserId(), request, snapshot);
         return ResponseEntity.ok(result);
     }
 }

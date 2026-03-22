@@ -20,7 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class RegistryWorkflowService {
+public class AnalysisWorkflowService {
 
     private final RegistrySnapshotService registrySnapshotService;
     private final PostAnalysisService postAnalysisService;
