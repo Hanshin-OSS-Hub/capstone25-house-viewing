@@ -1,9 +1,9 @@
 package com.house.houseviewing.domain.analysis.preanalysis.entity;
 
 import com.house.houseviewing.domain.common.BaseTimeEntity;
-import com.house.houseviewing.domain.common.RatePlan;
 import com.house.houseviewing.domain.common.RiskLevel;
 import com.house.houseviewing.domain.report.prereport.entity.PreReportEntity;
+import com.house.houseviewing.domain.user.entity.UserEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -23,9 +23,9 @@ public class PreAnalysisEntity extends BaseTimeEntity {
     @OneToOne(mappedBy = "analysis", cascade = CascadeType.ALL, orphanRemoval = true)
     private PreReportEntity preReportEntity;
 
-    @Enumerated(value = EnumType.STRING)
-    @Column(nullable = false)
-    private RatePlan ratePlan;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    private UserEntity user;
 
     @Column(nullable = false)
     private String nickname;
@@ -44,8 +44,7 @@ public class PreAnalysisEntity extends BaseTimeEntity {
     private Integer ltvScore;
 
     @Builder
-    public PreAnalysisEntity(RatePlan ratePlan, String nickname, String rawData, String mainReason, RiskLevel riskLevel, Integer ltvScore) {
-        this.ratePlan = ratePlan;
+    public PreAnalysisEntity(String nickname, String rawData, String mainReason, RiskLevel riskLevel, Integer ltvScore) {
         this.nickname = nickname;
         this.rawData = rawData;
         this.mainReason = mainReason;
@@ -55,5 +54,10 @@ public class PreAnalysisEntity extends BaseTimeEntity {
 
     public void addReport(PreReportEntity report){
         this.preReportEntity = report;
+    }
+
+    public void addUser(UserEntity user){
+        this.user = user;
+        user.addPreAnalysis(this);
     }
 }

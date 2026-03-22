@@ -33,10 +33,4 @@ public class PostAnalysisService {
         analysis.addContract(contract);
         return postAnalysisRepository.save(analysis);
     }
-
-    @Transactional
-    public PostAnalysisEntity preRegister(PreContractDiagnosisRequest request, MultipartFile snapshot){
-        PostAnalysisEntity analyze = snapshotAnalysisService.analyze(snapshot);
-        return postAnalysisRepository.save(analyze);
-    }
 }

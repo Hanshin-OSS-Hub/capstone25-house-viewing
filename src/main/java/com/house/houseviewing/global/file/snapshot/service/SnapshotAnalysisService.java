@@ -1,6 +1,7 @@
 package com.house.houseviewing.global.file.snapshot.service;
 
 import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
+import com.house.houseviewing.domain.analysis.preanalysis.entity.PreAnalysisEntity;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.global.file.snapshot.dto.SnapshotAnalysisResult;
@@ -15,7 +16,7 @@ public class SnapshotAnalysisService {
 
     private final PythonEngineClient pythonEngineClient;
 
-    public PostAnalysisEntity analyze(MultipartFile snapshot){
+    public PostAnalysisEntity postAnalyze(MultipartFile snapshot){
 
         try{
             SnapshotAnalysisResult result = pythonEngineClient.sendPdf(snapshot).block();
@@ -25,6 +26,27 @@ public class SnapshotAnalysisService {
             }
 
             return PostAnalysisEntity.builder()
+                    .rawData(result.getRawData())
+                    .mainReason(result.getMainReason())
+                    .ltvScore(result.getLtvScore())
+                    .riskLevel(result.getRiskLevel())
+                    .build();
+        } catch (Exception e){
+            throw new AppException(ExceptionCode.ANALYSIS_FAILED);
+        }
+    }
+
+    public PreAnalysisEntity preAnalyze(String nickname,MultipartFile snapshot){
+
+        try{
+            SnapshotAnalysisResult result = pythonEngineClient.sendPdf(snapshot).block();
+
+            if(result == null){
+                throw new AppException(ExceptionCode.ANALYSIS_FAILED);
+            }
+
+            return PreAnalysisEntity.builder()
+                    .nickname(nickname)
                     .rawData(result.getRawData())
                     .mainReason(result.getMainReason())
                     .ltvScore(result.getLtvScore())

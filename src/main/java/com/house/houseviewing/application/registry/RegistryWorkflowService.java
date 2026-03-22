@@ -1,5 +1,6 @@
 package com.house.houseviewing.application.registry;
 
+import com.house.houseviewing.domain.analysis.preanalysis.service.PreAnalysisService;
 import com.house.houseviewing.domain.report.postreport.entity.PostReportEntity;
 import com.house.houseviewing.domain.report.postreport.service.PostReportService;
 import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
@@ -22,6 +23,8 @@ public class RegistryWorkflowService {
     private final PostAnalysisService postAnalysisService;
     private final PostReportService postReportService;
 
+    private final PreAnalysisService preAnalysisService;
+
     public PdfDownloadResponse executePostContractDiagnosis(Long houseId, MultipartFile snapshot){
 
         RegistrySnapshotEntity snapshotEntity = registrySnapshotService.register(houseId, snapshot);
@@ -35,7 +38,7 @@ public class RegistryWorkflowService {
     }
 
     public PdfDownloadResponse executePreContractDiagnosis(PreContractDiagnosisRequest request, MultipartFile snapshot){
-        PostAnalysisEntity analyze = postAnalysisService.preRegister(request, snapshot);
+        PostAnalysisEntity postAnalysisEntity = preAnalysisService.preRegister(request, snapshot);
         PostReportEntity pdfReport = postReportService.preRegister(analyze);
 
         return PdfDownloadResponse.builder()
