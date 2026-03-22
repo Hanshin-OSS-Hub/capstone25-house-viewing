@@ -24,13 +24,4 @@ public class AnalysisResponse {
 
     private Integer ltvScore;
 
-    public static AnalysisResponse from(PostAnalysisEntity registryAnalysis){
-        String nickname;
-        if(registryAnalysis.getDiagnosisType() == RatePlan.PRECONTRACT){
-            nickname = registryAnalysis.getPreNickname();
-        }
-        else{
-            nickname =
-        }
-    }
 }

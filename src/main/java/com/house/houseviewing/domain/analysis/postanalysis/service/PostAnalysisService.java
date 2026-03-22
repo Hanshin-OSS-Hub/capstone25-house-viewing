@@ -28,7 +28,7 @@ public class PostAnalysisService {
         Long houseId = registrySnapshot.getHouse().getId();
         ContractEntity contract = contractRepository.findTopByHouseIdOrderByCreatedAtDesc(houseId)
                 .orElseThrow(() -> new AppException(ExceptionCode.CONTRACT_NOT_FOUND));
-        PostAnalysisEntity analysis = snapshotAnalysisService.analyze(snapshot);
+        PostAnalysisEntity analysis = snapshotAnalysisService.postAnalyze(snapshot);
         analysis.addRegistrySnapshot(registrySnapshot);
         analysis.addContract(contract);
         return postAnalysisRepository.save(analysis);

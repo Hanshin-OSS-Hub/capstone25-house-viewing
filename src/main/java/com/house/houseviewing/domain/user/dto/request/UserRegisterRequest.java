@@ -1,5 +1,6 @@
 package com.house.houseviewing.domain.user.dto.request;
 
+import com.house.houseviewing.domain.common.RatePlan;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -34,6 +35,7 @@ public class UserRegisterRequest {
                 .email(email)
                 .loginId(loginId)
                 .password(encodePassword)
+                .ratePlan(RatePlan.FREE)
                 .build();
     }
 

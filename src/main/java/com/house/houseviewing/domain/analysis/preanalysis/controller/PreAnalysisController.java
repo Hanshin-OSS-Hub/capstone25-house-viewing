@@ -4,8 +4,10 @@ import com.house.houseviewing.application.registry.RegistryWorkflowService;
 import com.house.houseviewing.domain.analysis.preanalysis.service.PreAnalysisService;
 import com.house.houseviewing.domain.registrysnapshot.dto.request.PreContractDiagnosisRequest;
 import com.house.houseviewing.global.file.pdf.dto.PdfDownloadResponse;
+import com.house.houseviewing.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -21,10 +23,11 @@ public class PreAnalysisController {
 
     @PostMapping("/pre-contract-diganoses")
     public ResponseEntity<PdfDownloadResponse> diagnosePreContract(
+            @AuthenticationPrincipal CustomUserDetails userDetails,
             @RequestPart("file") MultipartFile snapshot,
             @RequestPart("data") PreContractDiagnosisRequest request){
 
-        PdfDownloadResponse result = registryWorkflowService.executePreContractDiagnosis(request, snapshot);
+        PdfDownloadResponse result = registryWorkflowService.executePreContractDiagnosis(userDetails.getUserId(), request, snapshot);
         return ResponseEntity.ok(result);
     }
 }

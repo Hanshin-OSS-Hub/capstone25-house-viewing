@@ -38,15 +38,6 @@ public class PostReportService {
         return postReportRepository.save(pdfReport);
     }
 
-    @Transactional
-    public PostReportEntity preRegister(PostAnalysisEntity analyze){
-        PdfReportRequest request = getPdfReportPreRequest(analyze);
-        PdfUploadResult uploadResult = pdfReportTransferAndReceiveService.transferAndReceive(request);
-        PostReportEntity pdfReport = getPdfReportEntity(uploadResult);
-
-        return postReportRepository.save(pdfReport);
-    }
-
     private static PostReportEntity getPdfReportEntity(PdfUploadResult uploadResult) {
         return PostReportEntity.builder()
                 .pdfName(uploadResult.getPdfName())
@@ -67,14 +58,6 @@ public class PostReportService {
                 .maintenanceFee(contract.getMaintenanceFee())
                 .moveDate(contract.getMoveDate())
                 .confirmDate(contract.getConfirmDate())
-                .build();
-    }
-
-    private static PdfReportRequest getPdfReportPreRequest(PostAnalysisEntity analyze) {
-        return PdfReportRequest.builder()
-                .registryAnalysisId(analyze.getId())
-                .snapshotName(analyze.getSnapshot().getSnapshotName())
-                .rawData(analyze.getRawData())
                 .build();
     }
 }

@@ -3,7 +3,12 @@ package com.house.houseviewing.domain.analysis.preanalysis.service;
 import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
 import com.house.houseviewing.domain.analysis.preanalysis.entity.PreAnalysisEntity;
 import com.house.houseviewing.domain.analysis.preanalysis.repository.PreAnalysisRepository;
+import com.house.houseviewing.domain.common.RatePlan;
 import com.house.houseviewing.domain.registrysnapshot.dto.request.PreContractDiagnosisRequest;
+import com.house.houseviewing.domain.user.entity.UserEntity;
+import com.house.houseviewing.domain.user.repository.UserRepository;
+import com.house.houseviewing.global.exception.AppException;
+import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.global.file.snapshot.service.SnapshotAnalysisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -15,13 +20,24 @@ import org.springframework.web.multipart.MultipartFile;
 @Transactional(readOnly = true)
 public class PreAnalysisService {
 
+    private final UserRepository userRepository;
     private final SnapshotAnalysisService snapshotAnalysisService;
     private final PreAnalysisRepository preAnalysisRepository;
 
     @Transactional
-    public PreAnalysisEntity preRegister(PreContractDiagnosisRequest request, MultipartFile snapshot){
+    public PreAnalysisEntity preRegister(Long userId, PreContractDiagnosisRequest request, MultipartFile snapshot){
+        UserEntity user = userRepository.findById(userId).
+                orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
         PreAnalysisEntity analyze = snapshotAnalysisService.preAnalyze(request.getNickname(), snapshot);
-        analyze.updateRatePlan();
+        analyze.addUser(user);
         return preAnalysisRepository.save(analyze);
+    }
+
+    private boolean isFreePlan(UserEntity user){
+        if(user.getRatePlan() == RatePlan.FREE){
+            return true;
+        }
+        else
+            return false;
     }
 }
