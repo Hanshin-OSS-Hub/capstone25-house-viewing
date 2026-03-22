@@ -1,6 +1,6 @@
 package com.house.houseviewing.domain.analysis.preanalysis.controller;
 
-import com.house.houseviewing.application.analyze.AnalysisWorkflowService;
+import com.house.houseviewing.api.analysis.AnalysisWorkflowService;
 import com.house.houseviewing.domain.registrysnapshot.dto.request.PreContractDiagnosisRequest;
 import com.house.houseviewing.global.file.pdf.dto.PdfDownloadResponse;
 import com.house.houseviewing.global.security.CustomUserDetails;

@@ -1,4 +1,4 @@
-package com.house.houseviewing.application.analyze;
+package com.house.houseviewing.api.analysis;
 
 import com.house.houseviewing.domain.analysis.preanalysis.entity.PreAnalysisEntity;
 import com.house.houseviewing.domain.analysis.preanalysis.service.PreAnalysisService;

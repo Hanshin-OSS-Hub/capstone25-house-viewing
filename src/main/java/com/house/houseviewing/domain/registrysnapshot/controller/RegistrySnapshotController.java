@@ -1,6 +1,6 @@
 package com.house.houseviewing.domain.registrysnapshot.controller;
 
-import com.house.houseviewing.application.analyze.AnalysisWorkflowService;
+import com.house.houseviewing.api.analysis.AnalysisWorkflowService;
 import com.house.houseviewing.global.file.pdf.dto.PdfDownloadResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
