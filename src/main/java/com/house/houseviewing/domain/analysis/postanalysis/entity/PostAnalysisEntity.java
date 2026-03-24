@@ -21,7 +21,7 @@ public class PostAnalysisEntity extends BaseTimeEntity {
     @Column(name = "analysis_id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "snapshot_id")
     private RegistrySnapshotEntity snapshot;
 
@@ -29,7 +29,7 @@ public class PostAnalysisEntity extends BaseTimeEntity {
     @JoinColumn(name = "contract_id", unique = true)
     private ContractEntity contract;
 
-    @OneToOne(mappedBy = "analysis")
+    @OneToOne(mappedBy = "analysis", cascade = CascadeType.ALL, orphanRemoval = true)
     private PostReportEntity pdfReport;
 
     @Enumerated(EnumType.STRING)

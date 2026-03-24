@@ -18,7 +18,7 @@ public class PostReportEntity extends BaseTimeEntity {
     @Column(name = "report_id")
     private Long id;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "analysis_id", unique = true)
     private PostAnalysisEntity analysis;
 

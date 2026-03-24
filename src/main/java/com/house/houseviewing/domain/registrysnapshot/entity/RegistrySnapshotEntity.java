@@ -6,9 +6,6 @@ import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEn
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Entity
 @Table(name = "registrysnapshots")
 @Getter
@@ -23,8 +20,8 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
     @JoinColumn(name = "house_id")
     private HouseEntity house;
 
-    @OneToMany(mappedBy = "snapshot")
-    private List<PostAnalysisEntity> analyses = new ArrayList<>();
+    @OneToOne(mappedBy = "snapshot", cascade = CascadeType.ALL, orphanRemoval = true)
+    private PostAnalysisEntity analyses;
 
     @Column(nullable = false)
     private String snapshotUrl; // 새 등기부 PDF 경로
@@ -45,5 +42,5 @@ public class RegistrySnapshotEntity extends BaseTimeEntity {
     public void addHouse(HouseEntity houseEntity) {
         this.house = houseEntity;
     }
-    public void addAnalysis(PostAnalysisEntity analysis){ this.analyses.add(analysis); }
+    public void addAnalysis(PostAnalysisEntity analysis){ this.analyses = analysis; }
 }

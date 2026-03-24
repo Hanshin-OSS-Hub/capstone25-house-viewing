@@ -11,7 +11,6 @@ import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEnt
 import com.house.houseviewing.domain.registrysnapshot.service.RegistrySnapshotService;
 import com.house.houseviewing.domain.report.prereport.entity.PreReportEntity;
 import com.house.houseviewing.domain.report.prereport.service.PreReportService;
-import com.house.houseviewing.global.external.kakao.service.KakaoAddress;
 import com.house.houseviewing.global.file.pdf.dto.PdfDownloadResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
