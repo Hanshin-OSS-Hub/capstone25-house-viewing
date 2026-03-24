@@ -1,7 +1,8 @@
 package com.house.houseviewing.infrastructure.python;
 
 import com.house.houseviewing.global.file.pdf.dto.PdfReportRequest;
-import com.house.houseviewing.global.file.snapshot.dto.SnapshotAnalysisResult;
+import com.house.houseviewing.global.file.snapshot.dto.SnapshotPostAnalysisResult;
+import com.house.houseviewing.global.file.snapshot.dto.SnapshotPreAnalysisResult;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -20,7 +21,7 @@ public class PythonEngineClient {
         this.pythonWebClient = pythonWebClient;
     }
 
-    public Mono<SnapshotAnalysisResult> sendPdf(MultipartFile file){
+    public Mono<SnapshotPostAnalysisResult> sendPostPdf(MultipartFile file){
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("file", file.getResource())
                 .filename(file.getOriginalFilename());
@@ -30,7 +31,20 @@ public class PythonEngineClient {
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(builder.build()))
                 .retrieve()
-                .bodyToMono(SnapshotAnalysisResult.class);
+                .bodyToMono(SnapshotPostAnalysisResult.class);
+    }
+
+    public Mono<SnapshotPreAnalysisResult> sendPrePdf(MultipartFile file){
+        MultipartBodyBuilder builder = new MultipartBodyBuilder();
+        builder.part("file", file.getResource())
+                .filename(file.getOriginalFilename());
+
+        return pythonWebClient.post()
+                .uri("/engine/analyze")
+                .contentType(MediaType.MULTIPART_FORM_DATA)
+                .body(BodyInserters.fromMultipartData(builder.build()))
+                .retrieve()
+                .bodyToMono(SnapshotPreAnalysisResult.class);
     }
 
     public Mono<byte[]> sendDataAndReceivePdf(PdfReportRequest request){

@@ -1,5 +1,6 @@
 package com.house.houseviewing.domain.analysis.preanalysis.service;
 
+import com.house.houseviewing.domain.analysis.postanalysis.dto.response.AnalysisResponse;
 import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
 import com.house.houseviewing.domain.analysis.preanalysis.entity.PreAnalysisEntity;
 import com.house.houseviewing.domain.analysis.preanalysis.repository.PreAnalysisRepository;
@@ -14,6 +15,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -39,5 +42,13 @@ public class PreAnalysisService {
         }
         else
             return false;
+    }
+
+    public List<AnalysisResponse> getPreAnalyses(Long userId){
+        List<PreAnalysisEntity> preAnalyses = preAnalysisRepository.findAllByUserId(userId);
+        return preAnalyses
+                .stream()
+                .map(AnalysisResponse::from)
+                .toList();
     }
 }

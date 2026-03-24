@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 @AllArgsConstructor @Builder
 @Getter @NoArgsConstructor
-public class SnapshotAnalysisResult {
+public class SnapshotPostAnalysisResult {
 
     private RiskLevel riskLevel;
 

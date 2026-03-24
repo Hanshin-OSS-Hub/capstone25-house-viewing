@@ -36,6 +36,9 @@ public class PreAnalysisEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private String mainReason;
 
+    @Column(nullable = false)
+    private String address;
+
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
     private RiskLevel riskLevel;
@@ -44,10 +47,11 @@ public class PreAnalysisEntity extends BaseTimeEntity {
     private Integer ltvScore;
 
     @Builder
-    public PreAnalysisEntity(String nickname, String rawData, String mainReason, RiskLevel riskLevel, Integer ltvScore) {
+    public PreAnalysisEntity(String nickname, String rawData, String mainReason, String address, RiskLevel riskLevel, Integer ltvScore) {
         this.nickname = nickname;
         this.rawData = rawData;
         this.mainReason = mainReason;
+        this.address = address;
         this.riskLevel = riskLevel;
         this.ltvScore = ltvScore;
     }

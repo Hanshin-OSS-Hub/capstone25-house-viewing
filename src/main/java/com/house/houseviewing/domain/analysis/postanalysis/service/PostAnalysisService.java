@@ -1,10 +1,10 @@
 package com.house.houseviewing.domain.analysis.postanalysis.service;
 
+import com.house.houseviewing.domain.analysis.postanalysis.dto.response.AnalysisResponse;
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
 import com.house.houseviewing.domain.contract.repository.ContractRepository;
 import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
 import com.house.houseviewing.domain.analysis.postanalysis.repository.PostAnalysisRepository;
-import com.house.houseviewing.domain.registrysnapshot.dto.request.PreContractDiagnosisRequest;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
@@ -13,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -32,5 +34,13 @@ public class PostAnalysisService {
         analysis.addRegistrySnapshot(registrySnapshot);
         analysis.addContract(contract);
         return postAnalysisRepository.save(analysis);
+    }
+
+    public List<AnalysisResponse> getPostAnalyses(Long userId){
+        List<PostAnalysisEntity> postAnalyses = postAnalysisRepository.findAllByUserId(userId);
+        return postAnalyses
+                .stream()
+                .map(AnalysisResponse::from)
+                .toList();
     }
 }

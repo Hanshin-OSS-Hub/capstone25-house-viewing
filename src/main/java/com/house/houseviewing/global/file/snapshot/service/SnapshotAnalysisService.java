@@ -4,7 +4,8 @@ import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEn
 import com.house.houseviewing.domain.analysis.preanalysis.entity.PreAnalysisEntity;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
-import com.house.houseviewing.global.file.snapshot.dto.SnapshotAnalysisResult;
+import com.house.houseviewing.global.file.snapshot.dto.SnapshotPostAnalysisResult;
+import com.house.houseviewing.global.file.snapshot.dto.SnapshotPreAnalysisResult;
 import com.house.houseviewing.infrastructure.python.PythonEngineClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ public class SnapshotAnalysisService {
     public PostAnalysisEntity postAnalyze(MultipartFile snapshot){
 
         try{
-            SnapshotAnalysisResult result = pythonEngineClient.sendPdf(snapshot).block();
+            SnapshotPostAnalysisResult result = pythonEngineClient.sendPostPdf(snapshot).block();
 
             if(result == null){
                 throw new AppException(ExceptionCode.ANALYSIS_FAILED);
@@ -39,7 +40,7 @@ public class SnapshotAnalysisService {
     public PreAnalysisEntity preAnalyze(String nickname,MultipartFile snapshot){
 
         try{
-            SnapshotAnalysisResult result = pythonEngineClient.sendPdf(snapshot).block();
+            SnapshotPreAnalysisResult result = pythonEngineClient.sendPrePdf(snapshot).block();
 
             if(result == null){
                 throw new AppException(ExceptionCode.ANALYSIS_FAILED);
@@ -49,6 +50,7 @@ public class SnapshotAnalysisService {
                     .nickname(nickname)
                     .rawData(result.getRawData())
                     .mainReason(result.getMainReason())
+                    .address(result.getAddress())
                     .ltvScore(result.getLtvScore())
                     .riskLevel(result.getRiskLevel())
                     .build();
