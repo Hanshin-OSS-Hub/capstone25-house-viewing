@@ -17,6 +17,4 @@ public class SnapshotPreAnalysisResult {
     private String mainReason;
 
     private Integer ltvScore;
-
-    private String address;
 }

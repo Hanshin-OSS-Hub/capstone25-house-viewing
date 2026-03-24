@@ -38,6 +38,7 @@ public class HouseEntity extends BaseTimeEntity {
     private String nickname;
 
     @Embedded
+    @Column(nullable = false)
     private Address address;
 
     @Enumerated(EnumType.STRING)

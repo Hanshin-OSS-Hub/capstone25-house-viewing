@@ -12,7 +12,7 @@ import java.time.LocalDate;
 @Builder
 @Getter
 @NoArgsConstructor
-public class PdfReportRequest {
+public class PdfPostReportRequest {
 
     private Long registryAnalysisId;
 

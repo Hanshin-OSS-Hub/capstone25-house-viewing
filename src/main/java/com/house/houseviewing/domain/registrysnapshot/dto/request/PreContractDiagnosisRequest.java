@@ -10,4 +10,6 @@ import lombok.NoArgsConstructor;
 public class PreContractDiagnosisRequest {
 
     private String nickname;
+
+    private String address;
 }

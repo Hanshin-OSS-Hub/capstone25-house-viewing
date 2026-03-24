@@ -8,7 +8,7 @@ import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEn
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
-import com.house.houseviewing.global.file.pdf.dto.PdfReportRequest;
+import com.house.houseviewing.global.file.pdf.dto.PdfPostReportRequest;
 import com.house.houseviewing.global.file.pdf.dto.PdfUploadResult;
 import com.house.houseviewing.global.file.pdf.service.PdfReportTransferAndReceiveService;
 import lombok.RequiredArgsConstructor;
@@ -30,8 +30,8 @@ public class PostReportService {
         Long contractId = analyze.getContract().getId();
         ContractEntity contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new AppException(ExceptionCode.CONTRACT_NOT_FOUND));
-        PdfReportRequest request = getPdfReportPostRequest(snapshotEntity, analyze, contract);
-        PdfUploadResult uploadResult = pdfReportTransferAndReceiveService.transferAndReceive(request);
+        PdfPostReportRequest request = getPdfReportPostRequest(snapshotEntity, analyze, contract);
+        PdfUploadResult uploadResult = pdfReportTransferAndReceiveService.postTransferAndReceive(request);
         PostReportEntity pdfReport = getPdfReportEntity(uploadResult);
         pdfReport.addRegistryAnalysis(analyze);
 
@@ -47,8 +47,8 @@ public class PostReportService {
                 .build();
     }
 
-    private static PdfReportRequest getPdfReportPostRequest(RegistrySnapshotEntity snapshotEntity, PostAnalysisEntity analyze, ContractEntity contract) {
-        return PdfReportRequest.builder()
+    private static PdfPostReportRequest getPdfReportPostRequest(RegistrySnapshotEntity snapshotEntity, PostAnalysisEntity analyze, ContractEntity contract) {
+        return PdfPostReportRequest.builder()
                 .registryAnalysisId(analyze.getId())
                 .snapshotName(snapshotEntity.getSnapshotName())
                 .rawData(analyze.getRawData())

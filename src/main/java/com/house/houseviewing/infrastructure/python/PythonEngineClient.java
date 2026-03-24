@@ -1,6 +1,7 @@
 package com.house.houseviewing.infrastructure.python;
 
-import com.house.houseviewing.global.file.pdf.dto.PdfReportRequest;
+import com.house.houseviewing.global.file.pdf.dto.PdfPostReportRequest;
+import com.house.houseviewing.global.file.pdf.dto.PdfPreReportRequest;
 import com.house.houseviewing.global.file.snapshot.dto.SnapshotPostAnalysisResult;
 import com.house.houseviewing.global.file.snapshot.dto.SnapshotPreAnalysisResult;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -47,7 +48,16 @@ public class PythonEngineClient {
                 .bodyToMono(SnapshotPreAnalysisResult.class);
     }
 
-    public Mono<byte[]> sendDataAndReceivePdf(PdfReportRequest request){
+    public Mono<byte[]> postSendDataAndReceivePdf(PdfPostReportRequest request){
+        return pythonWebClient.post()
+                .uri("/engine/generate-pdf")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(byte[].class);
+    }
+
+    public Mono<byte[]> preSendDataAndReceivePdf(PdfPreReportRequest request){
         return pythonWebClient.post()
                 .uri("/engine/generate-pdf")
                 .contentType(MediaType.APPLICATION_JSON)

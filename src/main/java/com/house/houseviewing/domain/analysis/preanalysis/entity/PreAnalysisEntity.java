@@ -1,5 +1,6 @@
 package com.house.houseviewing.domain.analysis.preanalysis.entity;
 
+import com.house.houseviewing.domain.common.Address;
 import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.common.RiskLevel;
 import com.house.houseviewing.domain.report.prereport.entity.PreReportEntity;
@@ -36,8 +37,9 @@ public class PreAnalysisEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private String mainReason;
 
+    @Embedded
     @Column(nullable = false)
-    private String address;
+    private Address address;
 
     @Enumerated(value = EnumType.STRING)
     @Column(nullable = false)
@@ -47,7 +49,7 @@ public class PreAnalysisEntity extends BaseTimeEntity {
     private Integer ltvScore;
 
     @Builder
-    public PreAnalysisEntity(String nickname, String rawData, String mainReason, String address, RiskLevel riskLevel, Integer ltvScore) {
+    public PreAnalysisEntity(String nickname, String rawData, String mainReason, Address address, RiskLevel riskLevel, Integer ltvScore) {
         this.nickname = nickname;
         this.rawData = rawData;
         this.mainReason = mainReason;

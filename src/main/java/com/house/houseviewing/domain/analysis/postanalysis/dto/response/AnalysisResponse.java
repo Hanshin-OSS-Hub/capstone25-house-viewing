@@ -39,7 +39,7 @@ public class AnalysisResponse {
     public static AnalysisResponse from(PreAnalysisEntity preAnalysis){
         return AnalysisResponse.builder()
                 .nickname(preAnalysis.getNickname())
-                .address(preAnalysis.getAddress())
+                .address(preAnalysis.getAddress().getAddressName())
                 .mainReason(preAnalysis.getMainReason())
                 .riskLevel(preAnalysis.getRiskLevel())
                 .ltvScore(preAnalysis.getLtvScore())

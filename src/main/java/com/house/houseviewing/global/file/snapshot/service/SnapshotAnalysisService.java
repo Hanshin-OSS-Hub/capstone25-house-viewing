@@ -2,6 +2,7 @@ package com.house.houseviewing.global.file.snapshot.service;
 
 import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
 import com.house.houseviewing.domain.analysis.preanalysis.entity.PreAnalysisEntity;
+import com.house.houseviewing.domain.common.Address;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.global.file.snapshot.dto.SnapshotPostAnalysisResult;
@@ -37,7 +38,7 @@ public class SnapshotAnalysisService {
         }
     }
 
-    public PreAnalysisEntity preAnalyze(String nickname,MultipartFile snapshot){
+    public PreAnalysisEntity preAnalyze(String nickname, Address address, MultipartFile snapshot){
 
         try{
             SnapshotPreAnalysisResult result = pythonEngineClient.sendPrePdf(snapshot).block();
@@ -50,7 +51,7 @@ public class SnapshotAnalysisService {
                     .nickname(nickname)
                     .rawData(result.getRawData())
                     .mainReason(result.getMainReason())
-                    .address(result.getAddress())
+                    .address(address)
                     .ltvScore(result.getLtvScore())
                     .riskLevel(result.getRiskLevel())
                     .build();
