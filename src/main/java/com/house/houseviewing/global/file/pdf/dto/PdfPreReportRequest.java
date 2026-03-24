@@ -11,8 +11,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class PdfPreReportRequest {
 
-    private Long preAnalysisId;
-
     private String snapshotName;
 
     private String rawData;

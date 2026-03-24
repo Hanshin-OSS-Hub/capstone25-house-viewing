@@ -49,7 +49,6 @@ public class PostReportService {
 
     private static PdfPostReportRequest getPdfReportPostRequest(RegistrySnapshotEntity snapshotEntity, PostAnalysisEntity analyze, ContractEntity contract) {
         return PdfPostReportRequest.builder()
-                .registryAnalysisId(analyze.getId())
                 .snapshotName(snapshotEntity.getSnapshotName())
                 .rawData(analyze.getRawData())
                 .contractType(contract.getContractType())

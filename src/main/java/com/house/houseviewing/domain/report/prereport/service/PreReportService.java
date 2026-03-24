@@ -29,7 +29,6 @@ public class PreReportService {
 
     private static PdfPreReportRequest getPdfReportPreRequest(PreAnalysisEntity analyze) {
         return PdfPreReportRequest.builder()
-                .preAnalysisId(analyze.getId())
                 .snapshotName(analyze.getNickname())
                 .rawData(analyze.getRawData())
                 .build();
