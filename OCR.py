@@ -132,6 +132,95 @@ def extract_complex_name(addr: str):
         return None
     return name
 
+# =========================
+# 2-1) 시세 추정 설명 메시지 생성
+# =========================
+def build_valuation_failure(reason_code: str, details: dict | None = None):
+    details = details or {}
+
+    message_map = {
+        "NO_TRADES": "해당 지역의 최근 실거래 데이터가 존재하지 않아 시세 추정이 어렵습니다.",
+        "NO_MATCHED_TRADES": "해당 주소와 정확히 일치하는 실거래 데이터를 찾지 못해 시세 추정 신뢰도가 낮습니다.",
+    }
+
+    action_map = {
+        "NO_TRADES": "조회 기간 확대 또는 인근 유사 거래 기반 fallback 검토",
+        "NO_MATCHED_TRADES": "동일 동/유사 건물명 기준 fallback 사용 또는 사용자 직접 시세 입력 필요",
+    }
+
+    return {
+        "ok": False,
+        "reason": reason_code,
+        "reason_message": message_map.get(reason_code, "시세 추정에 실패했습니다."),
+        "confidence": "NONE",
+        "sample_count": 0,
+        "median_price_won": None,
+        "details": details,
+        "action": action_map.get(reason_code, "입력값 및 매핑 로직 확인 필요"),
+    }
+
+
+def build_valuation_success(
+    median_price_won: int,
+    sample_count: int,
+    confidence: str,
+    details: dict,
+    fallback_used: bool,
+    fallback_stage: str | None,
+):
+    if fallback_used:
+        if fallback_stage == "complex_name":
+            reason_message = "정확한 지번 매칭이 어려워 동일 동 내 유사 건물명 실거래를 기준으로 시세를 추정했습니다."
+        elif fallback_stage == "dong_only":
+            reason_message = "정확한 매물 매칭이 어려워 동일 법정동의 유사 거래를 기준으로 시세를 추정했습니다."
+        else:
+            reason_message = "정확한 매물 매칭이 어려워 fallback 기준으로 시세를 추정했습니다."
+    else:
+        if sample_count >= 10:
+            reason_message = "지번 기준으로 충분한 실거래 데이터를 확보하여 시세를 추정했습니다."
+        elif sample_count >= 3:
+            reason_message = "지번 기준 실거래 데이터는 확보되었으나 표본 수가 많지 않아 보통 수준의 신뢰도로 시세를 추정했습니다."
+        else:
+            reason_message = "지번 기준 매칭은 되었으나 실거래 표본 수가 적어 시세 추정 신뢰도가 낮습니다."
+
+    if fallback_used:
+        action = "보수적으로 LTV를 해석하고 필요 시 사용자 확인 시세를 함께 사용"
+    elif confidence == "LOW":
+        action = "시세 참고용으로만 활용하고 추가 검증 권장"
+    else:
+        action = "현재 시세 추정값을 LTV 계산에 사용 가능"
+
+    return {
+        "ok": True,
+        "reason_message": reason_message,
+        "median_price_won": int(median_price_won),
+    }
+
+
+def add_ltv_explanation(ltv_info: dict, valuation: dict):
+    if not isinstance(ltv_info, dict):
+        return ltv_info
+
+    valuation_ok = bool((valuation or {}).get("ok"))
+    valuation_conf = (valuation or {}).get("confidence")
+    valuation_msg = (valuation or {}).get("reason_message")
+
+    if not valuation_ok:
+        ltv_info["reason_message"] = "주택 시세를 안정적으로 추정하지 못해 LTV 계산 결과의 신뢰도가 낮거나 계산이 불가능합니다."
+        ltv_info["action"] = valuation_msg or "시세 추정 로직 확인 또는 사용자 입력 시세 필요"
+        return ltv_info
+
+    if valuation_conf == "LOW":
+        ltv_info["reason_message"] = "시세 추정 신뢰도가 낮아 LTV 결과는 참고용으로 해석해야 합니다."
+        ltv_info["action"] = "정확한 매매가 확인 후 재계산 권장"
+    elif valuation_conf == "MEDIUM":
+        ltv_info["reason_message"] = "시세 추정은 가능하나 표본 수 또는 매칭 조건상 보통 수준의 신뢰도를 가집니다."
+        ltv_info["action"] = "추가 검증 시 더 정확한 LTV 산출 가능"
+    else:
+        ltv_info["reason_message"] = "시세 추정 신뢰도가 비교적 높아 현재 LTV 결과를 활용할 수 있습니다."
+        ltv_info["action"] = "현재 계산 결과 활용 가능"
+
+    return ltv_info
 
 # =========================
 # PDF -> 이미지 변환
@@ -684,6 +773,7 @@ def estimate_price_by_median_rh_sh(snapshot: dict, df_lawd, lookback_months: int
 
     sido, sigungu, dong = parse_sido_sigungu_dong_from_address(addr_str)
     lawd_cd5 = get_lawd_cd5(df_lawd, sido, sigungu, dong)
+
     if not lawd_cd5:
         return {
             "ok": False,
@@ -696,6 +786,7 @@ def estimate_price_by_median_rh_sh(snapshot: dict, df_lawd, lookback_months: int
 
     ptype = guess_property_type(addr_str)
     url = RTMS_ENDPOINTS.get((ptype, "TRADE"))
+
     if not url:
         return {
             "ok": False,
@@ -726,19 +817,21 @@ def estimate_price_by_median_rh_sh(snapshot: dict, df_lawd, lookback_months: int
             continue
 
     if not all_trades:
-        return {
-            "ok": False,
-            "reason": "NO_TRADES",
-            "confidence": "NONE",
-            "sample_count": 0,
-            "median_price_won": None,
-            "filters": {"lawd_cd5": lawd_cd5, "ptype": ptype, "addr_jibun": addr_jibun}
-        }
+        return build_valuation_failure("NO_TRADES", {
+            "data_source": "RTMS",
+            "lawd_cd5": lawd_cd5,
+            "ptype": ptype,
+            "addr_jibun": addr_jibun,
+            "lookback_months": lookback_months,
+            "matched_count": 0,
+            "fallback_used": False,
+        })
 
     print("DEBUG SAMPLE KEYS:", sorted(list(all_trades[0].keys()))[:80])
     print("DEBUG SAMPLE ROW:", all_trades[0])
 
     fallback_used = False
+    fallback_stage = None
 
     def dong_ok(row):
         if not dong_expected:
@@ -753,13 +846,8 @@ def estimate_price_by_median_rh_sh(snapshot: dict, df_lawd, lookback_months: int
                 continue
             row_jibun = pick_field(row, ["jibun", "지번"])
             row_a, row_b = normalize_jibun_for_match(row_jibun)
-            if not row_a:
-                continue
-            if row_a != addr_a:
-                continue
-            if addr_b is not None and row_b is not None and row_b != addr_b:
-                continue
-            exact.append(row)
+            if row_a == addr_a and row_b == addr_b:
+                exact.append(row)
 
     candidates = exact
 
@@ -774,6 +862,7 @@ def estimate_price_by_median_rh_sh(snapshot: dict, df_lawd, lookback_months: int
         if tmp:
             candidates = tmp
             fallback_used = True
+            fallback_stage = "complex_name"
 
     if not candidates:
         tmp = []
@@ -784,6 +873,7 @@ def estimate_price_by_median_rh_sh(snapshot: dict, df_lawd, lookback_months: int
         if tmp:
             candidates = tmp
             fallback_used = True
+            fallback_stage = "dong_only"
 
     filtered = []
     step_total = len(all_trades)
@@ -802,65 +892,47 @@ def estimate_price_by_median_rh_sh(snapshot: dict, df_lawd, lookback_months: int
     med_price = median(prices)
     sample_count = len(prices)
 
-    print("\n===== RTMS FILTER DEBUG =====")
-    print("ptype =", ptype)
-    print("address =", addr_str)
-    print("filters =", {
+    details = {
+        "data_source": "RTMS",
+        "ptype": ptype,
+        "lawd_cd5": lawd_cd5,
         "sido": sido,
         "sigungu": sigungu,
         "dong": dong_expected,
-        "lawd_cd5": lawd_cd5,
         "addr_jibun": addr_jibun,
         "addr_jibun_norm": (addr_a, addr_b),
         "complex_name": complex_name,
         "fallback_used": fallback_used,
+        "fallback_stage": fallback_stage,
         "lookback_months": lookback_months,
-    })
-    print("all_trades_total =", step_total)
-    print("pass_candidates =", step_candidates)
-    print("pass_amount =", step_amount)
-    print("final_matched =", sample_count)
+        "all_trades_total": step_total,
+        "pass_candidates": step_candidates,
+        "pass_amount": step_amount,
+        "final_matched": sample_count,
+    }
+
+    print("\n===== RTMS FILTER DEBUG =====")
+    print("ptype =", ptype)
+    print("address =", addr_str)
+    print("details =", details)
     print("===== RTMS FILTER DEBUG END =====\n")
 
     if med_price is None or sample_count == 0:
-        return {
-            "ok": False,
-            "reason": "NO_MATCHED_TRADES",
-            "confidence": "NONE",
-            "sample_count": 0,
-            "median_price_won": None,
-            "filters": {
-                "lawd_cd5": lawd_cd5,
-                "ptype": ptype,
-                "addr_jibun": addr_jibun,
-                "complex_name": complex_name,
-                "dong": dong_expected
-            }
-        }
+        return build_valuation_failure("NO_MATCHED_TRADES", details)
 
     if fallback_used:
         conf = "LOW" if sample_count < 10 else "MEDIUM"
     else:
         conf = "HIGH" if sample_count >= 10 else ("MEDIUM" if sample_count >= 3 else "LOW")
 
-    return {
-        "ok": True,
-        "reason": None,
-        "confidence": conf,
-        "sample_count": sample_count,
-        "median_price_won": int(med_price),
-        "filters": {
-            "ptype": ptype,
-            "lawd_cd5": lawd_cd5,
-            "sido": sido,
-            "sigungu": sigungu,
-            "dong": dong_expected,
-            "addr_jibun": addr_jibun,
-            "complex_name": complex_name,
-            "fallback_used": fallback_used,
-            "lookback_months": lookback_months,
-        },
-    }
+    return build_valuation_success(
+        median_price_won=int(med_price),
+        sample_count=sample_count,
+        confidence=conf,
+        details=details,
+        fallback_used=fallback_used,
+        fallback_stage=fallback_stage,
+    )
 
 
 def run(pdf_path: str, tenant_info: dict | None = None):
