@@ -29,9 +29,8 @@ public class HousesResponse {
         if (!house.getSnapshots().isEmpty()){
             RegistrySnapshotEntity snapshot = house.getSnapshots()
                     .get(house.getSnapshots().size() - 1);
-            if(!snapshot.getAnalyses().isEmpty()){
-                PostAnalysisEntity analysis = snapshot.getAnalyses().get(snapshot.getAnalyses().size() - 1);
-
+            if(snapshot != null){
+                PostAnalysisEntity analysis = snapshot.getAnalyses();
                 ltvScore = analysis.getLtvScore();
             }
         }
