@@ -54,10 +54,12 @@ public class AnalysisQueryService {
     public List<AnalysisResponse> getAnalyses(Long userId){
         List<AnalysisResponse> postAnalyses = postAnalysisService.getPostAnalyses(userId);
         List<AnalysisResponse> preAnalyses = preAnalysisService.getPreAnalyses(userId);
+        List<AnalysisResponse> diffAnalyses = postAnalysisService.getDiffAnalyses(userId);
 
         List<AnalysisResponse> result = new ArrayList<>();
         result.addAll(postAnalyses);
         result.addAll(preAnalyses);
+        result.addAll(diffAnalyses);
 
         return result;
     }

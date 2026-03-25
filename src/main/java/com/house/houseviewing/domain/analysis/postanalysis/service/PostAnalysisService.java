@@ -56,4 +56,8 @@ public class PostAnalysisService {
         PostAnalysisEntity diffAnalyses = snapshotDiffAnalysisService.diffAnalyze();
         return postAnalysisRepository.save(diffAnalyses);
     }
+
+    public List<AnalysisResponse> getDiffAnalyses(Long userId){
+
+    }
 }

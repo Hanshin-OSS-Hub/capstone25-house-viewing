@@ -1,0 +1,166 @@
+{
+  "snapshot": {
+    "viewed_at": "2025-11-30",
+    "address": {
+      "raw_type": "라벨_집합건물",
+      "address": "경기도 오산시 양산동 387 에덴하우스 제105호"
+    },
+    "gabu": [
+      {
+        "rank": 1,
+        "purpose": "소유권보존",
+        "receipt": {
+          "date": "2013-01-22",
+          "number": "10279"
+        },
+        "owners": [
+          {
+            "name": "염선제",
+            "share": "2분의 1"
+          },
+          {
+            "name": "최효순",
+            "share": "2분의 1"
+          }
+        ]
+      }
+    ],
+    "eulgu": [
+      {
+        "rank": 1,
+        "purpose": "근저당권설정",
+        "receipt": {
+          "date": "2013-02-07",
+          "number": "19904"
+        },
+        "max_claim_amount": 373320000,
+        "status": "유효"
+      }
+    ]
+  },
+  "valuation": {
+    "ok": true,
+    "reason_message": "정확한 매물 매칭이 어려워 동일 법정동의 유사 거래를 기준으로 시세를 추정했습니다.",
+    "median_price_won": 25800000
+  },
+  "ltv": {
+    "ok": true,
+    "reason": null,
+    "house_price_won": 25800000,
+    "max_claim_total_won": 373320000,
+    "ltv": 14.4698,
+    "method": "ltv = max_claim_total / house_price",
+    "reason_message": "시세 추정 신뢰도가 비교적 높아 현재 LTV 결과를 활용할 수 있습니다.",
+    "action": "현재 계산 결과 활용 가능"
+  },
+  "diff": {
+    "baseline_present": false,
+    "baseline_viewed_at": null,
+    "summary": {
+      "added_count": 0,
+      "removed_count": 0,
+      "modified_count": 0
+    },
+    "changes": {
+      "gabu": {
+        "added": [],
+        "removed": [],
+        "modified": []
+      },
+      "eulgu": {
+        "added": [],
+        "removed": [],
+        "modified": []
+      }
+    }
+  },
+  "risk": {
+    "risk_score": 65,
+    "risk_level": "MEDIUM",
+    "signals": [
+      {
+        "code": "EULGU_ACTIVE_근저당권설정",
+        "severity": "MEDIUM",
+        "evidence": {
+          "representative": {
+            "rank": 1,
+            "purpose": "근저당권설정",
+            "max_claim_amount": 373320000,
+            "status": "유효"
+          },
+          "rows": [
+            {
+              "rank": 1,
+              "purpose": "근저당권설정",
+              "max_claim_amount": 373320000,
+              "status": "유효"
+            }
+          ]
+        },
+        "explain": "을구에 유효한 '근저당권설정' 항목이 있어 위험도가 상승합니다."
+      },
+      {
+        "code": "EULGU_MAX_CLAIM_HIGH",
+        "severity": "HIGH",
+        "evidence": {
+          "max_claim_amount_total": 373320000
+        },
+        "explain": "채권최고액 합계가 큰 편이라 보수적으로 위험을 높게 평가합니다."
+      },
+      {
+        "code": "LTV_ESTIMATED",
+        "severity": "HIGH",
+        "evidence": {
+          "ltv": 14.4698,
+          "house_price_won": 25800000,
+          "max_claim_total_won": 373320000,
+          "valuation_confidence": "NONE",
+          "valuation_sample_count": null
+        },
+        "explain": "LTV가 85% 이상으로 매우 높습니다. (실거래가 중앙값 기반 추정)"
+      }
+    ],
+    "checks": {
+      "has_active_mortgage": true,
+      "has_seizure": false,
+      "has_active_auction": false,
+      "max_claim_amount_total": 373320000,
+      "ltv": 14.4698,
+      "valuation_confidence": "NONE",
+      "signals_meta": {
+        "eulgu_total": 1,
+        "eulgu_active": 1,
+        "gabu_total": 1
+      }
+    }
+  },
+  "recovery": {
+    "priority": "SOON",
+    "tenant_input": {
+      "deposit": 100000000,
+      "move_in_date": "2024-03-01",
+      "fixed_date": "2024-03-02"
+    },
+    "calculation": {
+      "property_value": 25800000,
+      "auction_estimate": 20640000,
+      "senior_claim_total": 373320000,
+      "recoverable_amount": 0,
+      "loss_amount": 100000000
+    },
+    "warning": true,
+    "warning_message": "보증금 회수 가능 금액이 0원으로 계산되었습니다. 다만 이는 등기부상 권리관계, 추정 시세, 선순위 채권을 반영한 보수적 계산 결과이므로 실제 경매·배당 결과와 차이가 있을 수 있습니다.",
+    "action": "등기부 최신본 확인, 실제 시세 재검증, 선순위 권리 및 임차인의 대항력·우선변제권 여부를 추가로 확인하세요.",
+    "playbook": [
+      {
+        "step": 1,
+        "title": "근저당 채무 확인",
+        "how": [
+          "채권최고액 vs 실제 채무액 확인",
+          "말소 조건 확인"
+        ],
+        "output": "채무잔액 확인"
+      }
+    ]
+  }
+}
