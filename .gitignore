@@ -14,4 +14,4 @@ out/
 *.log
 
 # Mock / local data
-src/main/resources/mock/
+src/main/java/com/house/houseviewing/infrastructure/mock/registry
