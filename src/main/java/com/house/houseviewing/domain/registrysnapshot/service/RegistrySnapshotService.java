@@ -8,9 +8,13 @@ import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.global.file.snapshot.service.SnapshotExtractService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 
 @Service
 @Transactional(readOnly = true)
@@ -27,6 +31,16 @@ public class RegistrySnapshotService {
                 .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
 
         RegistrySnapshotEntity registrySnapshot = snapshotExtractService.register(snapshot);
+        house.addRegistrySnapshot(registrySnapshot);
+
+        return registrySnapshotRepository.save(registrySnapshot);
+    }
+
+    @Transactional
+    public RegistrySnapshotEntity diffRegister(Long houseId, String snapshot){
+        HouseEntity house = houseRepository.findById(houseId)
+                .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
+        RegistrySnapshotEntity registrySnapshot = snapshotExtractService.diffRegister(snapshot);
         house.addRegistrySnapshot(registrySnapshot);
 
         return registrySnapshotRepository.save(registrySnapshot);

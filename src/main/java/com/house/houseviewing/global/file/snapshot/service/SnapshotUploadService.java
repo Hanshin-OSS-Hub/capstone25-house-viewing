@@ -23,12 +23,32 @@ public class SnapshotUploadService {
         Long snapshotSizeBytes = snapshot.getSize();
         String fullPath = uploadPath + savedFileName;
 
-        try{
-            snapshot.transferTo(new File(fullPath));
+//        try{
+//            snapshot.transferTo(new File(fullPath));
+//
+//        } catch (IOException e) {
+//            throw new AppException(ExceptionCode.FILE_SAVE_FAILED);
+//        }
 
-        } catch (IOException e) {
-            throw new AppException(ExceptionCode.FILE_SAVE_FAILED);
-        }
+        return SnapshotUploadResult.builder()
+                .snapshotName(snapshotName)
+                .snapshotUrl(fullPath)
+                .snapshotSizeBytes(snapshotSizeBytes)
+                .build();
+    }
+
+    public SnapshotUploadResult upload(String snapshot){
+        String snapshotName = "_registry.json";
+        String savedFileName = UUID.randomUUID() + "_" + snapshotName;
+        Long snapshotSizeBytes = 500_000L;
+        String fullPath = uploadPath + savedFileName;
+
+//        try{
+//            snapshot.transferTo(new File(fullPath));
+//
+//        } catch (IOException e) {
+//            throw new AppException(ExceptionCode.FILE_SAVE_FAILED);
+//        }
 
         return SnapshotUploadResult.builder()
                 .snapshotName(snapshotName)

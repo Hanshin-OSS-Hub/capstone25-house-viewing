@@ -80,7 +80,7 @@ public class HouseService {
                 .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
         ContractEntity contract = contractRepository.findTopByHouseIdOrderByCreatedAtDesc(house.getId())
                 .orElseThrow(() -> new AppException(ExceptionCode.CONTRACT_NOT_FOUND));
-        RegistrySnapshotEntity snapshot = registrySnapshotRepository.findTopByHouseIdOrderByCreatedAtDesc(house.getId())
+        RegistrySnapshotEntity snapshot = registrySnapshotRepository.findTopByHouse_IdOrderByCreatedAtDesc(house.getId())
                 .orElseThrow(() -> new AppException(ExceptionCode.SNAPSHOT_NOT_FOUND));
         PostAnalysisEntity analysis = postAnalysisRepository.findTopBySnapshotIdOrderByCreatedAtDesc(snapshot.getId())
                 .orElseThrow(() -> new AppException(ExceptionCode.ANALYSIS_NOT_FOUND));

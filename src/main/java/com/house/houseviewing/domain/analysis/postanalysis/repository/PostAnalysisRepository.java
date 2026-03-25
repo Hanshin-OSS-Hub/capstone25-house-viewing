@@ -1,6 +1,7 @@
 package com.house.houseviewing.domain.analysis.postanalysis.repository;
 
 import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
+import io.lettuce.core.dynamic.annotation.Param;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
@@ -21,4 +22,6 @@ public interface PostAnalysisRepository extends JpaRepository<PostAnalysisEntity
         ORDER BY ra.createdAt DESC
     """)
     List<PostAnalysisEntity> findAllByUserId(Long userId);
+
+    List<PostAnalysisEntity> findTop2ByContractHouseIdOrderByCreatedAtDesc(Long houseId);
 }

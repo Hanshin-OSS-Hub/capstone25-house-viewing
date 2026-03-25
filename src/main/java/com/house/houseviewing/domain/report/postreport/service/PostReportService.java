@@ -1,5 +1,6 @@
 package com.house.houseviewing.domain.report.postreport.service;
 
+import com.house.houseviewing.domain.analysis.postanalysis.repository.PostAnalysisRepository;
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
 import com.house.houseviewing.domain.contract.repository.ContractRepository;
 import com.house.houseviewing.domain.report.postreport.entity.PostReportEntity;
@@ -16,6 +17,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
+
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
@@ -24,10 +27,10 @@ public class PostReportService {
     private final PostReportRepository postReportRepository;
     private final ContractRepository contractRepository;
     private final PdfReportTransferAndReceiveService pdfReportTransferAndReceiveService;
+    private final PostAnalysisRepository postAnalysisRepository;
 
     @Transactional
     public PostReportEntity postRegister(RegistrySnapshotEntity snapshotEntity, PostAnalysisEntity analyze){
-
         Long contractId = analyze.getContract().getId();
         ContractEntity contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new AppException(ExceptionCode.CONTRACT_NOT_FOUND));
@@ -40,16 +43,25 @@ public class PostReportService {
     }
 
     @Transactional
-    public PostReportEntity diffRegister(PostAnalysisEntity analyze){
-        PostAnalysisEntity analysisEntity = postReportRepository.findTopByIdLessThanOrderByIdDesc(analyze.getId())
-                .orElseThrow(() -> new AppException(ExceptionCode.ANALYSIS_FAILED));
-        String originData = analysisEntity.getRawData();
-        PdfDiffReportRequest request = getPdfDiffReportRequest(originData, analyze);
+    public PostReportEntity diffRegister(RegistrySnapshotEntity snapshotEntity, PostAnalysisEntity analyze){
+        Long houseId = analyze.getContract().getHouse().getId();
+        Long contractId = analyze.getContract().getId();
+        ContractEntity contract = contractRepository.findById(contractId)
+                .orElseThrow(() -> new AppException(ExceptionCode.CONTRACT_NOT_FOUND));
+        String originData = getOriginData(houseId);
+        PdfDiffReportRequest request = getPdfDiffReportRequest(originData, snapshotEntity, analyze, contract);
         PdfUploadResult uploadResult = pdfReportTransferAndReceiveService.diffTransferAndReceive(request);
-        PostReportEntity diffReport = getPdfReportEntity(uploadResult);
-        diffReport.addRegistryAnalysis(analyze);
+        PostReportEntity pdfReport = getPdfReportEntity(uploadResult);
+        pdfReport.addRegistryAnalysis(analyze);
 
-        return postReportRepository.save(diffReport);
+        return postReportRepository.save(pdfReport);
+    }
+
+    private String getOriginData(Long houseId) {
+        List<PostAnalysisEntity> list = postAnalysisRepository.findTop2ByContractHouseIdOrderByCreatedAtDesc(houseId);
+        PostAnalysisEntity analysisEntity = list.get(0);
+        String originData = analysisEntity.getRawData();
+        return originData;
     }
 
     private static PostReportEntity getPdfReportEntity(PdfUploadResult uploadResult) {
@@ -74,11 +86,17 @@ public class PostReportService {
                 .build();
     }
 
-    private static PdfDiffReportRequest getPdfDiffReportRequest(String originData, PostAnalysisEntity analysis){
+    private static PdfDiffReportRequest getPdfDiffReportRequest(String originData, RegistrySnapshotEntity snapshotEntity, PostAnalysisEntity analysis, ContractEntity contract){
         return PdfDiffReportRequest.builder()
+                .snapshotName(snapshotEntity.getSnapshotName())
                 .originData(originData)
                 .newData(analysis.getRawData())
-                .snapshotName("바뀐 등기부")
+                .contractType(contract.getContractType())
+                .deposit(contract.getDeposit())
+                .monthlyAmount(contract.getMonthlyAmount())
+                .maintenanceFee(contract.getMaintenanceFee())
+                .moveDate(contract.getMoveDate())
+                .confirmDate(contract.getConfirmDate())
                 .build();
     }
 }

@@ -68,9 +68,11 @@ public class PythonEngineClient {
                 .bodyToMono(byte[].class);
     }
 
-    public Mono<DiffAnalysisResult> diffSendSnapshot(){
-        return pythonWebClient.get()
+    public Mono<DiffAnalysisResult> diffSendSnapshot(String request){
+        return pythonWebClient.post()
                 .uri("/engine/analyze/mock")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
                 .retrieve()
                 .bodyToMono(DiffAnalysisResult.class);
     }

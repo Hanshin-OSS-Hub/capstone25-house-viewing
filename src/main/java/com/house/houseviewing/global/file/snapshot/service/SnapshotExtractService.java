@@ -21,4 +21,14 @@ public class SnapshotExtractService {
                 .snapshotSizeBytes(response.getSnapshotSizeBytes())
                 .build();
     }
+
+    public RegistrySnapshotEntity diffRegister(String snapshot){
+        SnapshotUploadResult response = snapshotUploadService.upload(snapshot);
+
+        return RegistrySnapshotEntity.builder()
+                .snapshotName(response.getSnapshotName())
+                .snapshotUrl(response.getSnapshotUrl())
+                .snapshotSizeBytes(response.getSnapshotSizeBytes())
+                .build();
+    }
 }

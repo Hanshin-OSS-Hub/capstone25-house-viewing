@@ -8,6 +8,7 @@ import java.util.Optional;
 
 public interface RegistrySnapshotRepository extends JpaRepository<RegistrySnapshotEntity, Long> {
 
-    Optional<RegistrySnapshotEntity> findTopByHouseIdOrderByCreatedAtDesc(Long houseId);
+    Optional<RegistrySnapshotEntity> findTopByHouse_IdOrderByCreatedAtDesc(Long houseId);
     List<RegistrySnapshotEntity> findByHouseUserId(Long userId);
+    long countByHouse_Id(Long houseId);
 }

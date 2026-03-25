@@ -14,9 +14,9 @@ public class SnapshotDiffAnalysisService {
 
     private final PythonEngineClient pythonEngineClient;
 
-    public PostAnalysisEntity diffAnalyze(){
+    public PostAnalysisEntity diffAnalyze(String snapshot){
         try{
-            DiffAnalysisResult result = pythonEngineClient.diffSendSnapshot().block();
+            DiffAnalysisResult result = pythonEngineClient.diffSendSnapshot(snapshot).block();
 
             if(result == null){
                 throw new AppException(ExceptionCode.ANALYSIS_FAILED);
