@@ -21,7 +21,7 @@ public class SnapshotAnalysisService {
     public PostAnalysisEntity postAnalyze(MultipartFile snapshot){
 
         try{
-            SnapshotPostAnalysisResult result = pythonEngineClient.sendPostPdf(snapshot).block();
+            SnapshotPostAnalysisResult result = pythonEngineClient.sendPostSnapshot(snapshot).block();
 
             if(result == null){
                 throw new AppException(ExceptionCode.ANALYSIS_FAILED);
@@ -41,7 +41,7 @@ public class SnapshotAnalysisService {
     public PreAnalysisEntity preAnalyze(String nickname, Address address, MultipartFile snapshot){
 
         try{
-            SnapshotPreAnalysisResult result = pythonEngineClient.sendPrePdf(snapshot).block();
+            SnapshotPreAnalysisResult result = pythonEngineClient.sendPreSnapshot(snapshot).block();
 
             if(result == null){
                 throw new AppException(ExceptionCode.ANALYSIS_FAILED);

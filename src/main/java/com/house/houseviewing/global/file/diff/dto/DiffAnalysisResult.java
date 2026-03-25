@@ -10,7 +10,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @Getter
 @NoArgsConstructor
-public class DiffAnalysisResponse {
+public class DiffAnalysisResult {
 
     private RiskLevel riskLevel;
 

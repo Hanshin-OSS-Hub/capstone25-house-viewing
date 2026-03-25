@@ -5,9 +5,12 @@ import com.house.houseviewing.domain.contract.entity.ContractEntity;
 import com.house.houseviewing.domain.contract.repository.ContractRepository;
 import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
 import com.house.houseviewing.domain.analysis.postanalysis.repository.PostAnalysisRepository;
+import com.house.houseviewing.domain.house.entity.HouseEntity;
+import com.house.houseviewing.domain.house.repository.HouseRepository;
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
+import com.house.houseviewing.global.file.diff.service.SnapshotDiffAnalysisService;
 import com.house.houseviewing.global.file.snapshot.service.SnapshotAnalysisService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,9 +24,11 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class PostAnalysisService {
 
+    private final HouseRepository houseRepository;
     private final ContractRepository contractRepository;
     private final PostAnalysisRepository postAnalysisRepository;
     private final SnapshotAnalysisService snapshotAnalysisService;
+    private final SnapshotDiffAnalysisService snapshotDiffAnalysisService;
 
     @Transactional
     public PostAnalysisEntity postRegister(MultipartFile snapshot, RegistrySnapshotEntity registrySnapshot){
@@ -42,5 +47,13 @@ public class PostAnalysisService {
                 .stream()
                 .map(AnalysisResponse::from)
                 .toList();
+    }
+
+    @Transactional
+    public PostAnalysisEntity diffRegister(Long houseId){
+        HouseEntity house = houseRepository.findById(houseId)
+                .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
+        PostAnalysisEntity diffAnalyses = snapshotDiffAnalysisService.diffAnalyze();
+        return postAnalysisRepository.save(diffAnalyses);
     }
 }

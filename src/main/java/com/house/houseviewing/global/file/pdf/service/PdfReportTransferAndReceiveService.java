@@ -2,6 +2,7 @@ package com.house.houseviewing.global.file.pdf.service;
 
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
+import com.house.houseviewing.global.file.pdf.dto.PdfDiffReportRequest;
 import com.house.houseviewing.global.file.pdf.dto.PdfPostReportRequest;
 import com.house.houseviewing.global.file.pdf.dto.PdfPreReportRequest;
 import com.house.houseviewing.global.file.pdf.dto.PdfUploadResult;
@@ -30,6 +31,18 @@ public class PdfReportTransferAndReceiveService {
 
     public PdfUploadResult preTransferAndReceive(PdfPreReportRequest request){
         byte[] pdf = pythonEngineClient.preSendDataAndReceivePdf(request).block();
+
+        if(pdf == null || pdf.length == 0){
+            throw new AppException(ExceptionCode.PDF_SAVE_FAILED);
+        }
+
+        PdfUploadResult uploadPdf = pdfStorageService.uploadPdf(pdf, request.getSnapshotName());
+
+        return uploadPdf;
+    }
+
+    public PdfUploadResult diffTransferAndReceive(PdfDiffReportRequest request){
+        byte[] pdf = pythonEngineClient.diffSendDataAndReceivePdf(request).block();
 
         if(pdf == null || pdf.length == 0){
             throw new AppException(ExceptionCode.PDF_SAVE_FAILED);

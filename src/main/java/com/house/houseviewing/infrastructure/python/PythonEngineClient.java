@@ -1,5 +1,7 @@
 package com.house.houseviewing.infrastructure.python;
 
+import com.house.houseviewing.global.file.diff.dto.DiffAnalysisResult;
+import com.house.houseviewing.global.file.pdf.dto.PdfDiffReportRequest;
 import com.house.houseviewing.global.file.pdf.dto.PdfPostReportRequest;
 import com.house.houseviewing.global.file.pdf.dto.PdfPreReportRequest;
 import com.house.houseviewing.global.file.snapshot.dto.SnapshotPostAnalysisResult;
@@ -22,7 +24,7 @@ public class PythonEngineClient {
         this.pythonWebClient = pythonWebClient;
     }
 
-    public Mono<SnapshotPostAnalysisResult> sendPostPdf(MultipartFile file){
+    public Mono<SnapshotPostAnalysisResult> sendPostSnapshot(MultipartFile file){
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("file", file.getResource())
                 .filename(file.getOriginalFilename());
@@ -35,7 +37,7 @@ public class PythonEngineClient {
                 .bodyToMono(SnapshotPostAnalysisResult.class);
     }
 
-    public Mono<SnapshotPreAnalysisResult> sendPrePdf(MultipartFile file){
+    public Mono<SnapshotPreAnalysisResult> sendPreSnapshot(MultipartFile file){
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("file", file.getResource())
                 .filename(file.getOriginalFilename());
@@ -60,6 +62,22 @@ public class PythonEngineClient {
     public Mono<byte[]> preSendDataAndReceivePdf(PdfPreReportRequest request){
         return pythonWebClient.post()
                 .uri("/engine/generate-pdf")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue(request)
+                .retrieve()
+                .bodyToMono(byte[].class);
+    }
+
+    public Mono<DiffAnalysisResult> diffSendSnapshot(){
+        return pythonWebClient.get()
+                .uri("/engine/analyze/mock")
+                .retrieve()
+                .bodyToMono(DiffAnalysisResult.class);
+    }
+
+    public Mono<byte[]> diffSendDataAndReceivePdf(PdfDiffReportRequest request){
+        return pythonWebClient.post()
+                .uri("/engine/generate-pdf/diff")
                 .contentType(MediaType.APPLICATION_JSON)
                 .bodyValue(request)
                 .retrieve()

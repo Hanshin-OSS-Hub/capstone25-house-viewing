@@ -1,10 +1,11 @@
 package com.house.houseviewing.domain.analysis.postanalysis.controller;
 
-import com.house.houseviewing.global.file.diff.dto.DiffAnalysisResponse;
+import com.house.houseviewing.api.query.service.DiffAnalysisQueryService;
 import com.house.houseviewing.global.file.pdf.dto.PdfDownloadResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -13,8 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/analysis")
 public class PostAnalysisController {
 
-    @GetMapping("/")
-    public ResponseEntity<PdfDownloadResponse> diffDiagnose(){
+    private final DiffAnalysisQueryService diffAnalysisQueryService;
 
+    @PostMapping("/{houseId}}/change-diagnoses")
+    public ResponseEntity<PdfDownloadResponse> diffDiagnose(@PathVariable Long houseId){
+        PdfDownloadResponse result = diffAnalysisQueryService.executeDiffDiagnosis(houseId);
+        return ResponseEntity.ok(result);
     }
 }

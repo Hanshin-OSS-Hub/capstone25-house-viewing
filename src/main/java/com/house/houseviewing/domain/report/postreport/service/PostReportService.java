@@ -8,6 +8,7 @@ import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEn
 import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
+import com.house.houseviewing.global.file.pdf.dto.PdfDiffReportRequest;
 import com.house.houseviewing.global.file.pdf.dto.PdfPostReportRequest;
 import com.house.houseviewing.global.file.pdf.dto.PdfUploadResult;
 import com.house.houseviewing.global.file.pdf.service.PdfReportTransferAndReceiveService;
@@ -38,6 +39,19 @@ public class PostReportService {
         return postReportRepository.save(pdfReport);
     }
 
+    @Transactional
+    public PostReportEntity diffRegister(PostAnalysisEntity analyze){
+        PostAnalysisEntity analysisEntity = postReportRepository.findTopByIdLessThanOrderByIdDesc(analyze.getId())
+                .orElseThrow(() -> new AppException(ExceptionCode.ANALYSIS_FAILED));
+        String originData = analysisEntity.getRawData();
+        PdfDiffReportRequest request = getPdfDiffReportRequest(originData, analyze);
+        PdfUploadResult uploadResult = pdfReportTransferAndReceiveService.diffTransferAndReceive(request);
+        PostReportEntity diffReport = getPdfReportEntity(uploadResult);
+        diffReport.addRegistryAnalysis(analyze);
+
+        return postReportRepository.save(diffReport);
+    }
+
     private static PostReportEntity getPdfReportEntity(PdfUploadResult uploadResult) {
         return PostReportEntity.builder()
                 .pdfName(uploadResult.getPdfName())
@@ -57,6 +71,14 @@ public class PostReportService {
                 .maintenanceFee(contract.getMaintenanceFee())
                 .moveDate(contract.getMoveDate())
                 .confirmDate(contract.getConfirmDate())
+                .build();
+    }
+
+    private static PdfDiffReportRequest getPdfDiffReportRequest(String originData, PostAnalysisEntity analysis){
+        return PdfDiffReportRequest.builder()
+                .originData(originData)
+                .newData(analysis.getRawData())
+                .snapshotName("바뀐 등기부")
                 .build();
     }
 }
