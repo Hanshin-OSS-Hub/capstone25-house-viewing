@@ -27,6 +27,4 @@ public class TokenBlacklistService {
         String key = generateKey(accessToken);
         return Boolean.TRUE.equals(stringRedisTemplate.hasKey(key));
     }
-
-
 }
