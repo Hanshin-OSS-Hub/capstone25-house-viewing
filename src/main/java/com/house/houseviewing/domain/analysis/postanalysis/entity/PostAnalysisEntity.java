@@ -13,7 +13,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "houses")
+@Table(name = "post_analyses")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PostAnalysisEntity extends BaseTimeEntity {

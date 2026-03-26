@@ -43,11 +43,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")){
                 token = authorizationHeader.substring(7);
 
-                if(!jwtTokenProvider.validateToken(token)){
+                if(tokenBlacklistService.isBlacklisted(token)){
                     writeErrorResponse(response, ExceptionCode.INVALID_TOKEN);
                     return;
                 }
 
+                jwtTokenProvider.validateToken(token);
                 loginId = jwtTokenProvider.getLoginId(token);
             }
             if (loginId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
