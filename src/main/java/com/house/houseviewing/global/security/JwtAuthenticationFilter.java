@@ -1,6 +1,8 @@
 package com.house.houseviewing.global.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.house.houseviewing.domain.auth.service.CustomUserDetailsService;
+import com.house.houseviewing.domain.auth.jwt.JwtTokenProvider;
 import com.house.houseviewing.global.exception.ExceptionCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

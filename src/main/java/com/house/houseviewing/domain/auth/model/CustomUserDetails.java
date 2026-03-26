@@ -1,4 +1,4 @@
-package com.house.houseviewing.global.security;
+package com.house.houseviewing.domain.auth.model;
 
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import lombok.Getter;

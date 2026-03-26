@@ -1,4 +1,4 @@
-package com.house.houseviewing.global.security;
+package com.house.houseviewing.domain.auth.jwt;
 
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;

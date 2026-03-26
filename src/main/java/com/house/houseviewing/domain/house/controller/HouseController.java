@@ -8,7 +8,7 @@ import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.house.dto.request.HouseRegisterRequest;
 import com.house.houseviewing.domain.house.dto.response.HouseRegisterResponse;
 import com.house.houseviewing.domain.house.service.HouseService;
-import com.house.houseviewing.global.security.CustomUserDetails;
+import com.house.houseviewing.domain.auth.model.CustomUserDetails;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

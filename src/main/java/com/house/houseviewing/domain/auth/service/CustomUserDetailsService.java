@@ -1,5 +1,6 @@
-package com.house.houseviewing.global.security;
+package com.house.houseviewing.domain.auth.service;
 
+import com.house.houseviewing.domain.auth.model.CustomUserDetails;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.repository.UserRepository;
 import com.house.houseviewing.global.exception.AppException;
