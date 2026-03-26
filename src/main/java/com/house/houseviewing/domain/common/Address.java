@@ -2,13 +2,14 @@ package com.house.houseviewing.domain.common;
 
 import jakarta.persistence.Embeddable;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Embeddable
 @Getter
 @NoArgsConstructor
-@AllArgsConstructor
+@AllArgsConstructor @Builder
 public class Address {
 
     private String addressName; // 서울 강남구 역삼동 830-31, 105호

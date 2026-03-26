@@ -3,53 +3,77 @@ package com.house.houseviewing.domain.house.entity;
 import com.house.houseviewing.domain.common.Address;
 import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
-import com.house.houseviewing.domain.house.enums.MonitoringStatus;
+import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.domain.user.entity.UserEntity;
+import com.house.houseviewing.domain.user.enums.MonitoringStatus;
+import com.house.houseviewing.global.exception.AppException;
+import com.house.houseviewing.global.exception.ExceptionCode;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "houses")
-@NoArgsConstructor @Getter
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class HouseEntity extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "house_id")
     private Long id;
 
-    @Setter
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private UserEntity userEntity;
+    private UserEntity user;
 
-    @OneToMany(mappedBy = "houseEntity")
+    @OneToMany(mappedBy = "house", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ContractEntity> contracts = new ArrayList<>();
+
+    @OneToMany(mappedBy = "house", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RegistrySnapshotEntity> snapshots = new ArrayList<>();
 
     @Column(nullable = false)
     private String nickname;
 
     @Embedded
+    @Column(nullable = false)
     private Address address;
 
-    private Integer ltvScore;
-
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private MonitoringStatus monitoringStatus;
 
-    public void addContract(ContractEntity contract){
-        contracts.add(contract);
-        contract.setHouseEntity(this);
-    }
-
-    public HouseEntity(String nickname, Address address, Integer ltvScore, MonitoringStatus monitoringStatus) {
+    @Builder
+    public HouseEntity(String nickname, Address address, MonitoringStatus monitoringStatus) {
         this.nickname = nickname;
         this.address = address;
-        this.ltvScore = ltvScore;
         this.monitoringStatus = monitoringStatus;
+    }
+
+    public void addContract(ContractEntity contract){
+        checkContract(contract);
+        this.contracts.add(contract);
+        contract.addHouse(this);
+    }
+
+    public void addRegistrySnapshot(RegistrySnapshotEntity registrySnapshot){
+        this.snapshots.add(registrySnapshot);
+        registrySnapshot.addHouse(this);
+    }
+
+    public void checkContract(ContractEntity contract) {
+        if(this.contracts.contains(contract))
+            throw new AppException(ExceptionCode.ALREADY_REGISTERED_CONTRACT);
+    }
+
+    public void updateMonitoringStatus(MonitoringStatus monitoringStatus){
+        this.monitoringStatus = monitoringStatus;
+    }
+    public void updateAddress(Address address) {this.address = address;}
+    public void updateNickname(String nickname) {this.nickname = nickname;}
+    public void addUser(UserEntity user) {
+        this.user = user;
     }
 }

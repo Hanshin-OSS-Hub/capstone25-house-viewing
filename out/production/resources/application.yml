@@ -10,6 +10,12 @@ spring:
   # docker exec -it mysql-house-viewing mysql -u root -p
   # http://localhost:8080/swagger-ui/index.html
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+  # docker exec -it redis redis-cli
+
   jpa:
     hibernate:
       ddl-auto: create # 테이블 새로 생성
@@ -29,3 +35,12 @@ kakao:
   api:
     key: ${KAKAO_REST_API_KEY}
     url: https://dapi.kakao.com
+
+python:
+  api:
+    url: http://localhost:8000
+
+jwt:
+  secret: your-very-long-and-secure-secret-key-at-least-32-chars
+  access-token-expiration: 3600000 # 1시간 (ms)
+  refresh-token-expiration: 604800000 # 7일 (ms)
