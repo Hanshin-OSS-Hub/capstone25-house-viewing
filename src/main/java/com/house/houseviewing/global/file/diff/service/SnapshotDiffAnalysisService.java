@@ -1,6 +1,7 @@
 package com.house.houseviewing.global.file.diff.service;
 
 import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
+import com.house.houseviewing.domain.analysis.postanalysis.enums.AnalysisType;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.global.file.diff.dto.DiffAnalysisResult;
@@ -23,6 +24,7 @@ public class SnapshotDiffAnalysisService {
             }
 
             return PostAnalysisEntity.builder()
+                    .analysisType(AnalysisType.DIFF)
                     .mainReason(result.getMainReason())
                     .rawData(result.getRawData())
                     .riskLevel(result.getRiskLevel())

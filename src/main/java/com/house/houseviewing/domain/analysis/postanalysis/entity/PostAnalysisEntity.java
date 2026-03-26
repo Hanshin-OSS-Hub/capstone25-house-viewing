@@ -1,5 +1,6 @@
 package com.house.houseviewing.domain.analysis.postanalysis.entity;
 
+import com.house.houseviewing.domain.analysis.postanalysis.enums.AnalysisType;
 import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.common.RiskLevel;
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
@@ -36,6 +37,9 @@ public class PostAnalysisEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private RiskLevel riskLevel;
 
+    @Enumerated(EnumType.STRING)
+    private AnalysisType analysisType;
+
     @Column(columnDefinition = "json", nullable = false)
     private String rawData;
 
@@ -46,8 +50,9 @@ public class PostAnalysisEntity extends BaseTimeEntity {
     private Integer ltvScore;
 
     @Builder
-    public PostAnalysisEntity(RiskLevel riskLevel, String rawData, String mainReason, Integer ltvScore) {
+    public PostAnalysisEntity(RiskLevel riskLevel, AnalysisType analysisType, String rawData, String mainReason, Integer ltvScore) {
         this.riskLevel = riskLevel;
+        this.analysisType = analysisType;
         this.rawData = rawData;
         this.mainReason = mainReason;
         this.ltvScore = ltvScore;

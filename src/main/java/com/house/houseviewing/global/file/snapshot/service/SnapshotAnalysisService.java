@@ -1,6 +1,7 @@
 package com.house.houseviewing.global.file.snapshot.service;
 
 import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
+import com.house.houseviewing.domain.analysis.postanalysis.enums.AnalysisType;
 import com.house.houseviewing.domain.analysis.preanalysis.entity.PreAnalysisEntity;
 import com.house.houseviewing.domain.common.Address;
 import com.house.houseviewing.global.exception.AppException;
@@ -28,6 +29,7 @@ public class SnapshotAnalysisService {
             }
 
             return PostAnalysisEntity.builder()
+                    .analysisType(AnalysisType.BASIC)
                     .rawData(result.getRawData())
                     .mainReason(result.getMainReason())
                     .ltvScore(result.getLtvScore())

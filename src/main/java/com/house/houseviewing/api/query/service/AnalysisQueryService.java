@@ -61,4 +61,8 @@ public class AnalysisQueryService {
 
         return result;
     }
+
+//    public List<AnalysisResponse> getDiffAnalyses(){
+//
+//    }
 }

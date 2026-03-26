@@ -6,6 +6,7 @@ import com.house.houseviewing.global.security.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,8 +19,16 @@ public class AnalysisQueryController {
 
     private final AnalysisQueryService analysisQueryService;
 
+    @GetMapping
     public ResponseEntity<List<AnalysisResponse>> getAnalyses(@AuthenticationPrincipal CustomUserDetails userDetails){
         List<AnalysisResponse> result = analysisQueryService.getAnalyses(userDetails.getUserId());
         return ResponseEntity.ok(result);
     }
+
+//    @GetMapping("/diff")
+//    public ResponseEntity<List<AnalysisResponse>> getDiffAnalyses(){
+//        List<AnalysisResponse> result = analysisQueryService.getDiffAnalyses();
+//        return ResponseEntity.ok(result);
+//    }
+
 }
