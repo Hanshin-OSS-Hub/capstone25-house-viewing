@@ -2,7 +2,7 @@ package com.house.houseviewing.domain.user;
 
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.dto.request.UserFindIdRequest;
-import com.house.houseviewing.domain.auth.dto.request.UserLoginRequest;
+import com.house.houseviewing.domain.auth.dto.request.LoginRequest;
 import com.house.houseviewing.domain.user.dto.request.UserResetPasswordRequest;
 import com.house.houseviewing.domain.user.dto.request.UserVerifyPasswordRequest;
 import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;
@@ -43,7 +43,7 @@ public class UserServiceIntegrationTest {
     void 로그인(){
         // given
         UserEntity register = getUserEntity();
-        UserLoginRequest loginRQ = UserLoginRequest.builder()
+        LoginRequest loginRQ = LoginRequest.builder()
                 .loginId(register.getLoginId())
                 .password(register.getPassword())
                 .build();

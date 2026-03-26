@@ -1,7 +1,7 @@
 package com.house.houseviewing.domain.auth.controller;
 
-import com.house.houseviewing.domain.auth.dto.request.UserLoginRequest;
-import com.house.houseviewing.domain.auth.dto.response.UserLoginResponse;
+import com.house.houseviewing.domain.auth.dto.request.LoginRequest;
+import com.house.houseviewing.domain.auth.dto.response.LoginResponse;
 import com.house.houseviewing.domain.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -19,8 +19,8 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    public ResponseEntity<UserLoginResponse> login(@Valid @RequestBody UserLoginRequest request){
-        UserLoginResponse result = authService.login(request);
+    public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request){
+        LoginResponse result = authService.login(request);
         return ResponseEntity.ok(result);
     }
 }

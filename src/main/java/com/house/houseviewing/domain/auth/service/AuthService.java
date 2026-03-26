@@ -1,7 +1,7 @@
 package com.house.houseviewing.domain.auth.service;
 
-import com.house.houseviewing.domain.auth.dto.request.UserLoginRequest;
-import com.house.houseviewing.domain.auth.dto.response.UserLoginResponse;
+import com.house.houseviewing.domain.auth.dto.request.LoginRequest;
+import com.house.houseviewing.domain.auth.dto.response.LoginResponse;
 import com.house.houseviewing.domain.auth.jwt.JwtTokenProvider;
 import com.house.houseviewing.domain.auth.model.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +18,7 @@ public class AuthService {
     private final RefreshTokenService refreshTokenService;
     private final AuthenticationManager authenticationManager;
 
-    public UserLoginResponse login(UserLoginRequest request){
+    public LoginResponse login(LoginRequest request){
         Authentication authenticate = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getLoginId(),
@@ -27,7 +27,8 @@ public class AuthService {
         CustomUserDetails userDetails = (CustomUserDetails) authenticate.getPrincipal();
         String accessToken = jwtTokenProvider.createAccessToken(userDetails.getUserId(), userDetails.getUsername());
         String refreshToken = jwtTokenProvider.createRefreshToken(userDetails.getUserId(), userDetails.getUsername());
+        refreshTokenService.saveRefreshToken(userDetails.getUserId(), refreshToken, jwtTokenProvider.getRefreshTokenExpiration());
 
-        return UserLoginResponse.from(accessToken, refreshToken);
+        return LoginResponse.from(accessToken, refreshToken);
     }
 }

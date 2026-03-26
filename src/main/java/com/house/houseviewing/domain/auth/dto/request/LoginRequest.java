@@ -7,7 +7,7 @@ import lombok.Getter;
 
 @Getter
 @AllArgsConstructor @Builder
-public class UserLoginRequest {
+public class LoginRequest {
 
     @NotBlank(message = "아이디를 입력해주세요")
     private String loginId;
