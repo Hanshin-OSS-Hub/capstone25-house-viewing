@@ -1,20 +1,86 @@
-# Gradle
+############################
+# OS
+############################
+.DS_Store
+Thumbs.db
+
+############################
+# Logs
+############################
+*.log
+
+############################
+# Runtime
+############################
+*.pid
+*.seed
+*.pid.lock
+
+############################
+# Gradle (Build)
+############################
 .gradle/
 build/
+!gradle/wrapper/gradle-wrapper.jar
 
+############################
+# Java
+############################
+*.class
+*.jar
+*.war
+*.ear
+
+############################
 # IntelliJ
+############################
 .idea/
 *.iml
 out/
 
-# OS
-.DS_Store
+############################
+# VSCode (optional)
+############################
+.vscode/
 
-# Logs
-*.log
+############################
+# Environment / Secrets
+############################
+.env
+.env.*
+*.env
 
-# mock registry json
+############################
+# Spring Profiles
+############################
+application-local.yml
+application-dev.yml
+application-prod.yml
+
+############################
+# Config (중요)
+############################
+src/main/resources/application.yml
+
+############################
+# Upload / Files (너 프로젝트 핵심)
+############################
+uploads/
+*.tmp
+
+############################
+# Mock Data
+############################
 src/main/java/com/house/houseviewing/infrastructure/mock/registry/*.json
 
-# .gitignore 파일
-src/main/resources/application.yml
+############################
+# Test / Coverage
+############################
+coverage/
+*.coverage
+
+############################
+# Node (프론트 대비)
+############################
+node_modules/
+dist/
