@@ -45,12 +45,16 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public String createToken(Long userId, String loginId){
+    public String createAccessToken(Long userId, String loginId){
         return createToken(userId, loginId, accessToken);
     }
 
-    public String refreshToken(Long userId, String loginId){
+    public String createRefreshToken(Long userId, String loginId){
         return createToken(userId, loginId, refreshToken);
+    }
+
+    public long getRefreshTokenExpiration(){
+        return refreshToken;
     }
 
     public boolean validateToken(String token){

@@ -25,9 +25,9 @@ public class AuthService {
                         request.getPassword()
                 ));
         CustomUserDetails userDetails = (CustomUserDetails) authenticate.getPrincipal();
-        String accessToken = jwtTokenProvider.createToken(userDetails.getUserId(), userDetails.getUsername());
-        String refreshToken = jwtTokenProvider.refreshToken(userDetails.getUserId(), userDetails.getUsername());
-        
+        String accessToken = jwtTokenProvider.createAccessToken(userDetails.getUserId(), userDetails.getUsername());
+        String refreshToken = jwtTokenProvider.createRefreshToken(userDetails.getUserId(), userDetails.getUsername());
+
         return UserLoginResponse.from(accessToken, refreshToken);
     }
 }
