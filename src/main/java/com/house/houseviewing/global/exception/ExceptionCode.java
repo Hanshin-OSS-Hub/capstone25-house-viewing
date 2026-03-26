@@ -24,6 +24,7 @@ public enum ExceptionCode {
     INVALID_TOKEN("AU002", HttpStatus.UNAUTHORIZED, "유효하지 않거나 만료된 토큰입니다."),
     FORBIDDEN("AU003", HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
     LOGIN_FAILED("AU004",HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 일치하지 않습니다."),
+    FREE_DIAGNOSIS_ALREADY_USED("AU005", HttpStatus.FORBIDDEN, "이미 무료 진단을 사용하셨습니다. 결제를 진행해주세요"),
 
     // VP
     FIND_LOGIN_ID_FAILED("VP001",HttpStatus.BAD_REQUEST, "이메일 또는 아이디가 틀렸습니다."),

@@ -8,4 +8,5 @@ import java.util.List;
 public interface PreAnalysisRepository extends JpaRepository<PreAnalysisEntity, Long> {
 
     List<PreAnalysisEntity> findAllByUserId(Long userId);
+    boolean existsByUserId(Long userId);
 }

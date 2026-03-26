@@ -1,12 +1,11 @@
 package com.house.houseviewing.domain.analysis.preanalysis.service;
 
 import com.house.houseviewing.domain.analysis.postanalysis.dto.response.AnalysisResponse;
-import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
 import com.house.houseviewing.domain.analysis.preanalysis.entity.PreAnalysisEntity;
 import com.house.houseviewing.domain.analysis.preanalysis.repository.PreAnalysisRepository;
 import com.house.houseviewing.domain.common.Address;
-import com.house.houseviewing.domain.common.RatePlan;
 import com.house.houseviewing.domain.registrysnapshot.dto.request.PreContractDiagnosisRequest;
+import com.house.houseviewing.domain.subscription.enums.PlanType;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.repository.UserRepository;
 import com.house.houseviewing.global.exception.AppException;
@@ -34,19 +33,11 @@ public class PreAnalysisService {
     public PreAnalysisEntity preRegister(Long userId, PreContractDiagnosisRequest request, MultipartFile snapshot){
         UserEntity user = userRepository.findById(userId).
                 orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
-
+        validateFreeDiagnosisAvailable(user);
         Address address = kakaoAddress.parsingAddress(request.getAddress());
         PreAnalysisEntity analyze = snapshotAnalysisService.preAnalyze(request.getNickname(), address, snapshot);
         analyze.addUser(user);
         return preAnalysisRepository.save(analyze);
-    }
-
-    private boolean isFreePlan(UserEntity user){
-        if(user.getRatePlan() == RatePlan.FREE){
-            return true;
-        }
-        else
-            return false;
     }
 
     public List<AnalysisResponse> getPreAnalyses(Long userId){
@@ -55,5 +46,15 @@ public class PreAnalysisService {
                 .stream()
                 .map(AnalysisResponse::from)
                 .toList();
+    }
+
+    public void validateFreeDiagnosisAvailable(UserEntity user){
+        if (user.getSubscription().getPlanType() == PlanType.PREMIUM){
+            return;
+        }
+        boolean validate = preAnalysisRepository.existsByUserId(user.getId());
+        if (validate){
+            throw new AppException(ExceptionCode.FREE_DIAGNOSIS_ALREADY_USED);
+        }
     }
 }

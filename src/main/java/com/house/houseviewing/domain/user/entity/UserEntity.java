@@ -2,7 +2,6 @@ package com.house.houseviewing.domain.user.entity;
 
 import com.house.houseviewing.domain.analysis.preanalysis.entity.PreAnalysisEntity;
 import com.house.houseviewing.domain.common.BaseTimeEntity;
-import com.house.houseviewing.domain.common.RatePlan;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
@@ -43,17 +42,12 @@ public class UserEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private String password;
 
-    @Enumerated(value = EnumType.STRING)
-    @Column(nullable = false)
-    private RatePlan ratePlan;
-
     @Builder
-    public UserEntity(String name, String email, String loginId, String password, RatePlan ratePlan) {
+    public UserEntity(String name, String email, String loginId, String password) {
         this.name = name;
         this.email = email;
         this.loginId = loginId;
         this.password = password;
-        this.ratePlan = ratePlan;
     }
 
     public void addHouse(HouseEntity house){
@@ -72,7 +66,6 @@ public class UserEntity extends BaseTimeEntity {
 
     public void updateSubscription(SubscriptionEntity subscription){this.subscription = subscription;}
     public void updatePassword(String password){this.password = password;}
-    public void updateRatePlan(RatePlan ratePlan){this.ratePlan = ratePlan;}
 
     public boolean isPremium() {
         return this.getSubscription().getPlanType() == PlanType.PREMIUM && this.getSubscription() != null;
