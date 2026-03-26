@@ -24,7 +24,7 @@ public class SecurityConfig {
 
     private static final String[] PERMIT_URL_ARRAY = {
             "/users/register",
-            "/users/login",
+            "/auth/login",
             "/users/find-id",
             "/users/password/verify",
             "/users/password/reset",

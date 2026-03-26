@@ -1,9 +1,13 @@
 package com.house.houseviewing.domain.auth.service;
 
 import com.house.houseviewing.domain.auth.dto.request.LoginRequest;
+import com.house.houseviewing.domain.auth.dto.request.ReissueRequest;
 import com.house.houseviewing.domain.auth.dto.response.LoginResponse;
+import com.house.houseviewing.domain.auth.dto.response.ReissueResponse;
 import com.house.houseviewing.domain.auth.jwt.JwtTokenProvider;
 import com.house.houseviewing.domain.auth.model.CustomUserDetails;
+import com.house.houseviewing.global.exception.AppException;
+import com.house.houseviewing.global.exception.ExceptionCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,5 +34,22 @@ public class AuthService {
         refreshTokenService.saveRefreshToken(userDetails.getUserId(), refreshToken, jwtTokenProvider.getRefreshTokenExpiration());
 
         return LoginResponse.from(accessToken, refreshToken);
+    }
+
+    public ReissueResponse reissue(ReissueRequest request){
+        String refreshToken = request.getRefreshToken();
+
+        jwtTokenProvider.validateToken(refreshToken);
+
+        Long userId = jwtTokenProvider.getUserId(refreshToken);
+        String loginId = jwtTokenProvider.getLoginId(refreshToken);
+
+        String savedRefreshToken = refreshTokenService.getRefreshToken(userId);
+
+        if(savedRefreshToken == null || !savedRefreshToken.equals(refreshToken)){
+            throw new AppException(ExceptionCode.INVALID_TOKEN);
+        }
+        String accessToken = jwtTokenProvider.createAccessToken(userId, loginId);
+        return ReissueResponse.builder().accessToken(accessToken).build();
     }
 }
