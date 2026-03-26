@@ -1,0 +1,89 @@
+############################
+# OS
+############################
+.DS_Store
+Thumbs.db
+
+############################
+# Logs
+############################
+*.log
+
+############################
+# Runtime
+############################
+*.pid
+*.seed
+*.pid.lock
+
+############################
+# Build (Gradle)
+############################
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+############################
+# Java
+############################
+*.class
+*.jar
+*.war
+*.ear
+
+############################
+# IntelliJ IDEA
+############################
+.idea/
+*.iml
+out/
+
+############################
+# VS Code (optional)
+############################
+.vscode/
+
+############################
+# Eclipse (optional)
+############################
+.project
+.classpath
+.settings/
+
+############################
+# Environment / Secrets
+############################
+.env
+.env.*
+*.env
+
+############################
+# Spring Boot
+############################
+application-local.yml
+application-dev.yml
+application-prod.yml
+
+############################
+# Upload / Files
+############################
+uploads/
+*.tmp
+
+############################
+# Test / Coverage
+############################
+coverage/
+*.coverage
+
+############################
+# Node (frontend 같이 쓸 경우 대비)
+############################
+node_modules/
+dist/
+
+# mock registry json
+src/main/java/com/house/houseviewing/infrastructure/mock/registry/*.json
+
+# .gitignore 파일
+src/main/resources/application.yml
