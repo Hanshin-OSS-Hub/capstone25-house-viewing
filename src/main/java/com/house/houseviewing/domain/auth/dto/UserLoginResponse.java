@@ -1,6 +1,5 @@
-package com.house.houseviewing.domain.common.auth.dto;
+package com.house.houseviewing.domain.auth.dto;
 
-import com.house.houseviewing.domain.user.entity.UserEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
