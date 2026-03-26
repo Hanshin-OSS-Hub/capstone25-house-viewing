@@ -1,6 +1,5 @@
-package com.house.houseviewing.domain.auth.controller;
+package com.house.houseviewing.domain.auth.test;
 
-import com.house.houseviewing.domain.auth.service.RedisTestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

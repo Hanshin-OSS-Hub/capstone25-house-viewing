@@ -1,4 +1,4 @@
-package com.house.houseviewing.domain.auth.service;
+package com.house.houseviewing.domain.auth.test;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.StringRedisTemplate;

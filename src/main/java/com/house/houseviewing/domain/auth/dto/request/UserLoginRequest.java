@@ -1,4 +1,4 @@
-package com.house.houseviewing.domain.auth.dto;
+package com.house.houseviewing.domain.auth.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

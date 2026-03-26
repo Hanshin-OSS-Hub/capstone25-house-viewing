@@ -1,8 +1,8 @@
 package com.house.houseviewing.domain.auth.controller;
 
-import com.house.houseviewing.domain.auth.dto.UserLoginRequest;
-import com.house.houseviewing.domain.auth.dto.UserLoginResponse;
-import com.house.houseviewing.domain.user.service.UserService;
+import com.house.houseviewing.domain.auth.dto.request.UserLoginRequest;
+import com.house.houseviewing.domain.auth.dto.response.UserLoginResponse;
+import com.house.houseviewing.domain.auth.service.AuthService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -16,11 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/users")
 public class AuthController {
 
-    private final UserService userService;
+    private final AuthService authService;
 
     @PostMapping("/login")
     public ResponseEntity<UserLoginResponse> login(@Valid @RequestBody UserLoginRequest request){
-        UserLoginResponse result = userService.login(request);
+        UserLoginResponse result = authService.login(request);
         return ResponseEntity.ok(result);
     }
 }

@@ -21,6 +21,9 @@ public class JwtTokenProvider {
     @Value("${jwt.access-token-expiration}")
     private long accessToken;
 
+    @Value("${jwt.refresh-token-expiration}")
+    private long refreshToken;
+
     private Key key;
 
     @PostConstruct
@@ -28,9 +31,9 @@ public class JwtTokenProvider {
         this.key = Keys.hmacShaKeyFor(secretKey.getBytes(StandardCharsets.UTF_8));
     }
 
-    public String createToken(Long userId, String loginId){
+    private String createToken(Long userId, String loginId, long expirationTime){
         final Date now = new Date(); // 현재시간
-        final Date expiry = new Date(now.getTime() + accessToken); // 만료시간
+        final Date expiry = new Date(now.getTime() + expirationTime); // 만료시간
 
         return Jwts.builder()
                 .setSubject(loginId)
@@ -40,6 +43,14 @@ public class JwtTokenProvider {
                 .setExpiration(expiry) // 유효기간 설정
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
+    }
+
+    public String createToken(Long userId, String loginId){
+        return createToken(userId, loginId, accessToken);
+    }
+
+    public String refreshToken(Long userId, String loginId){
+        return createToken(userId, loginId, refreshToken);
     }
 
     public boolean validateToken(String token){

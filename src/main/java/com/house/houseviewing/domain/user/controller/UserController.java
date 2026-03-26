@@ -4,8 +4,6 @@ import com.house.houseviewing.domain.user.dto.response.UserMeResponse;
 import com.house.houseviewing.domain.user.dto.request.UserFindIdRequest;
 import com.house.houseviewing.domain.user.dto.response.UserFindIdResponse;
 import com.house.houseviewing.domain.auth.model.CustomUserDetails;
-import com.house.houseviewing.domain.auth.dto.UserLoginRequest;
-import com.house.houseviewing.domain.auth.dto.UserLoginResponse;
 import com.house.houseviewing.domain.user.dto.request.UserResetPasswordRequest;
 import com.house.houseviewing.domain.user.dto.request.UserVerifyPasswordRequest;
 import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;

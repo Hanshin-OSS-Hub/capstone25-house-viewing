@@ -1,4 +1,4 @@
-package com.house.houseviewing.domain.auth.dto;
+package com.house.houseviewing.domain.auth.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,9 +10,12 @@ public class UserLoginResponse {
 
     private String accessToken;
 
-    public static UserLoginResponse from(String token){
+    private String refreshToken;
+
+    public static UserLoginResponse from(String accessToken, String refreshToken){
         return UserLoginResponse.builder()
-                .accessToken(token)
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
                 .build();
     }
 }

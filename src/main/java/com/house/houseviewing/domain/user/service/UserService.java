@@ -6,13 +6,13 @@ import com.house.houseviewing.domain.user.dto.response.UserFindIdResponse;
 import com.house.houseviewing.domain.user.dto.response.UserMeResponse;
 import com.house.houseviewing.domain.user.dto.response.UserRegisterResponse;
 import com.house.houseviewing.domain.auth.model.CustomUserDetails;
-import com.house.houseviewing.domain.auth.dto.UserLoginResponse;
+import com.house.houseviewing.domain.auth.dto.response.UserLoginResponse;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.domain.user.dto.request.UserFindIdRequest;
 import com.house.houseviewing.domain.user.dto.request.UserResetPasswordRequest;
 import com.house.houseviewing.domain.user.dto.request.UserVerifyPasswordRequest;
-import com.house.houseviewing.domain.auth.dto.UserLoginRequest;
+import com.house.houseviewing.domain.auth.dto.request.UserLoginRequest;
 import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.repository.UserRepository;
@@ -32,9 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
 
     @Transactional
     public UserRegisterResponse register(UserRegisterRequest request){
@@ -52,18 +50,6 @@ public class UserService {
         } catch (DataIntegrityViolationException e){
             throw new AppException(ExceptionCode.DUPLICATE_RESOURCE);
         }
-    }
-
-    public UserLoginResponse login(UserLoginRequest request){
-        Authentication authenticate = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getLoginId(),
-                        request.getPassword()
-                ));
-        CustomUserDetails userDetails = (CustomUserDetails) authenticate.getPrincipal();
-        String token = jwtTokenProvider.createToken(userDetails.getUserId(), userDetails.getUsername());
-
-        return UserLoginResponse.from(token);
     }
 
     public UserMeResponse me(Long userId){
