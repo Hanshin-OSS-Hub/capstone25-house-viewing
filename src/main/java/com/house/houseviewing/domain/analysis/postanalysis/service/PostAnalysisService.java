@@ -24,7 +24,6 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class PostAnalysisService {
 
-    private final HouseRepository houseRepository;
     private final ContractRepository contractRepository;
     private final PostAnalysisRepository postAnalysisRepository;
     private final SnapshotAnalysisService snapshotAnalysisService;
