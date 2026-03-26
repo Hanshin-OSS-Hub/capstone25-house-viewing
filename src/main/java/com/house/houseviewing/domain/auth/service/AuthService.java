@@ -21,6 +21,7 @@ public class AuthService {
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenService refreshTokenService;
     private final AuthenticationManager authenticationManager;
+    private final TokenBlacklistService tokenBlacklistService;
 
     public LoginResponse login(LoginRequest request){
         Authentication authenticate = authenticationManager.authenticate(
@@ -51,5 +52,21 @@ public class AuthService {
         }
         String accessToken = jwtTokenProvider.createAccessToken(userId, loginId);
         return ReissueResponse.builder().accessToken(accessToken).build();
+    }
+
+    public void logout(String authorizationHeader){
+        String accessToken = extractToken(authorizationHeader);
+        Long remainingTime = jwtTokenProvider.getRemainingTime(accessToken);
+        Long userId = jwtTokenProvider.getUserId(accessToken);
+
+        tokenBlacklistService.blacklistToken(accessToken, remainingTime);
+        refreshTokenService.deleteRefreshToken(userId);
+    }
+
+    private String extractToken(String authorizationHeader) {
+        if(authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")){
+            throw new AppException(ExceptionCode.INVALID_HEADER);
+        }
+        return authorizationHeader.substring(7);
     }
 }

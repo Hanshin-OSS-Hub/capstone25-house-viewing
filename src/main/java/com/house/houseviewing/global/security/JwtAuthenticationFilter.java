@@ -3,6 +3,7 @@ package com.house.houseviewing.global.security;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.house.houseviewing.domain.auth.service.CustomUserDetailsService;
 import com.house.houseviewing.domain.auth.jwt.JwtTokenProvider;
+import com.house.houseviewing.domain.auth.service.TokenBlacklistService;
 import com.house.houseviewing.global.exception.ExceptionCode;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -26,7 +27,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService customUserDetailsService;
+    private final TokenBlacklistService tokenBlacklistService;
     private final ObjectMapper objectMapper;
+
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,

@@ -5,14 +5,13 @@ import com.house.houseviewing.domain.auth.dto.request.ReissueRequest;
 import com.house.houseviewing.domain.auth.dto.response.LoginResponse;
 import com.house.houseviewing.domain.auth.dto.response.ReissueResponse;
 import com.house.houseviewing.domain.auth.service.AuthService;
+import com.house.houseviewing.global.exception.AppException;
+import com.house.houseviewing.global.exception.ExceptionCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -31,5 +30,11 @@ public class AuthController {
     public ResponseEntity<ReissueResponse> reissue(@RequestBody ReissueRequest request){
         ReissueResponse result = authService.reissue(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestHeader("Authorization") String authorizationHeader){
+        authService.logout(authorizationHeader);
+        return ResponseEntity.ok().build();
     }
 }
