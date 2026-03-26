@@ -32,7 +32,11 @@ public class SecurityConfig {
             // swagger
             "/v3/api-docs/**",
             "/swagger-ui/**",
-            "/swagger-ui.html"
+            "/swagger-ui.html",
+
+            // redis
+            "/redis/test/save",
+            "/redis/test/get"
     };
 
     @Bean
