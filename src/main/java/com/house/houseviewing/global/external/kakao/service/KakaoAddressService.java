@@ -7,6 +7,8 @@ import com.house.houseviewing.global.external.kakao.model.KakaoAddressRS;
 import com.house.houseviewing.global.external.kakao.model.KakaoAddressRS.Document;
 import com.house.houseviewing.global.external.kakao.model.KakaoAddressRS.ParsedAddress;
 import com.house.houseviewing.global.util.AddressUtils;
+import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -14,20 +16,15 @@ import org.springframework.web.reactive.function.client.WebClient;
 @Service
 public class KakaoAddressService implements KakaoAddress {
 
-    private final WebClient webClient;
+    private final WebClient kakaoWebClient;
 
-    public KakaoAddressService(
-            @Value("${kakao.api.url}") String kakaoUrl,
-            @Value("${kakao.api.key}") String kakaoKey ) {
-        this.webClient = WebClient.builder()
-                .baseUrl(kakaoUrl)
-                .defaultHeader("Authorization", "KakaoAK " + kakaoKey)
-                .build();
+    public KakaoAddressService(@Qualifier("kakaoWebClient") WebClient kakaoWebClient) {
+        this.kakaoWebClient = kakaoWebClient;
     }
 
     @Override
     public Address parsingAddress(String query) {
-        KakaoAddressRS kakaoAddressRSMono = webClient.get()
+        KakaoAddressRS kakaoAddressRSMono = kakaoWebClient.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/v2/local/search/address.json")
                         .queryParam("query", query)
