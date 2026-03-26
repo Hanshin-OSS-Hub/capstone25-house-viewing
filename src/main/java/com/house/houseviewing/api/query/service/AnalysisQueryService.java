@@ -62,7 +62,7 @@ public class AnalysisQueryService {
         return result;
     }
 
-//    public List<AnalysisResponse> getDiffAnalyses(){
-//
-//    }
+    public List<AnalysisResponse> getDiffAnalyses(Long userId){
+        return postAnalysisService.getDiffAnalyses(userId);
+    }
 }

@@ -25,10 +25,10 @@ public class AnalysisQueryController {
         return ResponseEntity.ok(result);
     }
 
-//    @GetMapping("/diff")
-//    public ResponseEntity<List<AnalysisResponse>> getDiffAnalyses(){
-//        List<AnalysisResponse> result = analysisQueryService.getDiffAnalyses();
-//        return ResponseEntity.ok(result);
-//    }
+    @GetMapping("/diff")
+    public ResponseEntity<List<AnalysisResponse>> getDiffAnalyses(@AuthenticationPrincipal CustomUserDetails userDetails){
+        List<AnalysisResponse> result = analysisQueryService.getDiffAnalyses(userDetails.getUserId());
+        return ResponseEntity.ok(result);
+    }
 
 }

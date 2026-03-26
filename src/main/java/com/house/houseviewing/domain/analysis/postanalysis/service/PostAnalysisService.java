@@ -1,6 +1,7 @@
 package com.house.houseviewing.domain.analysis.postanalysis.service;
 
 import com.house.houseviewing.domain.analysis.postanalysis.dto.response.AnalysisResponse;
+import com.house.houseviewing.domain.analysis.postanalysis.enums.AnalysisType;
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
 import com.house.houseviewing.domain.contract.repository.ContractRepository;
 import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
@@ -43,6 +44,14 @@ public class PostAnalysisService {
     public List<AnalysisResponse> getPostAnalyses(Long userId){
         List<PostAnalysisEntity> postAnalyses = postAnalysisRepository.findAllByUserId(userId);
         return postAnalyses
+                .stream()
+                .map(AnalysisResponse::from)
+                .toList();
+    }
+
+    public List<AnalysisResponse> getDiffAnalyses(Long userId){
+        List<PostAnalysisEntity> diffAnalyses = postAnalysisRepository.findAllByUserIdAndAnalysisType(userId, AnalysisType.DIFF);
+        return diffAnalyses
                 .stream()
                 .map(AnalysisResponse::from)
                 .toList();
