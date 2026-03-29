@@ -8,6 +8,7 @@ Thumbs.db
 # Logs
 ############################
 *.log
+logs/
 
 ############################
 # Runtime
@@ -24,12 +25,14 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 
 ############################
-# Java
+# Java (Build Output)
 ############################
 *.class
 *.jar
 *.war
 *.ear
+hs_err_pid*
+*.hprof
 
 ############################
 # IntelliJ
@@ -39,7 +42,7 @@ build/
 out/
 
 ############################
-# VSCode (optional)
+# VSCode
 ############################
 .vscode/
 
@@ -51,27 +54,17 @@ out/
 *.env
 
 ############################
-# Spring Profiles
+# Spring Profiles (환경별 설정 숨김)
 ############################
-application-local.yml
-application-dev.yml
-application-prod.yml
+src/main/resources/application-local.yml
+src/main/resources/application-dev.yml
+src/main/resources/application-prod.yml
 
 ############################
-# Config (중요)
-############################
-src/main/resources/application.yml
-
-############################
-# Upload / Files (너 프로젝트 핵심)
+# Upload / Files
 ############################
 uploads/
 *.tmp
-
-############################
-# Mock Data
-############################
-src/main/java/com/house/houseviewing/infrastructure/mock/registry/*.json
 
 ############################
 # Test / Coverage
