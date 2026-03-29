@@ -9,7 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "prereports")
+@Table(name = "pre_reports")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class PreReportEntity extends BaseTimeEntity {
