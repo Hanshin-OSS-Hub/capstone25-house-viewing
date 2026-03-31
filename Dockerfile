@@ -29,7 +29,7 @@ COPY gradlew gradlew.bat ./
 # Gradle 의존성을 다운로드합니다. '--no-daemon' 옵션은 CI/CD 환경에서 불필요한 Gradle 데몬 프로세스를 생성하지 않도록 합니다.
 # '|| true'는 의존성 분석 중 오류가 발생해도 빌드를 중단하지 않도록 하는 안전장치 역할을 할 수 있으나,
 # 여기서는 의존성을 확실히 받아오기 위해 `gradle dependencies`를 실행합니다.
-RUN ./gradlew dependencies --no-daemon
+RUN ./gradlew clean bootJar -x test --no-daemon
 
 # 나머지 소스 코드를 복사합니다.
 COPY src ./src
