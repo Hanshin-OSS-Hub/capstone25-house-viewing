@@ -26,16 +26,15 @@ COPY build.gradle settings.gradle ./
 COPY gradle ./gradle
 COPY gradlew gradlew.bat ./
 
-# Gradle 의존성을 다운로드합니다. '--no-daemon' 옵션은 CI/CD 환경에서 불필요한 Gradle 데몬 프로세스를 생성하지 않도록 합니다.
-# '|| true'는 의존성 분석 중 오류가 발생해도 빌드를 중단하지 않도록 하는 안전장치 역할을 할 수 있으나,
-# 여기서는 의존성을 확실히 받아오기 위해 `gradle dependencies`를 실행합니다.
-RUN ./gradlew clean bootJar -x test --no-daemon
+# gradlew 실행 권한을 부여하고, 소스 코드 복사 전에 의존성을 미리 내려받아 캐싱합니다.
+RUN chmod +x gradlew && ./gradlew dependencies --no-daemon
 
 # 나머지 소스 코드를 복사합니다.
 COPY src ./src
 
 # Gradle wrapper를 사용하여 애플리케이션을 빌드합니다. 'clean'은 이전 빌드 결과물을 삭제하고, 'bootJar'는 실행 가능한 Spring Boot JAR 파일을 생성합니다.
-RUN ./gradlew clean bootJar --no-daemon
+# 테스트는 Docker 빌드 과정에서 제외합니다.
+RUN ./gradlew clean bootJar -x test --no-daemon
 
 # --- STAGE 2: Runner ---
 # 빌드된 애플리케이션을 실행하기 위한 환경입니다.

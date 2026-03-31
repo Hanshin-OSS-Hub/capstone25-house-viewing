@@ -29,6 +29,9 @@ services:
     # "호스트포트:컨테이너포트" 형식으로, 호스트의 8080 포트로 오는 요청을 컨테이너의 8080 포트로 전달합니다.
     ports:
       - "8080:8080"
+    # Linux 호스트에서 host.docker.internal을 사용할 수 있도록 설정합니다.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     # environment: 컨테이너 내에서 사용할 환경 변수를 설정합니다.
     # application.yml에 정의된 값들을 Docker 환경에 맞게 여기서 덮어씁니다.
     environment:

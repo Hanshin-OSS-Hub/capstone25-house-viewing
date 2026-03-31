@@ -20,6 +20,10 @@ configurations {
 	}
 }
 
+springBoot {
+    mainClass = 'com.house.houseviewing.HouseViewingApplication'
+}
+
 repositories {
 	mavenCentral()
 }
@@ -47,3 +51,5 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+
