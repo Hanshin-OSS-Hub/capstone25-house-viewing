@@ -5,8 +5,6 @@ import com.house.houseviewing.domain.auth.dto.request.ReissueRequest;
 import com.house.houseviewing.domain.auth.dto.response.LoginResponse;
 import com.house.houseviewing.domain.auth.dto.response.ReissueResponse;
 import com.house.houseviewing.domain.auth.service.AuthService;
-import com.house.houseviewing.global.exception.AppException;
-import com.house.houseviewing.global.exception.ExceptionCode;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

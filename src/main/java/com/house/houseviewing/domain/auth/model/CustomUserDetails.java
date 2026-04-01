@@ -28,7 +28,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public String getUsername() {
-        return userEntity.getLoginId();
+        return userEntity.getName();
     }
 
     @Override
@@ -55,9 +55,7 @@ public class CustomUserDetails implements UserDetails {
         return userEntity.getId();
     }
 
-    public String getEmail() {
-        return userEntity.getEmail();
-    }
+    public String getLoginId(){ return userEntity.getLoginId();}
 
     public String getName() {
         return userEntity.getName();

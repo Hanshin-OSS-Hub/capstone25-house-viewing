@@ -34,7 +34,7 @@ public class AuthService {
         String refreshToken = jwtTokenProvider.createRefreshToken(userDetails.getUserId(), userDetails.getUsername());
         refreshTokenService.saveRefreshToken(userDetails.getUserId(), refreshToken, jwtTokenProvider.getRefreshTokenExpiration());
 
-        return LoginResponse.from(accessToken, refreshToken);
+        return LoginResponse.from(userDetails, accessToken, refreshToken);
     }
 
     public ReissueResponse reissue(ReissueRequest request){
