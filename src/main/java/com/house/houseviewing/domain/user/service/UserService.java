@@ -15,9 +15,13 @@ import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.Duration;
 
 @Service
 @Transactional(readOnly = true)
@@ -26,6 +30,7 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final StringRedisTemplate stringRedisTemplate;
 
     @Transactional
     public UserRegisterResponse register(UserRegisterRequest request){
@@ -62,14 +67,26 @@ public class UserService {
     public boolean passwordVerify(UserVerifyPasswordRequest request){
         UserEntity user = userRepository.findByEmailAndNameAndLoginId(request.getEmail(), request.getName(), request.getLoginId())
                 .orElseThrow(() -> new AppException(ExceptionCode.VERIFY_PASSWORD_FAILED));
+        String key = "PW_RESET_ALLOWED:" + user.getLoginId();
+        stringRedisTemplate.opsForValue().set(key, "true", Duration.ofMinutes(5));
+
         return true;
     }
 
     @Transactional
     public void passwordReset(UserResetPasswordRequest request){
-        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
+        String key = "PW_RESET_ALLOWED:" + request.getLoginId();
+        String allowed = stringRedisTemplate.opsForValue().get(key);
+
+        if(allowed == null){
+            throw new AppException(ExceptionCode.PASSWORD_RESET_NOT_ALLOWED);
+        }
+
+        UserEntity user = userRepository.findByLoginId(request.getLoginId())
+                .orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
         String encode = passwordEncoder.encode(request.getNewPassword());
         user.updatePassword(encode);
+        stringRedisTemplate.delete(key);
     }
 
     @Transactional

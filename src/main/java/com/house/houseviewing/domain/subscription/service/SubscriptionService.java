@@ -18,12 +18,11 @@ import org.springframework.transaction.annotation.Transactional;
 public class SubscriptionService {
 
     private final UserRepository userRepository;
-    private final SubscriptionRepository subscriptionRepository;
 
     @Transactional
-    public SubscriptionEntity premium(SubscriptionPremiumRequest request){
+    public SubscriptionEntity premium(Long userId){
 
-        UserEntity user = userRepository.findById(request.getUserId()).orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
+        UserEntity user = userRepository.findById(userId).orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
 
         SubscriptionEntity subscription = user.getSubscription();
         if (subscription == null){

@@ -1,5 +1,6 @@
 package com.house.houseviewing.domain.subscription.controller;
 
+import com.house.houseviewing.domain.auth.model.CustomUserDetails;
 import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import com.house.houseviewing.domain.subscription.dto.request.SubscriptionPremiumRequest;
 import com.house.houseviewing.domain.subscription.dto.response.SubscriptionPremiumResponse;
@@ -8,6 +9,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -21,8 +23,8 @@ public class SubscriptionController {
     private final SubscriptionService subscriptionService;
 
     @PostMapping("/premium")
-    public ResponseEntity<SubscriptionPremiumResponse> premium(@Valid @RequestBody SubscriptionPremiumRequest request){
-        SubscriptionEntity subscription = subscriptionService.premium(request);
+    public ResponseEntity<SubscriptionPremiumResponse> premium(@AuthenticationPrincipal CustomUserDetails userDetails){
+        SubscriptionEntity subscription = subscriptionService.premium(userDetails.getUserId());
         SubscriptionPremiumResponse result = SubscriptionPremiumResponse.builder()
                 .userId(subscription.getUser().getId())
                 .subscriptionId(subscription.getId())
