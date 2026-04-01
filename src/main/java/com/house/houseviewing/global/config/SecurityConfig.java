@@ -23,6 +23,7 @@ public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
 
     private static final String[] PERMIT_URL_ARRAY = {
+            "/",
             "/users/register",
             "/auth/login",
             "/users/find-id",

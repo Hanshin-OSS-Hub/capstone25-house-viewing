@@ -66,7 +66,7 @@ public class UserService {
     }
 
     @Transactional
-    public void passwordReset(Long userId, UserResetPasswordRequest request){
+    public void passwordReset(UserResetPasswordRequest request){
         UserEntity user = userRepository.findById(userId).orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
         String encode = passwordEncoder.encode(request.getNewPassword());
         user.updatePassword(encode);

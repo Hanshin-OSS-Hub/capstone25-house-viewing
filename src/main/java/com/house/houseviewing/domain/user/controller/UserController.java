@@ -49,9 +49,8 @@ public class UserController {
 
     @PatchMapping("/password/reset")
     public ResponseEntity<Void> resetPassword(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody UserResetPasswordRequest request){
-        userService.passwordReset(userDetails.getUserId(), request);
+        userService.passwordReset(request);
         return ResponseEntity.ok().build();
     }
 

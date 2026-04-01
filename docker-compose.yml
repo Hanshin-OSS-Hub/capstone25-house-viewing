@@ -13,93 +13,54 @@
 # =====================================================================================
 
 services:
-  # --- 1. Spring Boot 애플리케이션 서비스 ---
   app:
-    # build: Docker 이미지를 빌드할 경로를 지정합니다. '.'은 현재 디렉토리(프로젝트 루트)를 의미합니다.
-    # Docker는 현재 디렉토리의 Dockerfile을 사용하여 'app' 서비스의 이미지를 빌드합니다.
     build: .
-    # container_name: 컨테이너의 고정된 이름을 지정합니다. 지정하지 않으면 '프로젝트명_서비스명_번호' 형식으로 자동 생성됩니다.
     container_name: house-viewing-server
-    # depends_on: 다른 서비스에 대한 의존성을 설정합니다. 'app' 서비스는 'db'와 'redis' 서비스가 먼저 시작된 후에 시작됩니다.
-    # 이는 애플리케이션이 실행될 때 데이터베이스와 Redis가 준비되어 있도록 보장합니다.
     depends_on:
       - db
       - redis
-    # ports: 호스트 컴퓨터와 컨테이너의 포트를 매핑합니다.
-    # "호스트포트:컨테이너포트" 형식으로, 호스트의 8080 포트로 오는 요청을 컨테이너의 8080 포트로 전달합니다.
     ports:
       - "8080:8080"
-    # Linux 호스트에서 host.docker.internal을 사용할 수 있도록 설정합니다.
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    # environment: 컨테이너 내에서 사용할 환경 변수를 설정합니다.
-    # application.yml에 정의된 값들을 Docker 환경에 맞게 여기서 덮어씁니다.
     environment:
-      # Spring Boot 애플리케이션이 'db'라는 호스트 이름을 가진 MySQL 데이터베이스에 연결하도록 설정합니다.
-      # Docker Compose는 서비스 이름('db')을 해당 컨테이너의 호스트 이름으로 자동 해석해줍니다.
       - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/house_viewing
-      # application.yml에 설정된 username과 password는 그대로 사용됩니다.
       - SPRING_DATASOURCE_USERNAME=root
       - SPRING_DATASOURCE_PASSWORD=1234
-      # 애플리케이션이 'redis'라는 호스트 이름을 가진 Redis 서버에 연결하도록 설정합니다.
       - SPRING_DATA_REDIS_HOST=redis
       - SPRING_DATA_REDIS_PORT=6379
-      # 카카오 API 키와 같이 민감하거나 변경될 수 있는 값은 .env 파일이나 시스템 환경 변수로부터 주입받습니다.
-      # ${KAKAO_REST_API_KEY}는 이 docker-compose.yml 파일과 같은 위치에 있는 .env 파일에서 값을 찾아 주입합니다.
       - KAKAO_REST_API_KEY=${KAKAO_REST_API_KEY}
-      # Python API URL을 지정합니다. 'host.docker.internal'은 컨테이너에서 호스트 머신(Docker가 실행 중인 컴퓨터)을 가리키는 특수 DNS 이름입니다.
-      # 즉, 호스트 머신의 8000번 포트에서 실행 중인 Python 서버와 통신할 수 있게 됩니다.
       - PYTHON_API_URL=http://host.docker.internal:8000
-    # networks: 이 서비스를 연결할 네트워크를 지정합니다.
     networks:
       - app-network
 
-  # --- 2. MySQL 데이터베이스 서비스 ---
   db:
-    # image: 사용할 Docker 이미지를 지정합니다. MySQL 8.0 버전을 사용합니다.
     image: mysql:8.0
     container_name: mysql-house-viewing
-    # environment: MySQL 컨테이너 설정을 위한 환경 변수입니다.
     environment:
-      # MySQL root 사용자의 비밀번호를 설정합니다. application.yml의 password와 일치시킵니다.
       MYSQL_ROOT_PASSWORD: 1234
-      # 컨테이너가 처음 생성될 때 자동으로 생성할 데이터베이스의 이름을 지정합니다.
       MYSQL_DATABASE: house_viewing
-    # ports: 호스트와 컨테이너의 포트를 매핑합니다.
-    # application.yml에서 3307 포트를 사용하고 있었으므로, 호스트의 3307 포트를 컨테이너의 3306 포트와 연결하여 일관성을 유지합니다.
     ports:
       - "3307:3306"
-    # volumes: 데이터를 영속적으로 저장하기 위해 호스트의 볼륨과 컨테이너의 디렉토리를 연결합니다.
-    # 'db-data'라는 이름의 볼륨을 컨테이너의 '/var/lib/mysql' 디렉토리(MySQL 데이터가 저장되는 기본 경로)에 마운트합니다.
-    # 이렇게 하면 컨테이너가 삭제되거나 재시작되어도 데이터가 보존됩니다.
     volumes:
       - db-data:/var/lib/mysql
     networks:
       - app-network
 
-  # --- 3. Redis 서비스 ---
   redis:
-    # image: 경량화된 Alpine Linux 기반의 Redis 이미지를 사용합니다.
     image: redis:7-alpine
     container_name: house-viewing-redis
     ports:
-      # 호스트의 6379 포트와 컨테이너의 6379 포트를 연결합니다.
       - "6379:6379"
-    # volumes: Redis 데이터를 영속적으로 저장하기 위해 'redis-data' 볼륨을 사용합니다.
     volumes:
       - redis-data:/data
     networks:
       - app-network
 
-# --- 네트워크 정의 ---
-# 서비스들이 통신할 가상 네트워크를 정의합니다.
 networks:
   app-network:
-    # driver: 네트워크 드라이버를 지정합니다. 'bridge'는 단일 호스트 내에서 컨테이너들을 연결하는 기본 드라이버입니다.
     driver: bridge
 
-# --- 볼륨 정의 ---
-# 데이터 영속성을 위해 사용할 명명된 볼륨(named volumes)을 정의합니다.
 volumes:
   db-data:
   redis-data:
