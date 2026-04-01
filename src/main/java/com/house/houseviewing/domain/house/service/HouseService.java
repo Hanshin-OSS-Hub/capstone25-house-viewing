@@ -6,6 +6,7 @@ import com.house.houseviewing.domain.contract.repository.ContractRepository;
 import com.house.houseviewing.domain.house.dto.request.HouseEditRequest;
 import com.house.houseviewing.domain.house.dto.response.HouseEditResponse;
 import com.house.houseviewing.domain.house.dto.response.HouseMeResponse;
+import com.house.houseviewing.domain.house.dto.response.HouseRegisterResponse;
 import com.house.houseviewing.domain.house.dto.response.HousesResponse;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
@@ -39,20 +40,19 @@ public class HouseService {
     private final PostAnalysisRepository postAnalysisRepository;
 
     @Transactional
-    public HouseEntity register(Long userId, HouseRegisterRequest request){
+    public HouseRegisterResponse register(Long userId, HouseRegisterRequest request){
 
         UserEntity user = userRepository.findById(userId)
                 .orElseThrow(() -> new AppException(ExceptionCode.USER_NOT_FOUND));
-
         Address address = kakaoAddress.parsingAddress(request.getOriginAddress());
-
         HouseEntity house = request.toEntity(address, MonitoringStatus.OFFLINE);
         if(user.isPremium()){
             house.updateMonitoringStatus(MonitoringStatus.LIVE);
         }
+        houseRepository.save(house);
         user.addHouse(house);
 
-        return houseRepository.save(house);
+        return HouseRegisterResponse.from(house.getId());
     }
 
     @Transactional

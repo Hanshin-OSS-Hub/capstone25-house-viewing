@@ -29,18 +29,8 @@ public class HouseController {
     public ResponseEntity<HouseRegisterResponse> register(
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody HouseRegisterRequest request){
-        HouseEntity house = houseService.register(userDetails.getUserId(), request);
-        HouseRegisterResponse result = HouseRegisterResponse.builder()
-                .houseId(house.getId())
-                .address(house.getAddress())
-                .build();
+        HouseRegisterResponse result = houseService.register(userDetails.getUserId(), request);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
-    }
-
-    @GetMapping
-    public ResponseEntity<List<HousesResponse>> getHouses(@AuthenticationPrincipal CustomUserDetails userDetails){
-        List<HousesResponse> house = houseService.getHouses(userDetails.getUserId());
-        return ResponseEntity.ok(house);
     }
 
     @GetMapping("/{houseId}")
@@ -49,6 +39,12 @@ public class HouseController {
             @PathVariable Long houseId){
         HouseMeResponse result = houseService.getHouse(userDetails.getUserId(), houseId);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<HousesResponse>> getHouses(@AuthenticationPrincipal CustomUserDetails userDetails){
+        List<HousesResponse> house = houseService.getHouses(userDetails.getUserId());
+        return ResponseEntity.ok(house);
     }
 
     @PatchMapping("/{houseId}")
