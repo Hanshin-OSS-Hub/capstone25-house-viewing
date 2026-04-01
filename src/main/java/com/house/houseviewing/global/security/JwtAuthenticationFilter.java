@@ -21,6 +21,8 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.Map;
 
+import static reactor.netty.http.HttpConnectionLiveness.log;
+
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
@@ -67,6 +69,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
             filterChain.doFilter(request, response);
         } catch (Exception e){
+            log.error("Token validation failed: ", e); // 에러 원인을 콘솔에 상세히 찍어줌
             writeErrorResponse(response, ExceptionCode.INVALID_TOKEN);
         }
     }

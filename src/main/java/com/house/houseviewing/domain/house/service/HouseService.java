@@ -49,30 +49,10 @@ public class HouseService {
         if(user.isPremium()){
             house.updateMonitoringStatus(MonitoringStatus.LIVE);
         }
-        houseRepository.save(house);
         user.addHouse(house);
+        houseRepository.save(house);
 
         return HouseRegisterResponse.from(house.getId());
-    }
-
-    @Transactional
-    public void delete(Long userId, Long houseId){
-        HouseEntity saved = houseRepository.findById(houseId)
-                .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
-
-        if(!saved.getUser().getId().equals(userId)){
-            throw new AppException(ExceptionCode.FORBIDDEN);
-        }
-
-        houseRepository.deleteById(saved.getId());
-    }
-
-    public List<HousesResponse> getHouses(Long userId){
-        List<HouseEntity> houses = houseRepository.findByUserId(userId);
-
-        return houses.stream()
-                .map(HousesResponse::from)
-                .toList();
     }
 
     public HouseMeResponse getHouse(Long userId, Long houseId){
@@ -85,6 +65,22 @@ public class HouseService {
         PostAnalysisEntity analysis = postAnalysisRepository.findTopBySnapshotIdOrderByCreatedAtDesc(snapshot.getId())
                 .orElseThrow(() -> new AppException(ExceptionCode.ANALYSIS_NOT_FOUND));
         return HouseMeResponse.from(contract, analysis);
+    }
+
+    @Transactional
+    public void delete(Long userId, Long houseId){
+        HouseEntity saved = houseRepository.findById(houseId)
+                .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
+
+        houseRepository.delete(saved);
+    }
+
+    public List<HousesResponse> getHouses(Long userId){
+        List<HouseEntity> houses = houseRepository.findByUserId(userId);
+
+        return houses.stream()
+                .map(HousesResponse::from)
+                .toList();
     }
 
     @Transactional

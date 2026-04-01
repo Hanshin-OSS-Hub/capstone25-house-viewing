@@ -24,7 +24,7 @@ public class LoginResponse {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .userId(user.getUserId())
-                .loginId(user.getLoginId())
+                .loginId(user.getUsername())
                 .name(user.getName())
                 .build();
     }
