@@ -14,12 +14,9 @@ public class SubscriptionMeResponse {
 
     private String planType;
 
-    private LocalDateTime expiredAt;
-
     public static SubscriptionMeResponse from(SubscriptionEntity subscription){
         return SubscriptionMeResponse.builder()
                 .planType(subscription.getPlanType().name())
-                .expiredAt(subscription.getEndedAt())
                 .build();
     }
 }

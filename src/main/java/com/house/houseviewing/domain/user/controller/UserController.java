@@ -7,7 +7,6 @@ import com.house.houseviewing.domain.auth.model.CustomUserDetails;
 import com.house.houseviewing.domain.user.dto.request.UserResetPasswordRequest;
 import com.house.houseviewing.domain.user.dto.request.UserVerifyPasswordRequest;
 import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;
-import com.house.houseviewing.domain.user.dto.response.UserRegisterResponse;
 import com.house.houseviewing.domain.user.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,9 +23,9 @@ public class UserController {
     private final UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<UserRegisterResponse> register(@Valid @RequestBody UserRegisterRequest request){
-        UserRegisterResponse result = userService.register(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    public ResponseEntity<Void> register(@Valid @RequestBody UserRegisterRequest request){
+        userService.register(request);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping("/me")

@@ -4,7 +4,6 @@ import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
 import com.house.houseviewing.domain.user.dto.response.UserFindIdResponse;
 import com.house.houseviewing.domain.user.dto.response.UserMeResponse;
-import com.house.houseviewing.domain.user.dto.response.UserRegisterResponse;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.domain.user.dto.request.UserFindIdRequest;
@@ -15,7 +14,6 @@ import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,7 +31,7 @@ public class UserService {
     private final StringRedisTemplate stringRedisTemplate;
 
     @Transactional
-    public UserRegisterResponse register(UserRegisterRequest request){
+    public void register(UserRegisterRequest request){
         duplicateUser(request);
 
         try{
@@ -42,9 +40,7 @@ public class UserService {
             SubscriptionEntity subscription = defaultSubscription();
 
             user.addSubscription(subscription);
-            UserEntity savedUser = userRepository.save(user);
-
-            return new UserRegisterResponse(savedUser.getId());
+            userRepository.save(user);
         } catch (DataIntegrityViolationException e){
             throw new AppException(ExceptionCode.DUPLICATE_RESOURCE);
         }
