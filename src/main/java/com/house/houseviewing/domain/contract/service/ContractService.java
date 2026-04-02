@@ -1,5 +1,6 @@
 package com.house.houseviewing.domain.contract.service;
 
+import com.house.houseviewing.domain.contract.dto.response.ContractRegisterResponse;
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
 import com.house.houseviewing.domain.contract.dto.request.ContractRegisterRequest;
 import com.house.houseviewing.domain.contract.repository.ContractRepository;
@@ -20,12 +21,14 @@ public class ContractService {
     private final ContractRepository contractRepository;
 
     @Transactional
-    public ContractEntity register(ContractRegisterRequest request){
+    public ContractRegisterResponse register(ContractRegisterRequest request){
         HouseEntity house = houseRepository.findById(request.getHouseId())
                 .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
         ContractEntity contract = request.toEntity();
         house.addContract(contract);
-        return contractRepository.save(contract);
+        ContractEntity savedContract = contractRepository.save(contract);
+
+        return ContractRegisterResponse.from(house.getId(), savedContract.getId());
     }
 
     @Transactional
