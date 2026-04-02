@@ -8,14 +8,13 @@ import com.house.houseviewing.domain.house.dto.request.HouseRegisterRequest;
 import com.house.houseviewing.domain.house.dto.response.HouseRegisterResponse;
 import com.house.houseviewing.domain.house.service.HouseService;
 import com.house.houseviewing.domain.auth.model.CustomUserDetails;
-import com.house.houseviewing.global.util.AppUtils;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
 import java.util.List;
 
 @RestController
@@ -30,8 +29,7 @@ public class HouseController {
             @AuthenticationPrincipal CustomUserDetails userDetails,
             @Valid @RequestBody HouseRegisterRequest request){
         HouseRegisterResponse result = houseService.register(userDetails.getUserId(), request);
-        URI location = AppUtils.createLocation("/api/houses/{id}", result.getHouseId());
-        return ResponseEntity.created(location).body(result);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @GetMapping("/{houseId}")
