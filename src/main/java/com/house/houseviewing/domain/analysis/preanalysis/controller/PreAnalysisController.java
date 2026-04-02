@@ -5,6 +5,7 @@ import com.house.houseviewing.domain.registrysnapshot.dto.request.PreContractDia
 import com.house.houseviewing.global.file.pdf.dto.PdfDownloadResponse;
 import com.house.houseviewing.domain.auth.model.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,6 +28,6 @@ public class PreAnalysisController {
             @RequestPart("data") PreContractDiagnosisRequest request){
 
         PdfDownloadResponse result = analysisQueryService.executePreContractDiagnosis(userDetails.getUserId(), request, snapshot);
-        return ResponseEntity.ok(result);
+        return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 }
