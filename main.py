@@ -7,6 +7,7 @@ import time
 from fastapi import FastAPI, Request
 from fastapi.responses import Response
 from routers.engine import router as engine_router
+from routers.ocr import router as ocr_router
 
 app = FastAPI(
     title="부동산 권리 분석 서비스",
@@ -30,6 +31,7 @@ async def add_process_time_header(request: Request, call_next) -> Response:
 
 
 app.include_router(engine_router)
+app.include_router(ocr_router)
 
 
 @app.get("/health", summary="헬스체크", tags=["Infra"])

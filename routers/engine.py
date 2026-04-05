@@ -11,11 +11,12 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
 
 from dto import (
-    AnalysisResult, GeneratePdfRequest, RegistryDocument,
-    RiskAnalysisRequest, RecoveryPdfRequest, RecoveryRenderData,
+    GeneratePdfRequest, GenerateDiffPdfRequest,
+    RiskAnalysisRequest, RecoveryRenderData,
 )
 from html_generator import generate_html_report
 from recovery_html_generator import generate_recovery_html_report
+from diff_html_generator import generate_diff_html_report
 
 router = APIRouter(prefix="/engine", tags=["Engine"])
 
@@ -23,7 +24,7 @@ _WKHTMLTOPDF_PATH = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
 _PDFKIT_CONFIG = (
     pdfkit.configuration(wkhtmltopdf=_WKHTMLTOPDF_PATH)
     if os.path.exists(_WKHTMLTOPDF_PATH)
-    else None  # PATH에 있으면 None (자동 탐지)
+    else None
 )
 
 _PDFKIT_OPTIONS: dict = {
@@ -42,60 +43,28 @@ _PDFKIT_OPTIONS: dict = {
 _LEVEL_MAP = {"HIGH": "High", "MEDIUM": "Medium", "LOW": "Low"}
 
 
-def _extract_raw_info(raw: dict, snapshot_id: int) -> dict:
-    """은섭 분석 JSON에서 공통 필드 추출 (두 PDF 엔드포인트에서 공유)."""
-    risk_info  = raw.get("risk", {})
-    snapshot   = raw.get("snapshot", {})
-    gabu       = snapshot.get("gabu", [])
-    owners     = gabu[0].get("owners", []) if gabu else []
+def _extract_raw_info(raw: dict, snapshot_name: str) -> dict:
+    """은섭 분석 JSON에서 공통 필드 추출"""
+    risk_info = raw.get("risk", {})
+    snapshot  = raw.get("snapshot", {})
+    gabu      = snapshot.get("gabu", [])
+    owners    = gabu[0].get("owners", []) if gabu else []
 
     return {
-        "risk_level":  _LEVEL_MAP.get(risk_info.get("risk_level", "MEDIUM"), "Medium"),
-        "risk_score":  float(risk_info.get("risk_score", 50)),
-        "signals":     risk_info.get("signals", []),
-        "max_claim":   int(risk_info.get("checks", {}).get("max_claim_amount_total", 0)),
-        "owner_name":  ", ".join(o["name"] for o in owners) if owners else "미확인",
-        "address":     snapshot.get("address", {}).get("address", f"스냅샷 ID: {snapshot_id}"),
+        "risk_level": _LEVEL_MAP.get(risk_info.get("risk_level", "MEDIUM"), "Medium"),
+        "risk_score": float(risk_info.get("risk_score", 50)),
+        "signals":    risk_info.get("signals", []),
+        "max_claim":  int(risk_info.get("checks", {}).get("max_claim_amount_total", 0)),
+        "owner_name": ", ".join(o["name"] for o in owners) if owners else "미확인",
+        "address":    snapshot.get("address", {}).get("address", snapshot_name),
     }
 
 
-@router.post(
-    "/analyze",
-    response_model=AnalysisResult,
-    summary="등기부 분석 → risk / recovery / diff JSON 반환",
-    responses={
-        200: {"description": "분석 결과 JSON"},
-        422: {"description": "요청 데이터 유효성 오류"},
-    },
-)
-async def analyze(doc: RegistryDocument) -> AnalysisResult:
-    """TODO (은섭): 실제 분석 엔진 로직으로 교체. 현재는 LTV 계산 스텁."""
-    total_senior_liens = sum(doc.senior_liens)
-    ltv = ((total_senior_liens + doc.deposit_amount) / doc.property_value * 100
-           if doc.property_value > 0 else 0.0)
 
-    if ltv > 80:
-        risk = "High"
-    elif ltv > 60:
-        risk = "Medium"
-    else:
-        risk = "Low"
-
-    remaining = doc.property_value - total_senior_liens
-    recovery  = max(0, min(doc.deposit_amount, remaining))
-
-    return AnalysisResult(
-        ltv_percent=round(ltv, 2),
-        risk_score=risk,
-        expected_recovery_amount=recovery,
-        diff_summary=None,
-    )
-
-
-def _build_render_data(snapshot_id: int, raw: dict) -> RiskAnalysisRequest:
+def _build_render_data(snapshot_name: str, raw: dict) -> RiskAnalysisRequest:
     """은섭 분석 JSON → PDF 1 렌더링 데이터 변환"""
-    info     = _extract_raw_info(raw, snapshot_id)
-    signals  = info["signals"]
+    info      = _extract_raw_info(raw, snapshot_name)
+    signals   = info["signals"]
     checklist = [s["explain"] for s in signals] if signals else ["위험 시그널 없음"]
     playbook  = raw.get("recovery", {}).get("playbook", [])
     summary   = " / ".join(step["title"] for step in playbook[:2]) if playbook else "분석 결과 없음"
@@ -114,14 +83,64 @@ def _build_render_data(snapshot_id: int, raw: dict) -> RiskAnalysisRequest:
     )
 
 
+def _build_recovery_render_data(request: GeneratePdfRequest) -> RecoveryRenderData:
+    """은섭 분석 JSON → PDF 2 렌더링 데이터 변환"""
+    raw  = json_lib.loads(request.rawData)
+    info = _extract_raw_info(raw, request.snapshotName)
+
+    # property_value: ltv 정보 → valuation 순으로 fallback
+    ltv_info = raw.get("ltv") or {}
+    prop_val = int(ltv_info.get("house_price_won") or 0)
+    if prop_val == 0:
+        prop_val = int((raw.get("valuation") or {}).get("median_price_won") or 0)
+
+    # 예상 회수액: recovery 엔진 pre-computed 값 우선 사용
+    recovery_calc     = (raw.get("recovery") or {}).get("calculation") or {}
+    expected_recovery = int(recovery_calc.get("recoverable_amount") or 0)
+    deposit           = request.deposit or 0
+    recovery_rate     = round(expected_recovery / deposit * 100, 1) if deposit > 0 else 0.0
+
+    has_residency   = bool(request.moveDate)
+    has_priority    = has_residency and bool(request.confirmDate)
+
+    return RecoveryRenderData(
+        user_name=info["owner_name"],
+        address=info["address"],
+        contract_type=request.contractType or "",
+        deposit_amount=deposit,
+        monthly_amount=request.monthlyAmount or 0,
+        maintenance_fee=request.maintenanceFee or 0,
+        move_in_date=request.moveDate or "",
+        confirmed_date=request.confirmDate or "",
+        has_residency=has_residency,
+        has_priority_right=has_priority,
+        max_claim_amount=info["max_claim"],
+        property_value=prop_val,
+        expected_recovery=expected_recovery,
+        recovery_rate=recovery_rate,
+        ltv_percent=info["risk_score"],
+        risk_score=info["risk_level"],
+        signals=info["signals"],
+    )
+
+
+def _pdf_bytes(html: str) -> bytes:
+    """HTML → PDF 바이너리 변환"""
+    try:
+        return pdfkit.from_string(html, False, options=_PDFKIT_OPTIONS, configuration=_PDFKIT_CONFIG)
+    except OSError as e:
+        raise HTTPException(status_code=500, detail=f"PDF 변환 실패: wkhtmltopdf를 확인하세요. {e}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"PDF 변환 중 오류 발생: {e}")
+
+
 @router.post(
     "/generate-pdf",
-    summary="권리 분석 보고서 PDF 생성",
-    response_description="생성된 PDF 바이너리 파일",
+    summary="권리 분석 보고서 PDF 생성 (계약전/계약후 통합)",
     responses={
         200: {"content": {"application/pdf": {}}, "description": "PDF 파일 반환"},
         422: {"description": "요청 데이터 유효성 오류"},
-        500: {"description": "PDF 변환 실패 (wkhtmltopdf 확인 필요)"},
+        500: {"description": "PDF 변환 실패"},
     },
 )
 async def generate_pdf(request: GeneratePdfRequest) -> Response:
@@ -130,32 +149,34 @@ async def generate_pdf(request: GeneratePdfRequest) -> Response:
     except ValueError:
         raise HTTPException(status_code=422, detail="rawData가 유효한 JSON 문자열이 아닙니다.")
 
-    render_data = _build_render_data(request.snapshotId, raw)
-
     t0 = time.perf_counter()
-    try:
-        html_content: str = generate_html_report(render_data)
-    except Exception as e:
-        err = str(e)
-        if "429" in err or "RESOURCE_EXHAUSTED" in err:
-            raise HTTPException(status_code=429, detail="AI API 호출 한도 초과. 잠시 후 다시 시도하세요.")
-        raise HTTPException(status_code=503, detail=f"보고서 HTML 생성 실패: {err}")
-    ai_time = time.perf_counter() - t0
 
-    t1 = time.perf_counter()
-    try:
-        pdf_bytes: bytes = pdfkit.from_string(
-            html_content, False,
-            options=_PDFKIT_OPTIONS,
-            configuration=_PDFKIT_CONFIG,
-        )
-    except OSError as e:
-        raise HTTPException(status_code=500, detail=f"PDF 변환 실패: wkhtmltopdf를 확인하세요. 상세 오류: {e}")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"PDF 변환 중 예상치 못한 오류 발생: {e}")
-    pdf_time = time.perf_counter() - t1
+    if request.deposit is not None:
+        # 계약후: 보증금 회수 분석 PDF
+        render_data = _build_recovery_render_data(request)
+        try:
+            html_content = generate_recovery_html_report(render_data)
+        except Exception as e:
+            raise HTTPException(status_code=503, detail=f"보고서 HTML 생성 실패: {e}")
+        filename = f"recovery_{render_data.user_name}.pdf"
+    else:
+        # 계약전: 위험 분석 PDF
+        render_data = _build_render_data(request.snapshotName, raw)
+        try:
+            html_content = generate_html_report(render_data)
+        except Exception as e:
+            err = str(e)
+            if "429" in err or "RESOURCE_EXHAUSTED" in err:
+                raise HTTPException(status_code=429, detail="AI API 호출 한도 초과. 잠시 후 다시 시도하세요.")
+            raise HTTPException(status_code=503, detail=f"보고서 HTML 생성 실패: {err}")
+        filename = f"report_{render_data.user_name}.pdf"
 
-    encoded_name = quote(f"report_{render_data.user_name}.pdf", safe="")
+    ai_time   = time.perf_counter() - t0
+    t1        = time.perf_counter()
+    pdf_bytes = _pdf_bytes(html_content)
+    pdf_time  = time.perf_counter() - t1
+
+    encoded_name = quote(filename, safe="")
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
@@ -168,79 +189,44 @@ async def generate_pdf(request: GeneratePdfRequest) -> Response:
     )
 
 
-def _build_recovery_render_data(request: RecoveryPdfRequest) -> RecoveryRenderData:
-    """은섭 분석 JSON → PDF 2 렌더링 데이터 변환 (우선변제권 = 전입신고 AND 확정일자)"""
-    raw      = json_lib.loads(request.rawData)
-    info     = _extract_raw_info(raw, request.snapshotId)
-    max_claim = info["max_claim"]
-
-    has_priority = request.hasResidency and bool(request.confirmedDate)
-
-    prop_val = request.propertyValue
-    if prop_val > 0:
-        remaining         = max(0, prop_val - max_claim)
-        expected_recovery = min(request.depositAmount, remaining)
-        recovery_rate     = (expected_recovery / request.depositAmount * 100) if request.depositAmount > 0 else 0.0
-    else:
-        expected_recovery = 0
-        recovery_rate     = 0.0
-
-    return RecoveryRenderData(
-        user_name=info["owner_name"],
-        address=f"스냅샷 ID: {request.snapshotId}",
-        deposit_amount=request.depositAmount,
-        move_in_date=request.moveInDate,
-        confirmed_date=request.confirmedDate,
-        has_residency=request.hasResidency,
-        has_priority_right=has_priority,
-        max_claim_amount=max_claim,
-        property_value=prop_val,
-        expected_recovery=expected_recovery,
-        recovery_rate=round(recovery_rate, 1),
-        ltv_percent=info["risk_score"],  # 은섭 JSON에 ltv 없음 → risk_score 대체
-        risk_score=info["risk_level"],
-        signals=info["signals"],
-    )
-
-
 @router.post(
-    "/generate-recovery-pdf",
-    summary="보증금 회수 분석 PDF 생성",
-    response_description="생성된 PDF 바이너리 파일",
+    "/generate-pdf/diff",
+    summary="등기부 변동 비교 PDF 생성",
     responses={
         200: {"content": {"application/pdf": {}}, "description": "PDF 파일 반환"},
         422: {"description": "요청 데이터 유효성 오류"},
         500: {"description": "PDF 변환 실패"},
     },
 )
-async def generate_recovery_pdf(request: RecoveryPdfRequest) -> Response:
+async def generate_diff_pdf(request: GenerateDiffPdfRequest) -> Response:
     try:
-        json_lib.loads(request.rawData)
+        origin_raw: dict = json_lib.loads(request.originData)
+        new_raw: dict    = json_lib.loads(request.newData)
     except ValueError:
-        raise HTTPException(status_code=422, detail="rawData가 유효한 JSON 문자열이 아닙니다.")
-
-    render_data = _build_recovery_render_data(request)
+        raise HTTPException(status_code=422, detail="originData 또는 newData가 유효한 JSON이 아닙니다.")
 
     try:
-        html_content: str = generate_recovery_html_report(render_data)
-    except Exception as e:
-        raise HTTPException(status_code=503, detail=f"보고서 HTML 생성 실패: {e}")
-
-    try:
-        pdf_bytes: bytes = pdfkit.from_string(
-            html_content, False,
-            options=_PDFKIT_OPTIONS,
-            configuration=_PDFKIT_CONFIG,
+        html_content = generate_diff_html_report(
+            snapshot_name=request.snapshotName,
+            origin_raw=origin_raw,
+            new_raw=new_raw,
+            contract_type=request.contractType,
+            deposit=request.deposit,
+            monthly_amount=request.monthlyAmount,
+            maintenance_fee=request.maintenanceFee,
+            move_date=request.moveDate,
+            confirm_date=request.confirmDate,
         )
-    except OSError as e:
-        raise HTTPException(status_code=500, detail=f"PDF 변환 실패: {e}")
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"변동 보고서 생성 실패: {e}")
 
-    encoded_name = quote(f"recovery_{render_data.user_name}.pdf", safe="")
+    pdf_bytes    = _pdf_bytes(html_content)
+    encoded_name = quote(f"diff_{request.snapshotName}.pdf", safe="")
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",
         headers={
-            "Content-Disposition": f"attachment; filename=\"recovery.pdf\"; filename*=UTF-8''{encoded_name}",
+            "Content-Disposition": f"attachment; filename=\"diff_report.pdf\"; filename*=UTF-8''{encoded_name}",
             "Content-Length": str(len(pdf_bytes)),
         },
     )
