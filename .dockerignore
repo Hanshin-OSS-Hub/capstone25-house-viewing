@@ -1,0 +1,11 @@
+.env
+.git
+__pycache__
+*.pyc
+*.pyo
+uploads/
+pdf_pages/
+*.pdf
+*.json
+test_*.html
+ocr.gitignore
