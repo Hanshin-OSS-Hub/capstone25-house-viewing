@@ -1,0 +1,11 @@
+version: "3.8"
+
+services:
+  python-server:
+    build: .
+    container_name: python-server
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    restart: unless-stopped
