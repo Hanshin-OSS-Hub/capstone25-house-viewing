@@ -24,7 +24,7 @@ public class PdfReportTransferAndReceiveService {
             throw new AppException(ExceptionCode.PDF_SAVE_FAILED);
         }
 
-        PdfUploadResult uploadPdf = pdfStorageService.uploadPdf(pdf, request.getSnapshotName());
+        PdfUploadResult uploadPdf = pdfStorageService.uploadPdf(pdf);
 
         return uploadPdf;
     }
@@ -36,7 +36,7 @@ public class PdfReportTransferAndReceiveService {
             throw new AppException(ExceptionCode.PDF_SAVE_FAILED);
         }
 
-        PdfUploadResult uploadPdf = pdfStorageService.uploadPdf(pdf, request.getSnapshotName());
+        PdfUploadResult uploadPdf = pdfStorageService.uploadPdf(pdf);
 
         return uploadPdf;
     }
@@ -48,7 +48,7 @@ public class PdfReportTransferAndReceiveService {
             throw new AppException(ExceptionCode.PDF_SAVE_FAILED);
         }
 
-        PdfUploadResult uploadPdf = pdfStorageService.uploadPdf(pdf, request.getSnapshotName());
+        PdfUploadResult uploadPdf = pdfStorageService.uploadPdf(pdf);
 
         return uploadPdf;
     }

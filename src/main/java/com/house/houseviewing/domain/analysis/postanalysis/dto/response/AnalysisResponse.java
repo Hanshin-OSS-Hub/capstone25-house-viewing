@@ -25,8 +25,8 @@ public class AnalysisResponse {
     private Integer ltvScore;
 
     public static AnalysisResponse from(PostAnalysisEntity postAnalysis){
-        String nickname = postAnalysis.getSnapshot().getHouse().getNickname();
-        String address = postAnalysis.getSnapshot().getHouse().getAddress().getAddressName();
+        String nickname = postAnalysis.getHouse().getNickname();
+        String address = postAnalysis.getHouse().getAddress().getAddressName();
         return AnalysisResponse.builder()
                 .nickname(nickname)
                 .address(address)

@@ -8,9 +8,9 @@ import java.util.UUID;
 @Service
 public class PdfStorageService {
 
-    public PdfUploadResult uploadPdf(byte[] pdfBytes, String originName){
+    public PdfUploadResult uploadPdf(byte[] pdfBytes){
 
-        String pdfKey = "pdf/" + UUID.randomUUID() + "_" + originName;
+        String pdfKey = "pdf/" + UUID.randomUUID() + "_";
         String pdfPath = "https://s3-bucket-url/" + pdfKey;
         Long pdfSizeBytes = (long) pdfBytes.length;
 
@@ -18,7 +18,7 @@ public class PdfStorageService {
 
         return PdfUploadResult.builder()
                 .pdfSizeBytes(pdfSizeBytes)
-                .pdfName(originName)
+                .pdfName("test")
                 .pdfKey(pdfKey)
                 .pdfPath(pdfPath)
                 .build();

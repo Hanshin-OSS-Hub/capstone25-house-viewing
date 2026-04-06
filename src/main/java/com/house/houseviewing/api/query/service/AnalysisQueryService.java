@@ -5,9 +5,7 @@ import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEn
 import com.house.houseviewing.domain.analysis.postanalysis.service.PostAnalysisService;
 import com.house.houseviewing.domain.analysis.preanalysis.entity.PreAnalysisEntity;
 import com.house.houseviewing.domain.analysis.preanalysis.service.PreAnalysisService;
-import com.house.houseviewing.domain.registrysnapshot.dto.request.PreContractDiagnosisRequest;
-import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
-import com.house.houseviewing.domain.registrysnapshot.service.RegistrySnapshotService;
+import com.house.houseviewing.domain.analysis.preanalysis.dto.request.PreContractDiagnosisRequest;
 import com.house.houseviewing.domain.report.postreport.entity.PostReportEntity;
 import com.house.houseviewing.domain.report.postreport.service.PostReportService;
 import com.house.houseviewing.domain.report.prereport.entity.PreReportEntity;

@@ -34,7 +34,7 @@ public class PostReportService {
         Long contractId = analyze.getContract().getId();
         ContractEntity contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new AppException(ExceptionCode.CONTRACT_NOT_FOUND));
-        PdfPostReportRequest request = getPdfReportPostRequest(snapshotEntity, analyze, contract);
+        PdfPostReportRequest request = getPdfReportPostRequest(analyze, contract);
         PdfUploadResult uploadResult = pdfReportTransferAndReceiveService.postTransferAndReceive(request);
         PostReportEntity pdfReport = getPdfReportEntity(uploadResult);
         pdfReport.addRegistryAnalysis(analyze);
@@ -43,13 +43,13 @@ public class PostReportService {
     }
 
     @Transactional
-    public PostReportEntity diffRegister(RegistrySnapshotEntity snapshotEntity, PostAnalysisEntity analyze){
+    public PostReportEntity diffRegister(PostAnalysisEntity analyze){
         Long houseId = analyze.getContract().getHouse().getId();
         Long contractId = analyze.getContract().getId();
         ContractEntity contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new AppException(ExceptionCode.CONTRACT_NOT_FOUND));
         String originData = getOriginData(houseId);
-        PdfDiffReportRequest request = getPdfDiffReportRequest(originData, snapshotEntity, analyze, contract);
+        PdfDiffReportRequest request = getPdfDiffReportRequest(originData, analyze, contract);
         PdfUploadResult uploadResult = pdfReportTransferAndReceiveService.diffTransferAndReceive(request);
         PostReportEntity pdfReport = getPdfReportEntity(uploadResult);
         pdfReport.addRegistryAnalysis(analyze);
@@ -73,9 +73,8 @@ public class PostReportService {
                 .build();
     }
 
-    private static PdfPostReportRequest getPdfReportPostRequest(RegistrySnapshotEntity snapshotEntity, PostAnalysisEntity analyze, ContractEntity contract) {
+    private static PdfPostReportRequest getPdfReportPostRequest(PostAnalysisEntity analyze, ContractEntity contract) {
         return PdfPostReportRequest.builder()
-                .snapshotName(snapshotEntity.getSnapshotName())
                 .rawData(analyze.getRawData())
                 .contractType(contract.getContractType())
                 .deposit(contract.getDeposit())
@@ -86,9 +85,8 @@ public class PostReportService {
                 .build();
     }
 
-    private static PdfDiffReportRequest getPdfDiffReportRequest(String originData, RegistrySnapshotEntity snapshotEntity, PostAnalysisEntity analysis, ContractEntity contract){
+    private static PdfDiffReportRequest getPdfDiffReportRequest(String originData, PostAnalysisEntity analysis, ContractEntity contract){
         return PdfDiffReportRequest.builder()
-                .snapshotName(snapshotEntity.getSnapshotName())
                 .originData(originData)
                 .newData(analysis.getRawData())
                 .contractType(contract.getContractType())

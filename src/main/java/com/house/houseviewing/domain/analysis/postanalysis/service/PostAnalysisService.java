@@ -60,13 +60,15 @@ public class PostAnalysisService {
     }
 
     @Transactional
-    public PostAnalysisEntity diffRegister(String snapshot, RegistrySnapshotEntity registrySnapshot){
-        Long houseId = registrySnapshot.getHouse().getId();
+    public PostAnalysisEntity diffRegister(Long houseId, String snapshot){
+        HouseEntity house = houseRepository.findById(houseId)
+                .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
         ContractEntity contract = contractRepository.findTopByHouseIdOrderByCreatedAtDesc(houseId)
                 .orElseThrow(() -> new AppException(ExceptionCode.CONTRACT_NOT_FOUND));
         PostAnalysisEntity analysis = snapshotDiffAnalysisService.diffAnalyze(snapshot);
-        analysis.addRegistrySnapshot(registrySnapshot);
+        analysis.addHouse(house);
         analysis.addContract(contract);
+
         return postAnalysisRepository.save(analysis);
     }
 }

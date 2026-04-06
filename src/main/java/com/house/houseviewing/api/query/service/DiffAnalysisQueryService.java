@@ -1,10 +1,8 @@
 package com.house.houseviewing.api.query.service;
 
 import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
+import com.house.houseviewing.domain.analysis.postanalysis.repository.PostAnalysisRepository;
 import com.house.houseviewing.domain.analysis.postanalysis.service.PostAnalysisService;
-import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
-import com.house.houseviewing.domain.registrysnapshot.repository.RegistrySnapshotRepository;
-import com.house.houseviewing.domain.registrysnapshot.service.RegistrySnapshotService;
 import com.house.houseviewing.domain.report.postreport.entity.PostReportEntity;
 import com.house.houseviewing.domain.report.postreport.service.PostReportService;
 import com.house.houseviewing.global.exception.AppException;
@@ -23,18 +21,16 @@ import java.nio.charset.StandardCharsets;
 @RequiredArgsConstructor
 public class DiffAnalysisQueryService {
 
-    private final RegistrySnapshotRepository registrySnapshotRepository;
-    private final RegistrySnapshotService registrySnapshotService;
+    private final PostAnalysisRepository postAnalysisRepository;
     private final PostAnalysisService postAnalysisService;
     private final PostReportService postReportService;
 
     public PdfDownloadResponse executeDiffDiagnosis(Long houseId){
-        long count = registrySnapshotRepository.countByHouse_Id(houseId) - 1;
+        long count = postAnalysisRepository.countByHouse_Id(houseId) - 1;
         String snapshot = readMockJson(count);
 
-        RegistrySnapshotEntity snapshotEntity = registrySnapshotService.diffRegister(houseId, snapshot);
-        PostAnalysisEntity diffAnalysis = postAnalysisService.diffRegister(snapshot, snapshotEntity);
-        PostReportEntity pdfReport = postReportService.diffRegister(snapshotEntity, diffAnalysis);
+        PostAnalysisEntity diffAnalysis = postAnalysisService.diffRegister(houseId, snapshot);
+        PostReportEntity pdfReport = postReportService.diffRegister(diffAnalysis);
 
         return PdfDownloadResponse.builder()
                 .pdfReportId(pdfReport.getId())

@@ -11,8 +11,6 @@ import com.house.houseviewing.domain.house.dto.response.HousesResponse;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
 import com.house.houseviewing.domain.analysis.postanalysis.repository.PostAnalysisRepository;
-import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
-import com.house.houseviewing.domain.registrysnapshot.repository.RegistrySnapshotRepository;
 import com.house.houseviewing.domain.user.enums.MonitoringStatus;
 import com.house.houseviewing.domain.house.dto.request.HouseRegisterRequest;
 import com.house.houseviewing.domain.house.repository.HouseRepository;
@@ -36,7 +34,6 @@ public class HouseService {
     private final HouseRepository houseRepository;
     private final KakaoAddress kakaoAddress;
     private final ContractRepository contractRepository;
-    private final RegistrySnapshotRepository registrySnapshotRepository;
     private final PostAnalysisRepository postAnalysisRepository;
 
     @Transactional
@@ -60,9 +57,7 @@ public class HouseService {
                 .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
         ContractEntity contract = contractRepository.findTopByHouseIdOrderByCreatedAtDesc(house.getId())
                 .orElseThrow(() -> new AppException(ExceptionCode.CONTRACT_NOT_FOUND));
-        RegistrySnapshotEntity snapshot = registrySnapshotRepository.findTopByHouse_IdOrderByCreatedAtDesc(house.getId())
-                .orElseThrow(() -> new AppException(ExceptionCode.SNAPSHOT_NOT_FOUND));
-        PostAnalysisEntity analysis = postAnalysisRepository.findTopBySnapshotIdOrderByCreatedAtDesc(snapshot.getId())
+        PostAnalysisEntity analysis = postAnalysisRepository.findTopByHouseIdOrderByCreatedAtDesc(house.getId())
                 .orElseThrow(() -> new AppException(ExceptionCode.ANALYSIS_NOT_FOUND));
         return HouseMeResponse.from(contract, analysis);
     }

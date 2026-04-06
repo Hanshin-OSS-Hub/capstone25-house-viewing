@@ -11,7 +11,7 @@ import java.util.Optional;
 
 public interface PostAnalysisRepository extends JpaRepository<PostAnalysisEntity, Long> {
 
-    Optional<PostAnalysisEntity> findTopBySnapshotIdOrderByCreatedAtDesc(Long snapshotId);
+    Optional<PostAnalysisEntity> findTopByHouseIdOrderByCreatedAtDesc(Long houseId);
 
     @Query("""
         SELECT ra
@@ -40,4 +40,6 @@ public interface PostAnalysisRepository extends JpaRepository<PostAnalysisEntity
             @Param("userId") Long userId,
             @Param("analysisType") AnalysisType analysisType
     );
+
+    long countByHouse_Id(Long houseId);
 }

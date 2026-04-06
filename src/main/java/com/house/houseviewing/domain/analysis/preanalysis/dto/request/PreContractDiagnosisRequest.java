@@ -1,4 +1,4 @@
-package com.house.houseviewing.domain.registrysnapshot.dto.request;
+package com.house.houseviewing.domain.analysis.preanalysis.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

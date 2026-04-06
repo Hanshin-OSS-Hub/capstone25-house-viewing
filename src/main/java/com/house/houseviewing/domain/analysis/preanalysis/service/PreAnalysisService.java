@@ -4,7 +4,7 @@ import com.house.houseviewing.domain.analysis.postanalysis.dto.response.Analysis
 import com.house.houseviewing.domain.analysis.preanalysis.entity.PreAnalysisEntity;
 import com.house.houseviewing.domain.analysis.preanalysis.repository.PreAnalysisRepository;
 import com.house.houseviewing.domain.common.Address;
-import com.house.houseviewing.domain.registrysnapshot.dto.request.PreContractDiagnosisRequest;
+import com.house.houseviewing.domain.analysis.preanalysis.dto.request.PreContractDiagnosisRequest;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.repository.UserRepository;

@@ -14,8 +14,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class PdfPostReportRequest {
 
-    private String snapshotName;
-
     private String rawData;
 
     private ContractType contractType;
