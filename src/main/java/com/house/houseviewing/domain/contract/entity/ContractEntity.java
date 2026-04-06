@@ -47,7 +47,8 @@ public class ContractEntity extends BaseTimeEntity {
     private LocalDate confirmDate;
 
     @Builder
-    public ContractEntity(ContractType contractType, Long deposit, Long monthlyAmount, Long maintenanceFee, LocalDate moveDate, LocalDate confirmDate) {
+    public ContractEntity(Long id, ContractType contractType, Long deposit, Long monthlyAmount, Long maintenanceFee, LocalDate moveDate, LocalDate confirmDate) {
+        this.id = id;
         this.contractType = contractType;
         this.deposit = deposit;
         this.monthlyAmount = monthlyAmount;

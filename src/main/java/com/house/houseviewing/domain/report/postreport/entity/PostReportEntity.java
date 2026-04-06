@@ -35,7 +35,8 @@ public class PostReportEntity extends BaseTimeEntity {
     private Long pdfSizeBytes;
 
     @Builder
-    public PostReportEntity(String pdfKey, String pdfName, String pdfPath, Long pdfSizeBytes) {
+    public PostReportEntity(Long id, String pdfKey, String pdfName, String pdfPath, Long pdfSizeBytes) {
+        this.id = id;
         this.pdfKey = pdfKey;
         this.pdfName = pdfName;
         this.pdfPath = pdfPath;

@@ -9,16 +9,31 @@ public class HouseFixture {
 
     public static HouseEntity.HouseEntityBuilder createDefault(UserEntity user){
         return HouseEntity.builder()
-                .userEntity(user)
                 .nickname("자취방")
                 .monitoringStatus(MonitoringStatus.OFFLINE)
                 .address(AddressFixture.createAddress().build());
     }
 
-    public static HouseRegisterRequest.HouseRegisterRQBuilder createRegister(HouseEntity house){
+    public static HouseEntity createWithUserAndId(UserEntity user, Long id){
+        HouseEntity entity = HouseEntity.builder()
+                .nickname("자취방")
+                .monitoringStatus(MonitoringStatus.OFFLINE)
+                .address(AddressFixture.createAddress().build())
+                .build();
+        entity.addUser(user);
+        try {
+            java.lang.reflect.Field field = HouseEntity.class.getDeclaredField("id");
+            field.setAccessible(true);
+            field.set(entity, id);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return entity;
+    }
+
+    public static HouseRegisterRequest.HouseRegisterRequestBuilder createRegister(HouseEntity house){
         return HouseRegisterRequest.builder()
                 .nickname(house.getNickname())
-                .userId(house.getUser().getId())
                 .originAddress("서울시 강남구");
     }
 }

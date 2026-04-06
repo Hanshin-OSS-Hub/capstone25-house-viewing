@@ -23,6 +23,7 @@ public class PostAnalysisEntity extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "house_id", unique = true)
     private HouseEntity house;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -49,7 +50,8 @@ public class PostAnalysisEntity extends BaseTimeEntity {
     private Integer ltvScore;
 
     @Builder
-    public PostAnalysisEntity(RiskLevel riskLevel, AnalysisType analysisType, String mainReason, Integer ltvScore, String rawData) {
+    public PostAnalysisEntity(Long id, RiskLevel riskLevel, AnalysisType analysisType, String mainReason, Integer ltvScore, String rawData) {
+        this.id = id;
         this.riskLevel = riskLevel;
         this.analysisType = analysisType;
         this.mainReason = mainReason;

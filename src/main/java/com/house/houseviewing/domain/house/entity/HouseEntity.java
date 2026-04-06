@@ -46,7 +46,8 @@ public class HouseEntity extends BaseTimeEntity {
     private MonitoringStatus monitoringStatus;
 
     @Builder
-    public HouseEntity(String nickname, Address address, MonitoringStatus monitoringStatus) {
+    public HouseEntity(Long id, String nickname, Address address, MonitoringStatus monitoringStatus) {
+        this.id = id;
         this.nickname = nickname;
         this.address = address;
         this.monitoringStatus = monitoringStatus;

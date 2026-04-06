@@ -39,30 +39,25 @@ class SubscriptionServiceTest {
         @Test
         @DisplayName("성공")
         void 성공(){
-            // given
-            UserEntity user = UserFixture.createDefault().id(1L).build();
-            SubscriptionEntity subscription = SubscriptionFixture.createDefault(user).id(1L).build();
-            SubscriptionPremiumRequest request = SubscriptionFixture.createPremium(subscription).build();
+            UserEntity user = UserFixture.createDefault().build();
+            SubscriptionEntity subscription = SubscriptionFixture.createDefault(user).build();
+            user.updateSubscription(subscription);
+
             given(userRepository.findById(anyLong()))
                     .willReturn(Optional.of(user));
-            // when
-            SubscriptionEntity premium = subscriptionService.premium(request);
-            // then
-            assertThat(premium.getPlanType()).isEqualTo(PlanType.PREMIUM);
+
+            subscriptionService.premium(1L);
+
+            assertThat(user.getSubscription().getPlanType()).isEqualTo(PlanType.PREMIUM);
         }
 
         @Test
         @DisplayName("실패: 유저를 찾을 수 없음")
         void 실패(){
-            // given
-            UserEntity user = UserFixture.createDefault().id(1L).build();
-            SubscriptionEntity subscription = SubscriptionFixture.createDefault(user).id(1L).build();
-            SubscriptionPremiumRequest request = SubscriptionFixture.createPremium(subscription).build();
             given(userRepository.findById(anyLong()))
                     .willReturn(Optional.empty());
-            // when
-            // then
-            assertThatThrownBy(() -> subscriptionService.premium(request))
+
+            assertThatThrownBy(() -> subscriptionService.premium(1L))
                     .isInstanceOf(AppException.class)
                     .extracting("exceptionCode")
                     .isEqualTo(ExceptionCode.USER_NOT_FOUND);

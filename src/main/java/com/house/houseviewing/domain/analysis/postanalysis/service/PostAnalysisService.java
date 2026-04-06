@@ -8,7 +8,6 @@ import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEn
 import com.house.houseviewing.domain.analysis.postanalysis.repository.PostAnalysisRepository;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.house.repository.HouseRepository;
-import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.global.file.diff.service.SnapshotDiffAnalysisService;

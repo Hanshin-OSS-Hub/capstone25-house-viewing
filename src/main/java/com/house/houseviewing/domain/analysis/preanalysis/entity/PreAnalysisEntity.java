@@ -49,7 +49,8 @@ public class PreAnalysisEntity extends BaseTimeEntity {
     private Integer ltvScore;
 
     @Builder
-    public PreAnalysisEntity(String nickname, String rawData, String mainReason, Address address, RiskLevel riskLevel, Integer ltvScore) {
+    public PreAnalysisEntity(Long id, String nickname, String rawData, String mainReason, Address address, RiskLevel riskLevel, Integer ltvScore) {
+        this.id = id;
         this.nickname = nickname;
         this.rawData = rawData;
         this.mainReason = mainReason;

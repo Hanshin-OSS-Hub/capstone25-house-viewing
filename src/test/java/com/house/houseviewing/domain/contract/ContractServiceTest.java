@@ -2,6 +2,7 @@ package com.house.houseviewing.domain.contract;
 
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
 import com.house.houseviewing.domain.contract.dto.request.ContractRegisterRequest;
+import com.house.houseviewing.domain.contract.dto.response.ContractRegisterResponse;
 import com.house.houseviewing.domain.contract.repository.ContractRepository;
 import com.house.houseviewing.domain.contract.service.ContractService;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
@@ -41,33 +42,30 @@ public class ContractServiceTest {
         @Test
         @DisplayName("성공")
         void 성공(){
-            // given
             UserEntity user = UserFixture.createDefault().build();
-            HouseEntity house = HouseFixture.createDefault(user).id(1L).build();
+            HouseEntity house = HouseFixture.createDefault(user).build();
+            house.addUser(user);
             ContractEntity contract = ContractFixture.createDefault(house).build();
             ContractRegisterRequest request = ContractFixture.createRegister(contract).build();
-            given(houseRepository.findById(1L))
+            given(houseRepository.findById(anyLong()))
                     .willReturn(Optional.of(house));
             given(contractRepository.save(any()))
                     .willReturn(contract);
-            // when
-            ContractEntity register = contractService.register(request);
-            // then
-            assertThat(register).isNotNull();
+
+            ContractRegisterResponse response = contractService.register(request);
+
+            assertThat(response).isNotNull();
         }
 
         @Test
         @DisplayName("실패: 집을 찾을 수 없음")
         void 실패(){
-            // given
-            UserEntity user = UserFixture.createDefault().build();
-            HouseEntity house = HouseFixture.createDefault(user).id(1L).build();
-            ContractEntity contract = ContractFixture.createDefault(house).build();
-            ContractRegisterRequest request = ContractFixture.createRegister(contract).build();
+            ContractRegisterRequest request = ContractRegisterRequest.builder()
+                    .houseId(1L)
+                    .build();
             given(houseRepository.findById(1L))
                     .willReturn(Optional.empty());
-            // when
-            // then
+
             assertThatThrownBy(() -> contractService.register(request))
                     .isInstanceOf(AppException.class)
                     .extracting("exceptionCode")
@@ -82,30 +80,23 @@ public class ContractServiceTest {
         @Test
         @DisplayName("성공")
         void 성공(){
-            // given
-            UserEntity user = UserFixture.createDefault().build();
-            HouseEntity house = HouseFixture.createDefault(user).build();
-            ContractEntity contract = ContractFixture.createDefault(house).id(1L).build();
+            ContractEntity contract = ContractEntity.builder()
+                    .build();
             given(contractRepository.findById(anyLong()))
                     .willReturn(Optional.of(contract));
-            // when
-            contractService.delete(contract.getId());
-            // then
+
+            contractService.delete(1L);
+
             then(contractRepository).should(times(1)).findById(1L);
         }
 
         @Test
         @DisplayName("실패: 계약을 찾을 수 없음")
         void 실패(){
-            // given
-            UserEntity user = UserFixture.createDefault().build();
-            HouseEntity house = HouseFixture.createDefault(user).build();
-            ContractEntity contract = ContractFixture.createDefault(house).id(1L).build();
             given(contractRepository.findById(anyLong()))
                     .willReturn(Optional.empty());
-            // when
-            // then
-            assertThatThrownBy(() -> contractService.delete(contract.getId()))
+
+            assertThatThrownBy(() -> contractService.delete(1L))
                     .isInstanceOf(AppException.class)
                     .extracting("exceptionCode")
                     .isEqualTo(ExceptionCode.CONTRACT_NOT_FOUND);

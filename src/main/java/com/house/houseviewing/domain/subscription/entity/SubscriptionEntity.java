@@ -31,7 +31,8 @@ public class SubscriptionEntity extends BaseTimeEntity {
     private LocalDateTime endedAt;
 
     @Builder
-    public SubscriptionEntity(PlanType planType, LocalDateTime purchasedAt, LocalDateTime endedAt) {
+    public SubscriptionEntity(Long id, PlanType planType, LocalDateTime purchasedAt, LocalDateTime endedAt) {
+        this.id = id;
         this.planType = planType;
         this.purchasedAt = purchasedAt;
         this.endedAt = endedAt;

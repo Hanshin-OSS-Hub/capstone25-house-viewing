@@ -35,7 +35,8 @@ public class PreReportEntity extends BaseTimeEntity {
     private String pdfName;
 
     @Builder
-    public PreReportEntity(String pdfKey, String pdfPath, Long pdfSizeBytes, String pdfName) {
+    public PreReportEntity(Long id, String pdfKey, String pdfPath, Long pdfSizeBytes, String pdfName) {
+        this.id = id;
         this.pdfKey = pdfKey;
         this.pdfPath = pdfPath;
         this.pdfSizeBytes = pdfSizeBytes;

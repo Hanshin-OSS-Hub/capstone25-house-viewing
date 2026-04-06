@@ -6,7 +6,6 @@ import com.house.houseviewing.domain.contract.repository.ContractRepository;
 import com.house.houseviewing.domain.report.postreport.entity.PostReportEntity;
 import com.house.houseviewing.domain.report.postreport.repository.PostReportRepository;
 import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
-import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.global.file.pdf.dto.PdfDiffReportRequest;

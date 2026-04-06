@@ -4,30 +4,66 @@ import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
 import com.house.houseviewing.domain.subscription.enums.PlanType;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.dto.request.UserFindIdRequest;
-import com.house.houseviewing.domain.auth.dto.request.LoginRequest;
-import com.house.houseviewing.domain.user.dto.request.UserResetPasswordRequest;
 import com.house.houseviewing.domain.user.dto.request.UserVerifyPasswordRequest;
 import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;
-import org.springframework.transaction.annotation.Transactional;
 
-@Transactional
 public class UserFixture {
 
-    public static UserEntity.UserEntityBuilder createDefault(){
-
-        SubscriptionEntity subscription = SubscriptionEntity.builder()
-                .planType(PlanType.FREE)
+    public static UserEntity createDefaultBuilt(){
+        UserEntity entity = UserEntity.builder()
+                .name("유인근")
+                .loginId("yooyoo9191")
+                .password("okok0630!")
+                .email("yooyoo9191@gmail.com")
                 .build();
+        entity.addSubscription(SubscriptionEntity.builder()
+                .planType(PlanType.FREE)
+                .build());
+        return entity;
+    }
 
+    public static UserEntity.UserEntityBuilder createDefault(){
         return UserEntity.builder()
+                .name("유인근")
+                .loginId("yooyoo9191")
+                .password("okok0630!")
+                .email("yooyoo9191@gmail.com");
+    }
+
+    public static UserEntity createPremium(){
+        UserEntity entity = UserEntity.builder()
                 .name("유인근")
                 .loginId("yooyoo9191")
                 .password("okok0635!")
                 .email("yooyoo9191@gmail.com")
-                .subscription(subscription);
+                .build();
+        entity.addSubscription(SubscriptionEntity.builder()
+                .planType(PlanType.PREMIUM)
+                .build());
+        return entity;
     }
 
-    public static UserRegisterRequest.UserRegisterRQBuilder createRegister(UserEntity user){
+    public static UserEntity createDefaultWithId(Long id){
+        UserEntity entity = UserEntity.builder()
+                .name("유인근")
+                .loginId("yooyoo9191")
+                .password("okok0635!")
+                .email("yooyoo9191@gmail.com")
+                .build();
+        entity.addSubscription(SubscriptionEntity.builder()
+                .planType(PlanType.FREE)
+                .build());
+        try {
+            java.lang.reflect.Field field = UserEntity.class.getDeclaredField("id");
+            field.setAccessible(true);
+            field.set(entity, id);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return entity;
+    }
+
+    public static UserRegisterRequest.UserRegisterRequestBuilder createRegister(UserEntity user){
         return UserRegisterRequest.builder()
                 .name(user.getName())
                 .email(user.getEmail())
@@ -35,29 +71,16 @@ public class UserFixture {
                 .password(user.getPassword());
     }
 
-    public static LoginRequest.UserLoginRQBuilder createLogin(UserEntity user){
-        return LoginRequest.builder()
-                .loginId(user.getLoginId())
-                .password(user.getPassword());
-    }
-
-    public static UserFindIdRequest.UserFindIdRQBuilder createFindId(UserEntity user){
+    public static UserFindIdRequest.UserFindIdRequestBuilder createFindId(UserEntity user){
         return UserFindIdRequest.builder()
                 .name(user.getName())
                 .email(user.getEmail());
     }
 
-    public static UserVerifyPasswordRequest.UserVerifyPasswordRQBuilder createVerifyPassword(UserEntity user){
+    public static UserVerifyPasswordRequest.UserVerifyPasswordRequestBuilder createVerifyPassword(UserEntity user){
         return UserVerifyPasswordRequest.builder()
                 .name(user.getName())
                 .loginId(user.getLoginId())
                 .email(user.getEmail());
-    }
-
-    public static UserResetPasswordRequest.UserResetPasswordRQBuilder createResetPassword(UserEntity user, String newPassword, String confirmPassword){
-        return UserResetPasswordRequest.builder()
-                .userId(user.getId())
-                .newPassword(newPassword)
-                .confirmPassword(confirmPassword);
     }
 }

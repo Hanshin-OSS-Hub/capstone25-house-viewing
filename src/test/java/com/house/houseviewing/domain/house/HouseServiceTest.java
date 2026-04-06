@@ -2,6 +2,7 @@ package com.house.houseviewing.domain.house;
 
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.house.dto.request.HouseRegisterRequest;
+import com.house.houseviewing.domain.house.dto.response.HouseRegisterResponse;
 import com.house.houseviewing.domain.house.repository.HouseRepository;
 import com.house.houseviewing.domain.house.service.HouseService;
 import com.house.houseviewing.domain.user.entity.UserEntity;
@@ -42,37 +43,29 @@ class HouseServiceTest {
         @Test
         @DisplayName("성공")
         void 성공(){
-            // given
-            UserEntity user = UserFixture.createDefault()
-                    .id(1L).build();
+            UserEntity user = UserFixture.createPremium();
             HouseEntity house = HouseFixture.createDefault(user).build();
-            HouseRegisterRequest request = HouseFixture.createRegister(house)
-                    .userId(1L).build();
+            HouseRegisterRequest request = HouseFixture.createRegister(house).build();
             given(userRepository.findById(anyLong()))
                     .willReturn(Optional.of(user));
             given(houseRepository.save(any()))
                     .willReturn(house);
-            // when
-            HouseEntity register = houseService.register(request);
-            // then
-            assertThat(register).isNotNull();
-            assertThat(register.getNickname()).isEqualTo(request.getNickname());
+
+            HouseRegisterResponse result = houseService.register(1L, request);
+
+            assertThat(result).isNotNull();
         }
 
         @Test
         @DisplayName("실패: 사용자를 찾을 수 없음")
         void 실패1(){
-            // given
-            UserEntity user = UserFixture.createDefault()
-                    .id(1L).build();
+            UserEntity user = UserFixture.createDefault().build();
             HouseEntity house = HouseFixture.createDefault(user).build();
-            HouseRegisterRequest request = HouseFixture.createRegister(house)
-                    .userId(1L).build();
+            HouseRegisterRequest request = HouseFixture.createRegister(house).build();
             given(userRepository.findById(anyLong()))
                     .willReturn(Optional.empty());
-            // when
-            // then
-            assertThatThrownBy(() -> houseService.register(request))
+
+            assertThatThrownBy(() -> houseService.register(1L, request))
                     .isInstanceOf(AppException.class)
                     .extracting("exceptionCode")
                     .isEqualTo(ExceptionCode.USER_NOT_FOUND);
@@ -86,29 +79,23 @@ class HouseServiceTest {
         @Test
         @DisplayName("성공")
         void 성공(){
-            // given
             UserEntity user = UserFixture.createDefault().build();
-            HouseEntity house = HouseFixture.createDefault(user)
-                    .id(1L).build();
+            HouseEntity house = HouseFixture.createDefault(user).build();
             given(houseRepository.findById(anyLong()))
                     .willReturn(Optional.of(house));
-            // when
-            houseService.delete(house.getId());
-            // then
+
+            houseService.delete(1L, 1L);
+
             then(houseRepository).should(times(1)).findById(1L);
         }
 
         @Test
         @DisplayName("실패: 집을 찾을 수 없음")
         void 실패(){
-            // given
-            UserEntity user = UserFixture.createDefault().id(1L).build();
-            HouseEntity house = HouseFixture.createDefault(user).build();
             given(houseRepository.findById(anyLong()))
                     .willReturn(Optional.empty());
-            // when
-            // then
-            assertThatThrownBy(() -> houseService.delete(1L))
+
+            assertThatThrownBy(() -> houseService.delete(1L, 1L))
                     .isInstanceOf(AppException.class)
                     .extracting("exceptionCode")
                     .isEqualTo(ExceptionCode.HOUSE_NOT_FOUND);
