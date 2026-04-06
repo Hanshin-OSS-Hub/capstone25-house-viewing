@@ -12,6 +12,7 @@ import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;
 import com.house.houseviewing.domain.user.repository.UserRepository;
 import com.house.houseviewing.domain.user.service.UserService;
+import com.house.houseviewing.domain.common.RiskLevel;
 import com.house.houseviewing.fixture.AddressFixture;
 import com.house.houseviewing.fixture.HouseFixture;
 import com.house.houseviewing.fixture.UserFixture;
@@ -51,12 +52,13 @@ public class PreAnalysisIntegrationTest {
     @DisplayName("사전 분석 목록 조회")
     void 사전_분석_목록_조회(){
         given(snapshotAnalysisService.preAnalyze(anyString(), any(), any()))
-                .willReturn(PreAnalysisEntity.builder()
-                        .nickname("테스트")
+                .willAnswer(invocation -> PreAnalysisEntity.builder()
+                        .nickname(invocation.getArgument(0))
                         .rawData("{\"test\": true}")
                         .mainReason("안전")
                         .address(AddressFixture.createAddress().build())
                         .ltvScore(80)
+                        .riskLevel(RiskLevel.SAFE)
                         .build());
 
         UserEntity user = getUserEntity();

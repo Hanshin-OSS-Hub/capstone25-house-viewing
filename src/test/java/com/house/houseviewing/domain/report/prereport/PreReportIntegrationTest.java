@@ -15,6 +15,7 @@ import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;
 import com.house.houseviewing.domain.user.repository.UserRepository;
 import com.house.houseviewing.domain.user.service.UserService;
+import com.house.houseviewing.domain.common.RiskLevel;
 import com.house.houseviewing.fixture.AddressFixture;
 import com.house.houseviewing.fixture.HouseFixture;
 import com.house.houseviewing.fixture.UserFixture;
@@ -56,12 +57,13 @@ public class PreReportIntegrationTest {
     @DisplayName("사전 리포트 등록")
     void 사전_리포트_등록(){
         given(snapshotAnalysisService.preAnalyze(anyString(), any(), any()))
-                .willReturn(PreAnalysisEntity.builder()
-                        .nickname("테스트")
+                .willAnswer(invocation -> PreAnalysisEntity.builder()
+                        .nickname(invocation.getArgument(0))
                         .rawData("{\"test\": true}")
                         .mainReason("안전")
                         .address(AddressFixture.createAddress().build())
                         .ltvScore(80)
+                        .riskLevel(RiskLevel.SAFE)
                         .build());
 
         given(pdfReportTransferAndReceiveService.preTransferAndReceive(any()))
@@ -86,7 +88,7 @@ public class PreReportIntegrationTest {
         assertThat(report).isNotNull();
         assertThat(report.getPdfKey()).isEqualTo("test-key");
         assertThat(report.getPdfPath()).isEqualTo("/test/path");
-        assertThat(report.getAnalysis()).isEqualTo(analysis);
+        assertThat(report.getAnalysis().getId()).isEqualTo(analysis.getId());
     }
 
     private UserEntity getUserEntity() {

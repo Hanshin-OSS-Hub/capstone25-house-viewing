@@ -22,7 +22,7 @@ public class PreReportService {
     public PreReportEntity preRegister(PreAnalysisEntity analyze){
         PdfPreReportRequest request = getPdfReportPreRequest(analyze);
         PdfUploadResult uploadResult = pdfReportTransferAndReceiveService.preTransferAndReceive(request);
-        PreReportEntity pdfReport = getPdfReportEntity(uploadResult);
+        PreReportEntity pdfReport = getPdfReportEntity(uploadResult, analyze);
 
         return preReportRepository.save(pdfReport);
     }
@@ -34,12 +34,14 @@ public class PreReportService {
                 .build();
     }
 
-    private static PreReportEntity getPdfReportEntity(PdfUploadResult uploadResult) {
-        return PreReportEntity.builder()
+    private static PreReportEntity getPdfReportEntity(PdfUploadResult uploadResult, PreAnalysisEntity analyze) {
+        PreReportEntity pdfReport = PreReportEntity.builder()
                 .pdfName(uploadResult.getPdfName())
                 .pdfPath(uploadResult.getPdfPath())
                 .pdfKey(uploadResult.getPdfKey())
                 .pdfSizeBytes(uploadResult.getPdfSizeBytes())
                 .build();
+        pdfReport.addAnalysis(analyze);
+        return pdfReport;
     }
 }
