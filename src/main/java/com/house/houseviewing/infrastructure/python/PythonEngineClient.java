@@ -4,8 +4,7 @@ import com.house.houseviewing.global.file.diff.dto.DiffAnalysisResult;
 import com.house.houseviewing.global.file.pdf.dto.PdfDiffReportRequest;
 import com.house.houseviewing.global.file.pdf.dto.PdfPostReportRequest;
 import com.house.houseviewing.global.file.pdf.dto.PdfPreReportRequest;
-import com.house.houseviewing.global.file.snapshot.dto.SnapshotPostAnalysisResult;
-import com.house.houseviewing.global.file.snapshot.dto.SnapshotPreAnalysisResult;
+import com.house.houseviewing.global.file.snapshot.dto.SnapshotAnalysisResult;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
@@ -24,7 +23,7 @@ public class PythonEngineClient {
         this.pythonWebClient = pythonWebClient;
     }
 
-    public Mono<SnapshotPostAnalysisResult> sendPostSnapshot(MultipartFile file){
+    public Mono<SnapshotAnalysisResult> sendSnapshot(MultipartFile file){
         MultipartBodyBuilder builder = new MultipartBodyBuilder();
         builder.part("file", file.getResource())
                 .filename(file.getOriginalFilename());
@@ -34,20 +33,7 @@ public class PythonEngineClient {
                 .contentType(MediaType.MULTIPART_FORM_DATA)
                 .body(BodyInserters.fromMultipartData(builder.build()))
                 .retrieve()
-                .bodyToMono(SnapshotPostAnalysisResult.class);
-    }
-
-    public Mono<SnapshotPreAnalysisResult> sendPreSnapshot(MultipartFile file){
-        MultipartBodyBuilder builder = new MultipartBodyBuilder();
-        builder.part("file", file.getResource())
-                .filename(file.getOriginalFilename());
-
-        return pythonWebClient.post()
-                .uri("/engine/analyze")
-                .contentType(MediaType.MULTIPART_FORM_DATA)
-                .body(BodyInserters.fromMultipartData(builder.build()))
-                .retrieve()
-                .bodyToMono(SnapshotPreAnalysisResult.class);
+                .bodyToMono(SnapshotAnalysisResult.class);
     }
 
     public Mono<byte[]> postSendDataAndReceivePdf(PdfPostReportRequest request){

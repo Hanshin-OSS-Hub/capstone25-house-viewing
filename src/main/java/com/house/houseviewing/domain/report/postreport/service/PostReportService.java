@@ -30,7 +30,7 @@ public class PostReportService {
     private final PostAnalysisRepository postAnalysisRepository;
 
     @Transactional
-    public PostReportEntity postRegister(RegistrySnapshotEntity snapshotEntity, PostAnalysisEntity analyze){
+    public PostReportEntity postRegister(PostAnalysisEntity analyze){
         Long contractId = analyze.getContract().getId();
         ContractEntity contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new AppException(ExceptionCode.CONTRACT_NOT_FOUND));

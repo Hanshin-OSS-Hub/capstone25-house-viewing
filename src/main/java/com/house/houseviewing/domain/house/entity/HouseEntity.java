@@ -1,9 +1,9 @@
 package com.house.houseviewing.domain.house.entity;
 
+import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
 import com.house.houseviewing.domain.common.Address;
 import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
-import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.enums.MonitoringStatus;
 import com.house.houseviewing.global.exception.AppException;
@@ -29,10 +29,10 @@ public class HouseEntity extends BaseTimeEntity {
     private UserEntity user;
 
     @OneToMany(mappedBy = "house", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ContractEntity> contracts = new ArrayList<>();
+    private List<PostAnalysisEntity> analyses = new ArrayList<>();
 
     @OneToMany(mappedBy = "house", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<RegistrySnapshotEntity> snapshots = new ArrayList<>();
+    private List<ContractEntity> contracts = new ArrayList<>();
 
     @Column(nullable = false)
     private String nickname;
@@ -58,11 +58,6 @@ public class HouseEntity extends BaseTimeEntity {
         contract.addHouse(this);
     }
 
-    public void addRegistrySnapshot(RegistrySnapshotEntity registrySnapshot){
-        this.snapshots.add(registrySnapshot);
-        registrySnapshot.addHouse(this);
-    }
-
     public void checkContract(ContractEntity contract) {
         if(this.contracts.contains(contract))
             throw new AppException(ExceptionCode.ALREADY_REGISTERED_CONTRACT);
@@ -73,7 +68,6 @@ public class HouseEntity extends BaseTimeEntity {
     }
     public void updateAddress(Address address) {this.address = address;}
     public void updateNickname(String nickname) {this.nickname = nickname;}
-    public void addUser(UserEntity user) {
-        this.user = user;
-    }
+    public void addUser(UserEntity user) {this.user = user;}
+    public void addAnalysis(PostAnalysisEntity postAnalysis) {this.analyses.add(postAnalysis);}
 }

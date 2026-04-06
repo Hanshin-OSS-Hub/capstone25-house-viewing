@@ -6,8 +6,7 @@ import com.house.houseviewing.domain.analysis.preanalysis.entity.PreAnalysisEnti
 import com.house.houseviewing.domain.common.Address;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
-import com.house.houseviewing.global.file.snapshot.dto.SnapshotPostAnalysisResult;
-import com.house.houseviewing.global.file.snapshot.dto.SnapshotPreAnalysisResult;
+import com.house.houseviewing.global.file.snapshot.dto.SnapshotAnalysisResult;
 import com.house.houseviewing.infrastructure.python.PythonEngineClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,7 +21,7 @@ public class SnapshotAnalysisService {
     public PostAnalysisEntity postAnalyze(MultipartFile snapshot){
 
         try{
-            SnapshotPostAnalysisResult result = pythonEngineClient.sendPostSnapshot(snapshot).block();
+            SnapshotAnalysisResult result = pythonEngineClient.sendSnapshot(snapshot).block();
 
             if(result == null){
                 throw new AppException(ExceptionCode.ANALYSIS_FAILED);
@@ -43,7 +42,7 @@ public class SnapshotAnalysisService {
     public PreAnalysisEntity preAnalyze(String nickname, Address address, MultipartFile snapshot){
 
         try{
-            SnapshotPreAnalysisResult result = pythonEngineClient.sendPreSnapshot(snapshot).block();
+            SnapshotAnalysisResult result = pythonEngineClient.sendSnapshot(snapshot).block();
 
             if(result == null){
                 throw new AppException(ExceptionCode.ANALYSIS_FAILED);

@@ -26,14 +26,12 @@ public class AnalysisQueryService {
 
     private final PostAnalysisService postAnalysisService;
     private final PreAnalysisService preAnalysisService;
-    private final RegistrySnapshotService registrySnapshotService;
     private final PostReportService postReportService;
     private final PreReportService preReportService;
 
     public PdfDownloadResponse executePostContractDiagnosis(Long houseId, MultipartFile snapshot){
-        RegistrySnapshotEntity snapshotEntity = registrySnapshotService.register(houseId, snapshot);
-        PostAnalysisEntity analyze = postAnalysisService.postRegister(snapshot, snapshotEntity);
-        PostReportEntity pdfReport = postReportService.postRegister(snapshotEntity, analyze);
+        PostAnalysisEntity analyze = postAnalysisService.postRegister(houseId, snapshot);
+        PostReportEntity pdfReport = postReportService.postRegister(analyze);
 
         return PdfDownloadResponse.builder()
                 .pdfReportId(pdfReport.getId())

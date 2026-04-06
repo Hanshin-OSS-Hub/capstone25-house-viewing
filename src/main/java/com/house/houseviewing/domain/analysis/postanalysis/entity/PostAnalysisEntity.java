@@ -4,8 +4,8 @@ import com.house.houseviewing.domain.analysis.postanalysis.enums.AnalysisType;
 import com.house.houseviewing.domain.common.BaseTimeEntity;
 import com.house.houseviewing.domain.common.RiskLevel;
 import com.house.houseviewing.domain.contract.entity.ContractEntity;
+import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.report.postreport.entity.PostReportEntity;
-import com.house.houseviewing.domain.registrysnapshot.entity.RegistrySnapshotEntity;
 import jakarta.persistence.*;
 import lombok.AccessLevel;
 import lombok.Builder;
@@ -22,9 +22,8 @@ public class PostAnalysisEntity extends BaseTimeEntity {
     @Column(name = "analysis_id")
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "snapshot_id")
-    private RegistrySnapshotEntity snapshot;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private HouseEntity house;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "contract_id", unique = true)
@@ -40,7 +39,7 @@ public class PostAnalysisEntity extends BaseTimeEntity {
     @Enumerated(EnumType.STRING)
     private AnalysisType analysisType;
 
-    @Column(columnDefinition = "json", nullable = false)
+    @Column(nullable = false, columnDefinition = "json")
     private String rawData;
 
     @Column(nullable = false)
@@ -50,23 +49,21 @@ public class PostAnalysisEntity extends BaseTimeEntity {
     private Integer ltvScore;
 
     @Builder
-    public PostAnalysisEntity(RiskLevel riskLevel, AnalysisType analysisType, String rawData, String mainReason, Integer ltvScore) {
+    public PostAnalysisEntity(RiskLevel riskLevel, AnalysisType analysisType, String mainReason, Integer ltvScore, String rawData) {
         this.riskLevel = riskLevel;
         this.analysisType = analysisType;
-        this.rawData = rawData;
         this.mainReason = mainReason;
         this.ltvScore = ltvScore;
+        this.rawData = rawData;
     }
 
     public void addContract(ContractEntity contract){
         this.contract = contract;
         contract.addRegistryAnalysis(this);
     }
-
-    public void addRegistrySnapshot(RegistrySnapshotEntity registrySnapshot){
-        this.snapshot = registrySnapshot;
-        registrySnapshot.addAnalysis(this);
+    public void addHouse(HouseEntity house){
+        this.house = house;
+        house.addAnalysis(this);
     }
-
     public void addPdfReport(PostReportEntity pdfReport) {this.pdfReport = pdfReport;}
 }

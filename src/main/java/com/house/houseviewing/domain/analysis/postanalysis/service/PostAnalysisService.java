@@ -29,14 +29,16 @@ public class PostAnalysisService {
     private final PostAnalysisRepository postAnalysisRepository;
     private final SnapshotAnalysisService snapshotAnalysisService;
     private final SnapshotDiffAnalysisService snapshotDiffAnalysisService;
+    private final HouseRepository houseRepository;
 
     @Transactional
-    public PostAnalysisEntity postRegister(MultipartFile snapshot, RegistrySnapshotEntity registrySnapshot){
-        Long houseId = registrySnapshot.getHouse().getId();
+    public PostAnalysisEntity postRegister(Long houseId, MultipartFile snapshot){
+        HouseEntity house = houseRepository.findById(houseId)
+                .orElseThrow(() -> new AppException(ExceptionCode.HOUSE_NOT_FOUND));
         ContractEntity contract = contractRepository.findTopByHouseIdOrderByCreatedAtDesc(houseId)
                 .orElseThrow(() -> new AppException(ExceptionCode.CONTRACT_NOT_FOUND));
         PostAnalysisEntity analysis = snapshotAnalysisService.postAnalyze(snapshot);
-        analysis.addRegistrySnapshot(registrySnapshot);
+        analysis.addHouse(house);
         analysis.addContract(contract);
         return postAnalysisRepository.save(analysis);
     }

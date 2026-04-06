@@ -14,20 +14,5 @@ import org.springframework.web.multipart.MultipartFile;
 @RequiredArgsConstructor
 public class RegistrySnapshotController {
 
-    private final AnalysisQueryService analysisQueryService;
-    private final DiffAnalysisQueryService diffAnalysisQueryService;
 
-    @PostMapping("/{houseId}/post-contract-diagnoses")
-    public ResponseEntity<PdfDownloadResponse> diagnosePostContract(
-            @PathVariable Long houseId,
-            @RequestPart("file") MultipartFile snapshot){
-        PdfDownloadResponse result = analysisQueryService.executePostContractDiagnosis(houseId, snapshot);
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
-    }
-
-    @PostMapping("/{houseId}/change-diagnoses")
-    public ResponseEntity<PdfDownloadResponse> diffDiagnose(@PathVariable Long houseId){
-        PdfDownloadResponse result = diffAnalysisQueryService.executeDiffDiagnosis(houseId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(result);
-    }
 }
