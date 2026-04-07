@@ -37,6 +37,7 @@ public enum ExceptionCode {
     FILE_SAVE_FAILED("ER001", HttpStatus.BAD_REQUEST, "파일 저장에 실패했습니다."),
     ANALYSIS_FAILED("ER002", HttpStatus.INTERNAL_SERVER_ERROR, "등기부 분석에 실패했습니다."),
     PDF_SAVE_FAILED("ER003", HttpStatus.BAD_REQUEST, "PDF 저장에 실패했습니다."),
+    S3_UPLOAD_FAILED("ER004", HttpStatus.INTERNAL_SERVER_ERROR, "S3 서버로의 파일 업로드에 실패했습니다."),
 
     // NF
     USER_NOT_FOUND("NF001", HttpStatus.NOT_FOUND, "해당 사용자는 존재하지 않습니다."),
