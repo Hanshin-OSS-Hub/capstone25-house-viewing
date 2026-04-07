@@ -7,6 +7,7 @@ import com.house.houseviewing.global.file.pdf.dto.PdfPostReportRequest;
 import com.house.houseviewing.global.file.pdf.dto.PdfPreReportRequest;
 import com.house.houseviewing.global.file.pdf.dto.PdfUploadResult;
 import com.house.houseviewing.infrastructure.python.PythonEngineClient;
+import com.house.houseviewing.infrastructure.s3.S3Service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +16,7 @@ import org.springframework.stereotype.Service;
 public class PdfReportTransferAndReceiveService {
 
     private final PythonEngineClient pythonEngineClient;
-    private final PdfStorageService pdfStorageService;
+    private final S3Service s3Service;
 
     public PdfUploadResult postTransferAndReceive(PdfPostReportRequest request){
         byte[] pdf = pythonEngineClient.postSendDataAndReceivePdf(request).block();
@@ -24,7 +25,7 @@ public class PdfReportTransferAndReceiveService {
             throw new AppException(ExceptionCode.PDF_SAVE_FAILED);
         }
 
-        PdfUploadResult uploadPdf = pdfStorageService.uploadPdf(pdf);
+        PdfUploadResult uploadPdf = s3Service.pdfUpload(pdf);
 
         return uploadPdf;
     }
@@ -36,7 +37,7 @@ public class PdfReportTransferAndReceiveService {
             throw new AppException(ExceptionCode.PDF_SAVE_FAILED);
         }
 
-        PdfUploadResult uploadPdf = pdfStorageService.uploadPdf(pdf);
+        PdfUploadResult uploadPdf = s3Service.pdfUpload(pdf);
 
         return uploadPdf;
     }
@@ -48,7 +49,7 @@ public class PdfReportTransferAndReceiveService {
             throw new AppException(ExceptionCode.PDF_SAVE_FAILED);
         }
 
-        PdfUploadResult uploadPdf = pdfStorageService.uploadPdf(pdf);
+        PdfUploadResult uploadPdf = s3Service.pdfUpload(pdf);
 
         return uploadPdf;
     }
