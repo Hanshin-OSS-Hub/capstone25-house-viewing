@@ -2,7 +2,6 @@ package com.house.houseviewing.domain.house.dto.request;
 
 import com.house.houseviewing.domain.common.Address;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
-import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.enums.MonitoringStatus;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;

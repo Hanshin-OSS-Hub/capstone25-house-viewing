@@ -1,6 +1,5 @@
 package com.house.houseviewing.domain.house;
 
-import com.house.houseviewing.domain.common.Address;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.house.dto.request.HouseRegisterRequest;
 import com.house.houseviewing.domain.house.repository.HouseRepository;

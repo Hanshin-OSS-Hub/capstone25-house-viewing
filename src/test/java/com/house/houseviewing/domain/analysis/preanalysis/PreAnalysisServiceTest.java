@@ -6,9 +6,6 @@ import com.house.houseviewing.domain.analysis.preanalysis.entity.PreAnalysisEnti
 import com.house.houseviewing.domain.analysis.preanalysis.repository.PreAnalysisRepository;
 import com.house.houseviewing.domain.analysis.preanalysis.service.PreAnalysisService;
 import com.house.houseviewing.domain.common.Address;
-import com.house.houseviewing.domain.subscription.entity.SubscriptionEntity;
-import com.house.houseviewing.domain.subscription.enums.PlanType;
-import com.house.houseviewing.domain.subscription.service.SubscriptionService;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.repository.UserRepository;
 import com.house.houseviewing.fixture.AddressFixture;
@@ -28,7 +25,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 import org.springframework.mock.web.MockMultipartFile;
-import org.springframework.util.ReflectionUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.lang.reflect.Field;

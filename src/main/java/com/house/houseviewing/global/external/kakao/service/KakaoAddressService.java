@@ -7,9 +7,7 @@ import com.house.houseviewing.global.external.kakao.model.KakaoAddressRS;
 import com.house.houseviewing.global.external.kakao.model.KakaoAddressRS.Document;
 import com.house.houseviewing.global.external.kakao.model.KakaoAddressRS.ParsedAddress;
 import com.house.houseviewing.global.util.AddressUtils;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
