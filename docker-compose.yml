@@ -2,9 +2,12 @@ services:
   app:
     build: .
     container_name: house-viewing-server
+    restart: unless-stopped
     depends_on:
-      - db
-      - redis
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
     ports:
       - "8080:8080"
     extra_hosts:
@@ -23,6 +26,7 @@ services:
   db:
     image: mysql:8.0
     container_name: mysql-house-viewing
+    restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: 1234
       MYSQL_DATABASE: house_viewing
@@ -30,16 +34,29 @@ services:
       - "3307:3306"
     volumes:
       - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p1234"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
     networks:
       - app-network
 
   redis:
     image: redis:7-alpine
     container_name: house-viewing-redis
+    restart: unless-stopped
     ports:
       - "6379:6379"
     volumes:
       - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
     networks:
       - app-network
 

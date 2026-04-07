@@ -1,4 +1,4 @@
-FROM gradle:8.7-jdk17 AS builder
+FROM eclipse-temurin:17-jdk-jammy AS builder
 
 WORKDIR /app
 
