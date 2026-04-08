@@ -53,8 +53,8 @@ public class UserServiceIntegrationTest {
                 .loginId(user.getLoginId())
                 .name(user.getName())
                 .build();
-        boolean result = userService.passwordVerify(request);
-        assertThat(result).isTrue();
+        String result = userService.passwordVerify(request);
+        assertThat(result).isNotNull();
     }
 
     @Test

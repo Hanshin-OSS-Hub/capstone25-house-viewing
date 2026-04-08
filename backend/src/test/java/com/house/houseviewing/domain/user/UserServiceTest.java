@@ -144,9 +144,9 @@ class UserServiceTest {
                     .willReturn(Optional.of(user));
             given(stringRedisTemplate.opsForValue()).willReturn(valueOperations);
 
-            boolean result = userService.passwordVerify(request);
+            String result = userService.passwordVerify(request);
 
-            assertThat(result).isTrue();
+            assertThat(result).isNotNull();
         }
 
         @Test
