@@ -11,7 +11,10 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.capstone.houseviewingapp.R
+import com.capstone.houseviewingapp.data.local.AuthTokenLocalStore
+import com.capstone.houseviewingapp.data.local.BillingLocalStore
 import com.capstone.houseviewingapp.data.local.HouseLocalStore
+import com.capstone.houseviewingapp.data.local.QuickDiagnosisLocalStore
 import com.capstone.houseviewingapp.databinding.FragmentHomeBinding
 import com.capstone.houseviewingapp.registration.HouseRegistrationActivity
 
@@ -24,6 +27,7 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
     ) { result ->
         if (result.resultCode != Activity.RESULT_OK) return@registerForActivityResult
         loadAndShowCards()
+        refreshQuickDiagnosisBanner()
     }
 
     override fun onCreateView(
@@ -68,6 +72,15 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
             HouseLocalStore.updateHouseDetailById(requireContext(), houseId, updated)
             loadAndShowCards()
         }
+        parentFragmentManager.setFragmentResultListener(
+            PaidQuickDiagnosisDialogFragment.REQUEST_KEY,
+            viewLifecycleOwner
+        ) { _, result ->
+            val shouldContinue = result.getBoolean(PaidQuickDiagnosisDialogFragment.KEY_CONTINUE, false)
+            if (shouldContinue) {
+                openQuickDiagnosisFlow()
+            }
+        }
 
         loadAndShowCards()
 
@@ -80,10 +93,14 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
         // TODO: startButton 경로만 quick 모드=true.
         // TODO: plusHouseButton/onAddClick은 일반 등록 플로우(1->2->3) 유지.
         binding.startButton.setOnClickListener {
-            val intent = Intent(requireContext(), HouseRegistrationActivity::class.java).apply{
-                putExtra(HouseRegistrationActivity.EXTRA_QUICK_DIAGNOSIS_MODE, true)
+            val loginId = AuthTokenLocalStore.getLoginId(requireContext()).orEmpty()
+            val freeUsed = QuickDiagnosisLocalStore.isFreeUsed(requireContext(), loginId)
+            if (freeUsed) {
+                PaidQuickDiagnosisDialogFragment()
+                    .show(parentFragmentManager, "PaidQuickDiagnosisDialog")
+            } else {
+                openQuickDiagnosisFlow()
             }
-            startActivity(intent)
         }
 
     }
@@ -92,8 +109,10 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
     private fun loadAndShowCards() {
         val storedItems = HouseLocalStore.getHouses(requireContext())
         val items = storedItems
+        val isPremium = BillingLocalStore.isPremium(requireContext())
         binding.viewpager.adapter = HouseCardAdapter(
             items,
+            isPremium,
             onDelete = { _, index ->
                 HouseLocalStore.removeHouse(requireContext(), index)
                 loadAndShowCards()
@@ -124,6 +143,25 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
         updateEmptyState(storedItems)
     }
 
+    private fun refreshQuickDiagnosisBanner() {
+        val loginId = AuthTokenLocalStore.getLoginId(requireContext()).orEmpty()
+        val freeUsed = QuickDiagnosisLocalStore.isFreeUsed(requireContext(), loginId)
+        if (freeUsed) {
+            binding.bannerTextView.text = "부동산 안전 진단"
+            binding.startButton.text = "진단하기 ->"
+        } else {
+            binding.bannerTextView.text = "1회 무료 부동산 안전 진단"
+            binding.startButton.text = "무료 진단하기 ->"
+        }
+    }
+
+    private fun openQuickDiagnosisFlow() {
+        val intent = Intent(requireContext(), HouseRegistrationActivity::class.java).apply {
+            putExtra(HouseRegistrationActivity.EXTRA_QUICK_DIAGNOSIS_MODE, true)
+        }
+        startActivity(intent)
+    }
+
     // NOTE : 카드 목록이 비어있는지 여부에 따라 빈 화면과 카드 뷰의 표시 상태를 업데이트하는 함수
     private fun updateEmptyState(items: List<HouseCardItem>) {
         if (items.isEmpty()) {
@@ -137,7 +175,10 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
 
     override fun onResume() {
         super.onResume()
-        if (_binding != null) loadAndShowCards()
+        if (_binding != null) {
+            loadAndShowCards()
+            refreshQuickDiagnosisBanner()
+        }
     }
 
     override fun onDestroyView() {
