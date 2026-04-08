@@ -2,15 +2,35 @@ package com.capstone.houseviewingapp.login
 
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.widget.addTextChangedListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.capstone.houseviewingapp.auth.AuthRepositoryProvider
+import com.capstone.houseviewingapp.auth.model.FindIdRequest
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.databinding.ActivityFindIdBinding
 
 class FindIdActivity : AppCompatActivity() {
     private lateinit var binding : ActivityFindIdBinding
+
+    private fun setConfirmEnabled(enabled: Boolean) {
+        binding.confirmButton.isEnabled = enabled
+        val color = androidx.core.content.ContextCompat.getColor(
+            this,
+            if (enabled) R.color.blue else R.color.icongray
+        )
+        binding.confirmButton.backgroundTintList = android.content.res.ColorStateList.valueOf(color)
+    }
+
+    private fun validateInputs() {
+        val nameOk = binding.nameEditText.text?.toString()?.trim().orEmpty().isNotBlank()
+        val emailOk = binding.emailEditText.text?.toString()?.trim().orEmpty().isNotBlank()
+        setConfirmEnabled(nameOk && emailOk)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         binding = ActivityFindIdBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
@@ -29,12 +49,22 @@ class FindIdActivity : AppCompatActivity() {
 //            startActivity(intent) // NOTE: 이렇게 작성하면 앱 화면이 쌓여서 나중에 오류 생김
             finish()
         }
+        binding.nameEditText.addTextChangedListener { validateInputs() }
+        binding.emailEditText.addTextChangedListener { validateInputs() }
+
         binding.confirmButton.setOnClickListener {
-            // TODO: [백엔드 연동] 나중에 실제 서버 API를 호출해서 아이디를 받아와야 함!
-            // 지금은 테스트용으로 가짜 아이디("capstone123")를 넣어둠
-            val id = "capstone123"
-            val bottomsheet = FindIDResultFragment(id)
-            bottomsheet.show(supportFragmentManager, "FindIDResultTag")
+            val request = FindIdRequest(
+                name = binding.nameEditText.text?.toString()?.trim().orEmpty(),
+                email = binding.emailEditText.text?.toString()?.trim().orEmpty()
+            )
+
+            val result = AuthRepositoryProvider.repository.findId(request)
+            result.onSuccess { res ->
+                FindIDResultFragment(res.loginId).show(supportFragmentManager, "FindIDResultTag")
+            }.onFailure {
+                Toast.makeText(this, "일치하는 계정을 찾지 못했습니다.", Toast.LENGTH_SHORT).show()
+            }
         }
+        validateInputs()
     }
 }
