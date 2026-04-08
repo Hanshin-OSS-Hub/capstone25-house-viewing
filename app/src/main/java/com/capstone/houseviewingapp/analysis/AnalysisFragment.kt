@@ -1,6 +1,7 @@
 package com.capstone.houseviewingapp.analysis
 
 import android.app.AlertDialog
+import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.core.content.ContextCompat
@@ -10,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.data.local.AnalysisLocalStore
 import com.capstone.houseviewingapp.databinding.FragmentAnalysisBinding
+import com.capstone.houseviewingapp.home.PdfViewerActivity
 
 class AnalysisFragment : Fragment(R.layout.fragment_analysis) {
 
@@ -81,18 +83,39 @@ class AnalysisFragment : Fragment(R.layout.fragment_analysis) {
         p.edit().putBoolean("seeded_once", true).apply()
     }
     private fun setupRecycler() {
-        recordAdapter = AnalysisRecordAdapter { item ->
-            AlertDialog.Builder(requireContext())
-                .setTitle("기록 삭제")
-                .setMessage("이 진단 기록을 삭제할까요?")
-                .setPositiveButton("삭제") { _, _ ->
-                    AnalysisLocalStore.removeRecord(requireContext(), item)
-                    allRecords = AnalysisLocalStore.getRecords(requireContext())
-                    applyFilters()
-                }
-                .setNegativeButton("취소", null)
-                .show()
-        }
+        recordAdapter = AnalysisRecordAdapter(
+            onLongClickDelete = { item ->
+                AlertDialog.Builder(requireContext())
+                    .setTitle("기록 삭제")
+                    .setMessage("이 진단 기록을 삭제할까요?")
+                    .setPositiveButton("삭제") { _, _ ->
+                        AnalysisLocalStore.removeRecord(requireContext(), item)
+                        allRecords = AnalysisLocalStore.getRecords(requireContext())
+                        applyFilters()
+                    }
+                    .setNegativeButton("취소", null)
+                    .show()
+            },
+            onDetailClick = { item ->
+                val uri = ReportPdfDummyFactory.createOrGet(requireContext(), item)
+                startActivity(
+                    Intent(requireContext(), PdfViewerActivity::class.java).apply {
+                        putExtra(PdfViewerActivity.EXTRA_URI, uri.toString())
+                        putExtra(PdfViewerActivity.EXTRA_TITLE, "${item.title} 상세 대응 리포트")
+                    }
+                )
+            },
+            onParsedPdfClick = { item ->
+                val uri = ParsedPdfDummyFactory.createOrGet(requireContext(), item)
+                startActivity(
+                    Intent(requireContext(), PdfViewerActivity::class.java).apply {
+                        putExtra(PdfViewerActivity.EXTRA_URI, uri.toString())
+                        putExtra(PdfViewerActivity.EXTRA_TITLE, "${item.title} 파싱 검증 PDF")
+                        putExtra(PdfViewerActivity.EXTRA_SHOW_REPORT_BUTTON, true)
+                    }
+                )
+            }
+        )
         binding.recordRecyclerView.layoutManager = LinearLayoutManager(requireContext())
         binding.recordRecyclerView.adapter = recordAdapter
     }
