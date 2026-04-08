@@ -12,6 +12,8 @@ import android.view.animation.AccelerateDecelerateInterpolator
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.capstone.houseviewingapp.R
+import com.capstone.houseviewingapp.analysis.model.PreContractDiagnosisRequest
+import com.capstone.houseviewingapp.data.local.AuthTokenLocalStore
 import com.capstone.houseviewingapp.databinding.FragmentAnalysisLoadingBinding
 
 class AnalysisLoadingFragment : Fragment() {
@@ -99,13 +101,36 @@ class AnalysisLoadingFragment : Fragment() {
 
             val houses = com.capstone.houseviewingapp.data.local.HouseLocalStore.getHouses(requireContext())
             val primaryHouse = houses.firstOrNull()
+            val manualAddress = arguments?.getString(AnalysisFlow.ARG_ORIGIN_ADDRESS)
+                ?: primaryHouse?.address
+                ?: "주소 수신 대기"
             val level = when (source) {
                 RecordSource.AUTO -> RiskLevel.RED
                 RecordSource.MANUAL -> RiskLevel.AMBER
             }
+            val accessToken = AuthTokenLocalStore.getAccessToken(requireContext()).orEmpty()
+            val downloadUrl = runCatching {
+                when (source) {
+                    RecordSource.MANUAL -> {
+                        val fileUri = arguments?.getString(AnalysisFlow.ARG_SELECTED_FILE_URI).orEmpty()
+                        AnalysisRepositoryProvider.repository.preContractDiagnoses(
+                            accessToken = accessToken,
+                            fileUri = fileUri,
+                            request = PreContractDiagnosisRequest(address = manualAddress)
+                        ).getOrThrow().downloadUrl
+                    }
+                    RecordSource.AUTO -> {
+                        val houseId = primaryHouse?.houseId ?: 1L
+                        AnalysisRepositoryProvider.repository.changeDiagnoses(houseId)
+                            .getOrThrow()
+                            .downloadUrl
+                    }
+                }
+            }.getOrNull()
 
             val manualTitle = arguments?.getString(AnalysisFlow.ARG_HOUSE_NICKNAME)?.trim()?.takeIf { it.isNotBlank() }
                 ?: "무료 1회 진단"
+            val sourcePdfUri = arguments?.getString(AnalysisFlow.ARG_SELECTED_FILE_URI)?.trim()?.ifBlank { null }
             val record = AnalysisRecordItem(
                 title = when (source) {
                     RecordSource.AUTO ->
@@ -117,12 +142,17 @@ class AnalysisLoadingFragment : Fragment() {
                     RecordSource.AUTO ->
                         primaryHouse?.address ?: "등록된 집 정보 없음"
                     RecordSource.MANUAL ->
-                        "주소 수신 대기"
+                        manualAddress
                 },
-                riskSummary = "분석 결과 수신 대기",
+                riskSummary = if (downloadUrl.isNullOrBlank()) {
+                    "분석 결과 수신 대기"
+                } else {
+                    "리포트 생성 완료"
+                },
                 level = level, //TODO: 백엔드에서 실제값 매핑
                 source = source,
-                ltv = null
+                ltv = null,
+                sourcePdfUri = sourcePdfUri
             )
             // TODO(backend): 실제 API 응답값으로 title/address/riskSummary/level/ltv 매핑
             com.capstone.houseviewingapp.data.local.AnalysisLocalStore.addRecord(requireContext(), record)
