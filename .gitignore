@@ -77,3 +77,12 @@ coverage/
 ############################
 node_modules/
 dist/
+
+# Gradle 찌꺼기들 확실히 차단
+.gradle/
+caches/
+daemon/
+native/
+wrapper/
+build/
+out/
