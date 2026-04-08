@@ -1,3 +1,13 @@
+# .gitignore 파일 맨 위에 넣으세요
+/.gradle/
+/build/
+/out/
+/caches/
+/daemon/
+/native/
+/wrapper/
+/.idea/
+
 ############################
 # OS
 ############################
