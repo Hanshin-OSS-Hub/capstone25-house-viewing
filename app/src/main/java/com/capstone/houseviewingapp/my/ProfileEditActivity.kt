@@ -7,6 +7,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.capstone.houseviewingapp.R
+import com.capstone.houseviewingapp.auth.AuthRepositoryProvider
+import com.capstone.houseviewingapp.data.local.AuthTokenLocalStore
+import com.capstone.houseviewingapp.data.local.UserProfileLocalStore
 import com.capstone.houseviewingapp.databinding.ActivityProfileEditBinding
 import com.capstone.houseviewingapp.login.LoginActivity
 
@@ -37,8 +40,13 @@ class ProfileEditActivity : AppCompatActivity() {
     }
 
     fun performLogout() {
-        // TODO: 백엔드 연동 시 서버 로그아웃 API 호출 (토큰 무효화 등)
-        // TODO: 로컬 저장소에서 토큰/세션 삭제 (SharedPreferences 등)
+        val accessToken = AuthTokenLocalStore.getAccessToken(this)
+        if (!accessToken.isNullOrBlank()) {
+            AuthRepositoryProvider.repository.logout(accessToken)
+        }
+        AuthTokenLocalStore.clear(this)
+        UserProfileLocalStore.clear(this)
+
         val intent = Intent(this, LoginActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
