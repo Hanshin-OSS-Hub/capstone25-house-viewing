@@ -111,17 +111,23 @@ class MainActivity : AppCompatActivity() {
             val source = sourceIntent.getStringExtra(EXTRA_ANALYSIS_SOURCE)
                 ?: com.capstone.houseviewingapp.analysis.AnalysisFlow.SOURCE_MANUAL
             val houseNickname = sourceIntent.getStringExtra(com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_HOUSE_NICKNAME)
+            val selectedFileUri = sourceIntent.getStringExtra(com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_SELECTED_FILE_URI)
+            val originAddress = sourceIntent.getStringExtra(com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_ORIGIN_ADDRESS)
 
             navController.navigate(
                 R.id.nav_analysis_loading,
                 androidx.core.os.bundleOf(
                     com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_ANALYSIS_SOURCE to source,
-                    com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_HOUSE_NICKNAME to (houseNickname ?: "")
+                    com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_HOUSE_NICKNAME to (houseNickname ?: ""),
+                    com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_SELECTED_FILE_URI to (selectedFileUri ?: ""),
+                    com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_ORIGIN_ADDRESS to (originAddress ?: "")
                 )
             )
             binding.navigationBar.menu.findItem(R.id.nav_analysis)?.isChecked = true
             sourceIntent.removeExtra(EXTRA_SHOW_ANALYSIS_LOADING)
             sourceIntent.removeExtra(EXTRA_ANALYSIS_SOURCE)
+            sourceIntent.removeExtra(com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_SELECTED_FILE_URI)
+            sourceIntent.removeExtra(com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_ORIGIN_ADDRESS)
         }
 
         // NOTE: 알림 접근 권한 안내 바텀시트 표시
