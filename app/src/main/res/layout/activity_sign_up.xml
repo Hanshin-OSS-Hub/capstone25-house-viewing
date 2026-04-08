@@ -153,6 +153,20 @@
                 />
 
             <TextView
+                android:id="@+id/idStatusTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="6dp"
+                android:fontFamily="@font/pretendard_medium"
+                android:text=""
+                android:textColor="@color/textgray"
+                android:textSize="12sp"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="@id/idTextInputLayout"
+                app:layout_constraintTop_toBottomOf="@id/idTextInputLayout" />
+
+            <TextView
                 android:id="@+id/emailLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -162,7 +176,7 @@
                 android:textColor="@color/textgray"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="@id/nameTextInputLayout"
-                app:layout_constraintTop_toBottomOf="@id/idTextInputLayout"
+                app:layout_constraintTop_toBottomOf="@id/idStatusTextView"
                 android:layout_marginTop="24dp"
                 android:layout_marginStart="4dp"
                 />
@@ -195,6 +209,20 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
+                android:id="@+id/emailStatusTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="6dp"
+                android:fontFamily="@font/pretendard_medium"
+                android:text=""
+                android:textColor="@color/textgray"
+                android:textSize="12sp"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="@id/emailTextInputLayout"
+                app:layout_constraintTop_toBottomOf="@id/emailTextInputLayout" />
+
+            <TextView
                 android:id="@+id/passwordLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -204,7 +232,7 @@
                 android:textColor="@color/textgray"
                 android:textStyle="bold"
                 app:layout_constraintStart_toStartOf="@id/nameTextInputLayout"
-                app:layout_constraintTop_toBottomOf="@id/emailTextInputLayout"
+                app:layout_constraintTop_toBottomOf="@id/emailStatusTextView"
                 android:layout_marginTop="24dp"
                 android:layout_marginStart="4dp"
                 />
@@ -234,6 +262,7 @@
                     android:drawablePadding="12dp"
                     android:drawableTint="@color/icongray"
                     android:includeFontPadding="false"
+                    android:inputType="textPassword"
                     android:hint="8자 이상 입력" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -249,6 +278,7 @@
                 android:layout_marginTop="6dp">
 
                 <ImageView
+                    android:id="@+id/passwordInfoIcon"
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:src="@drawable/baseline_error_24"
@@ -258,10 +288,11 @@
                     />
 
                 <TextView
+                    android:id="@+id/passwordInfoTextView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textColor="@color/textgray"
-                    android:text="영문, 숫자 포함 8장 이상"
+                    android:text="영문, 숫자 포함 8자 이상"
                     android:textSize="13sp"
                     />
             </LinearLayout>
@@ -292,8 +323,8 @@
                 app:layout_constraintTop_toBottomOf="@id/passwordCheckLabel"
                 android:layout_marginTop="10dp"
                 android:layout_marginHorizontal="24dp"
-                app:errorEnabled="true"
-                app:helperTextEnabled="true"
+                app:endIconMode="password_toggle"
+                app:endIconTint="@color/icongray"
 
                 >
 
@@ -307,16 +338,31 @@
                     android:drawablePadding="12dp"
                     android:drawableTint="@color/icongray"
                     android:includeFontPadding="false"
+                    android:inputType="textPassword"
                     android:hint="비밀번호 재입력" />
 
             </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/passwordCheckStatusTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="4dp"
+                android:layout_marginTop="6dp"
+                android:fontFamily="@font/pretendard_medium"
+                android:text=""
+                android:textColor="@color/textgray"
+                android:textSize="12sp"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="@id/passwordCheckTextInputLayout"
+                app:layout_constraintTop_toBottomOf="@id/passwordCheckTextInputLayout" />
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/termsCardView"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 app:layout_constraintStart_toStartOf="@id/passwordCheckTextInputLayout"
-                app:layout_constraintTop_toBottomOf="@id/passwordCheckTextInputLayout"
+                app:layout_constraintTop_toBottomOf="@id/passwordCheckStatusTextView"
                 app:layout_constraintEnd_toEndOf="@id/passwordCheckTextInputLayout"
                 android:layout_marginTop="24dp"
                 app:cardCornerRadius="12dp"
