@@ -41,9 +41,9 @@ public class UserController {
     }
 
     @PostMapping("/password/verify")
-    public ResponseEntity<Boolean> verifyPassword(@Valid @RequestBody UserVerifyPasswordRequest request){
-        boolean verify = userService.passwordVerify(request);
-        return ResponseEntity.ok(verify);
+    public ResponseEntity<String> verifyPassword(@Valid @RequestBody UserVerifyPasswordRequest request){
+        String result = userService.passwordVerify(request);
+        return ResponseEntity.ok(result);
     }
 
     @PatchMapping("/password/reset")
