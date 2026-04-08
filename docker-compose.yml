@@ -21,7 +21,7 @@ services:
       - KAKAO_REST_API_KEY=${KAKAO_REST_API_KEY}
       - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
       - AWS_SECRET_KEY=${AWS_SECRET_KEY}
-      - PYTHON_API_URL=http://host.docker.internal:8000
+      - PYTHON_API_URL=http://python-service:8000
     networks:
       - app-network
 
@@ -69,3 +69,13 @@ networks:
 volumes:
   db-data:
   redis-data:
+
+# Python 서비스 추가 예시:
+#   python-service:
+#     build: ./python
+#     container_name: python-api
+#     restart: unless-stopped
+#     ports:
+#       - "8000:8000"
+#     networks:
+#       - app-network

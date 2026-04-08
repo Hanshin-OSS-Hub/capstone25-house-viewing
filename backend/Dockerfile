@@ -1,16 +1,20 @@
 FROM eclipse-temurin:17-jdk-jammy AS builder
 
+RUN apt-get update && apt-get install -y unzip
+
 WORKDIR /app
 
 COPY build.gradle settings.gradle ./
-COPY gradle ./gradle
-COPY gradlew gradlew.bat ./
 
-RUN chmod +x gradlew && ./gradlew dependencies --no-daemon
+RUN curl -sLO https://services.gradle.org/distributions/gradle-8.5-bin.zip && \
+    unzip -q gradle-8.5-bin.zip && \
+    rm gradle-8.5-bin.zip
+
+ENV PATH="/app/gradle-8.5/bin:${PATH}"
 
 COPY src ./src
 
-RUN ./gradlew clean bootJar -x test --no-daemon
+RUN gradle clean bootJar -x test --no-daemon
 
 FROM eclipse-temurin:17-jre-jammy
 
