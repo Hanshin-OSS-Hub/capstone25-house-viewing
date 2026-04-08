@@ -17,10 +17,18 @@ import androidx.core.widget.addTextChangedListener
 class HouseInfoStep3Fragment : Fragment(R.layout.fragment_house_info_step3) {
     companion object {
         private const val ARG_QUICK_DIAGNOSIS = "arg_quick_diagnosis"
-        fun newInstance(isQuickDiagnosisMode: Boolean): HouseInfoStep3Fragment {
+        /** 빠른 진단에서 Step1에서 닉네임을 이미 받은 경우 Step3에서 닉네임 입력을 숨김 */
+        private const val ARG_SHOW_QUICK_NICKNAME = "arg_show_quick_nickname"
+
+        fun newInstance(
+            isQuickDiagnosisMode: Boolean,
+            showQuickNickname: Boolean = true
+        ): HouseInfoStep3Fragment {
             return HouseInfoStep3Fragment().apply {
-                arguments =
-                    Bundle().apply { putBoolean(ARG_QUICK_DIAGNOSIS, isQuickDiagnosisMode) }
+                arguments = Bundle().apply {
+                    putBoolean(ARG_QUICK_DIAGNOSIS, isQuickDiagnosisMode)
+                    putBoolean(ARG_SHOW_QUICK_NICKNAME, showQuickNickname)
+                }
             }
         }
     }
@@ -52,11 +60,13 @@ class HouseInfoStep3Fragment : Fragment(R.layout.fragment_house_info_step3) {
     ): View {
         _binding = FragmentHouseInfoStep3Binding.inflate(inflater, container, false)
         val isQuickDiagnosis = arguments?.getBoolean(ARG_QUICK_DIAGNOSIS, false) ?: false
-        // 1회 무료 진단(빠른 진단)일 때만 닉네임 등록 영역 표시. 주택 등록 info1→info2→info3 플로우에서는 숨김
+        val showQuickNickname = arguments?.getBoolean(ARG_SHOW_QUICK_NICKNAME, true) ?: true
+        val showNicknameArea = isQuickDiagnosis && showQuickNickname
+        // 빠른 진단 + Step3 단독(구버전)일 때만 닉네임. Step1→Step3 재사용 시에는 Step1에서 닉네임 처리
         binding.step3NicknameAreaWrapper.visibility =
-            if (isQuickDiagnosis) View.VISIBLE else View.GONE
+            if (showNicknameArea) View.VISIBLE else View.GONE
         binding.quickDiagnosisNicknameContainer.visibility =
-            if (isQuickDiagnosis) View.VISIBLE else View.GONE
+            if (showNicknameArea) View.VISIBLE else View.GONE
         return binding.root
     }
 
@@ -85,15 +95,17 @@ class HouseInfoStep3Fragment : Fragment(R.layout.fragment_house_info_step3) {
 
     fun getNicknameOrNull(): String? {
         if (arguments?.getBoolean(ARG_QUICK_DIAGNOSIS, false) != true) return null
+        if (arguments?.getBoolean(ARG_SHOW_QUICK_NICKNAME, true) != true) return null
         return binding.quickNicknameEditText.text?.toString()?.trim()?.takeIf { it.isNotBlank() }
     }
 
     private fun validateAndUpdateNextButton() {
         val hasFile = selectedFileUri != null
         val isQuick = arguments?.getBoolean(ARG_QUICK_DIAGNOSIS, false) ?: false
+        val showQuickNickname = arguments?.getBoolean(ARG_SHOW_QUICK_NICKNAME, true) ?: true
         val nicknameOk =
-            !isQuick || binding.quickNicknameEditText.text?.toString()?.trim().orEmpty()
-                .isNotBlank()
+            !isQuick || !showQuickNickname || binding.quickNicknameEditText.text?.toString()?.trim()
+                .orEmpty().isNotBlank()
         (activity as? HouseRegistrationActivity)?.setNextButtonEnabled(hasFile && nicknameOk)
     }
 
