@@ -37,6 +37,7 @@ object HouseLocalStore {
                 homeName = item.homeName,
                 originAddress = item.address,
                 detailAddress = "",
+                documentUri = null,
                 contractType = "WOLSE",
                 deposit = 0L,
                 monthlyAmount = 0L,
@@ -118,6 +119,7 @@ object HouseLocalStore {
                     homeName = card.homeName,
                     originAddress = card.address,
                     detailAddress = "",
+                    documentUri = null,
                     contractType = "WOLSE",
                     deposit = 0L,
                     monthlyAmount = 0L,
@@ -140,6 +142,7 @@ object HouseLocalStore {
             obj.put("homeName", d.homeName)
             obj.put("originAddress", d.originAddress)
             obj.put("detailAddress", d.detailAddress)
+            if (!d.documentUri.isNullOrBlank()) obj.put("documentUri", d.documentUri)
             obj.put("contractType", d.contractType)
             obj.put("deposit", d.deposit)
             obj.put("monthlyAmount", d.monthlyAmount)
@@ -163,6 +166,7 @@ object HouseLocalStore {
                     homeName = o.getString("homeName"),
                     originAddress = o.optString("originAddress", ""),
                     detailAddress = o.optString("detailAddress", ""),
+                    documentUri = o.optString("documentUri", "").ifBlank { null },
                     contractType = o.optString("contractType", "WOLSE"),
                     deposit = o.optLong("deposit", 0L),
                     monthlyAmount = o.optLong("monthlyAmount", 0L),
