@@ -10,5 +10,6 @@ data class AnalysisRecordItem(
     val riskSummary: String, // 주요 원인
     val level: RiskLevel,
     val source: RecordSource, // 수동 입력인지 자동 분석인지
-    val ltv: Double? = null
+    val ltv: Double? = null,
+    val sourcePdfUri: String? = null
 )
