@@ -30,9 +30,6 @@ spring:
         bucket: house-viewing-storage
       region:
         static: ap-northeast-2
-      credentials:
-        access-key: ${AWS_ACCESS_KEY}
-        secret-key: ${AWS_SECRET_KEY}
       stack:
         auto: false
 
