@@ -14,6 +14,7 @@ import com.capstone.houseviewingapp.databinding.ItemHouseCardBinding
 
 class HouseCardAdapter(
     private val items: List<HouseCardItem>,
+    private val isPremiumUser: Boolean,
     private val onDelete: (HouseCardItem, Int) -> Unit,
     private val onEdit: (HouseCardItem, Int) -> Unit,
     private val onAddClick: () -> Unit,
@@ -67,6 +68,19 @@ class HouseCardAdapter(
             is ViewHolder -> {
                 val item = items[position]
                 with(holder.binding) {
+                    if (isPremiumUser) {
+                        chip.text = "LIVE 감시중"
+                        chip.chipBackgroundColor = android.content.res.ColorStateList.valueOf(
+                            ContextCompat.getColor(root.context, R.color.green)
+                        )
+                        chip.setTextColor(ContextCompat.getColor(root.context, R.color.textgreen))
+                    } else {
+                        chip.text = "실시간 감시 미적용"
+                        chip.chipBackgroundColor = android.content.res.ColorStateList.valueOf(
+                            ContextCompat.getColor(root.context, R.color.risk_amber_bg)
+                        )
+                        chip.setTextColor(ContextCompat.getColor(root.context, R.color.risk_amber_text))
+                    }
                     homeNameText.text = item.homeName
                     addressText.text = item.address
                     progressBar.max = 100
