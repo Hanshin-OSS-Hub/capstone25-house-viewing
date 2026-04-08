@@ -7,14 +7,20 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.text.TextUtils
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.widget.addTextChangedListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.capstone.houseviewingapp.MainActivity
 import com.capstone.houseviewingapp.R
+import com.capstone.houseviewingapp.auth.AuthRepositoryProvider
+import com.capstone.houseviewingapp.auth.model.LoginRequest
+import com.capstone.houseviewingapp.data.local.AuthTokenLocalStore
+import com.capstone.houseviewingapp.data.local.UserProfileLocalStore
 import com.capstone.houseviewingapp.databinding.ActivityLoginBinding
 
 class LoginActivity : AppCompatActivity() {
@@ -24,6 +30,18 @@ class LoginActivity : AppCompatActivity() {
         ActivityResultContracts.RequestPermission()
     ) { isGranted ->
         gotoMain()
+    }
+
+    private fun setLoginEnabled(enabled: Boolean) {
+        binding.loginButton.isEnabled = enabled
+        val color = ContextCompat.getColor(this, if (enabled) R.color.blue else R.color.icongray)
+        binding.loginButton.backgroundTintList = android.content.res.ColorStateList.valueOf(color)
+    }
+
+    private fun validateInputs() {
+        val idOk = binding.idEditText.text?.toString()?.trim().orEmpty().isNotBlank()
+        val pwOk = binding.passwordEditText.text?.toString().orEmpty().isNotBlank()
+        setLoginEnabled(idOk && pwOk)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -48,8 +66,24 @@ class LoginActivity : AppCompatActivity() {
         binding.findPWTextView.setOnClickListener {
             startActivity(Intent(this, FindPasswordActivity::class.java))
         }
+        binding.idEditText.addTextChangedListener { validateInputs() }
+        binding.passwordEditText.addTextChangedListener { validateInputs() }
         binding.loginButton.setOnClickListener {
-            // TODO: DB에 있는 아이디 비번이 맞는지 체크해서 로그인 홈화면으로
+            val request = LoginRequest(
+                loginId = binding.idEditText.text?.toString()?.trim().orEmpty(),
+                password = binding.passwordEditText.text?.toString().orEmpty()
+            )
+            val result = AuthRepositoryProvider.repository.login(request)
+            val token = result.getOrElse {
+                Toast.makeText(this, "로그인에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+            AuthTokenLocalStore.saveTokens(this, token.accessToken, token.refreshToken)
+            AuthTokenLocalStore.saveLoginId(this, request.loginId)
+            AuthRepositoryProvider.repository.me(token.accessToken).getOrNull()?.let { me ->
+                UserProfileLocalStore.save(this, me.name, me.email, me.loginId)
+            }
+
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
                     != PackageManager.PERMISSION_GRANTED
@@ -60,6 +94,7 @@ class LoginActivity : AppCompatActivity() {
             }
             gotoMain()
         }
+        validateInputs()
     }
 
     private fun gotoMain() {
