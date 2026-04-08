@@ -2,6 +2,8 @@ package com.capstone.houseviewingapp.registration
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -10,7 +12,9 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.capstone.houseviewingapp.MainActivity
 import com.capstone.houseviewingapp.R
+import com.capstone.houseviewingapp.data.local.AuthTokenLocalStore
 import com.capstone.houseviewingapp.data.local.HouseLocalStore
+import com.capstone.houseviewingapp.data.local.QuickDiagnosisLocalStore
 import com.capstone.houseviewingapp.data.local.model.HouseDetailItem
 import com.capstone.houseviewingapp.databinding.ActivityHouseRegistrationBinding
 
@@ -25,6 +29,8 @@ class HouseRegistrationActivity : AppCompatActivity() {
     private val vm: HouseRegistrationViewModel by viewModels()
     private var currentStep = 1 // TODO: 현재 단계에 따라 이 값을 업데이트
     private var isQuickDiagnosisMode = false
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private var pendingFinalizeRunnable: Runnable? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,15 +49,27 @@ class HouseRegistrationActivity : AppCompatActivity() {
         }
 
         if (savedInstanceState == null) {
-            if(isQuickDiagnosisMode) {
-                currentStep = 3
+            if (isQuickDiagnosisMode) {
+                // 빠른 진단: 기존 Step1(주소·닉네임) → Step3(PDF만), Step2(계약) 생략
+                currentStep = 1
                 supportFragmentManager.beginTransaction()
-                    .replace(R.id.registerationFragmentContainer, HouseInfoStep3Fragment.newInstance(true))
+                    .replace(R.id.registerationFragmentContainer, HouseInfoStep1Fragment())
                     .commit()
             } else {
                 supportFragmentManager.beginTransaction()
                     .replace(R.id.registerationFragmentContainer, HouseInfoStep1Fragment())
                     .commit()
+            }
+            updateStepUi()
+        }
+
+        supportFragmentManager.addOnBackStackChangedListener {
+            val top = supportFragmentManager.findFragmentById(R.id.registerationFragmentContainer)
+            currentStep = when (top) {
+                is HouseInfoStep1Fragment -> 1
+                is HouseInfoStep2Fragment -> 2
+                is HouseInfoStep3Fragment -> 3
+                else -> currentStep
             }
             updateStepUi()
         }
@@ -72,11 +90,25 @@ class HouseRegistrationActivity : AppCompatActivity() {
                     detailAddress = input.detailAddress
                 )
 
-                supportFragmentManager.beginTransaction()
-                    .replace(R.id.registerationFragmentContainer, HouseInfoStep2Fragment())
-                    .addToBackStack(null)
-                    .commit()
-                currentStep = 2
+                if (isQuickDiagnosisMode) {
+                    supportFragmentManager.beginTransaction()
+                        .replace(
+                            R.id.registerationFragmentContainer,
+                            HouseInfoStep3Fragment.newInstance(
+                                isQuickDiagnosisMode = true,
+                                showQuickNickname = false
+                            )
+                        )
+                        .addToBackStack(null)
+                        .commit()
+                    currentStep = 3
+                } else {
+                    supportFragmentManager.beginTransaction()
+                        .replace(R.id.registerationFragmentContainer, HouseInfoStep2Fragment())
+                        .addToBackStack(null)
+                        .commit()
+                    currentStep = 2
+                }
             } else if (currentStep == 2) {
                 val step2 = supportFragmentManager
                     .findFragmentById(R.id.registerationFragmentContainer) as? HouseInfoStep2Fragment
@@ -105,12 +137,28 @@ class HouseRegistrationActivity : AppCompatActivity() {
                     return@setOnClickListener
                 }
                 if (isQuickDiagnosisMode) {
-                    val nickname = step3.getNicknameOrNull().orEmpty()
+                    val nickname = step3.getNicknameOrNull()
+                        ?: vm.draft.value.nickname.trim()
+                    val selectedFileUri = step3.getSelectedFileUriString().orEmpty()
+                    val originAddress = vm.draft.value.originAddress
+                    val loginId = AuthTokenLocalStore.getLoginId(this).orEmpty()
+                    QuickDiagnosisLocalStore.markFreeUsed(this, loginId)
                     val intent = Intent(this, MainActivity::class.java).apply {
                         flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                         putExtra(MainActivity.EXTRA_SHOW_ANALYSIS_LOADING, true)
                         putExtra(MainActivity.EXTRA_ANALYSIS_SOURCE, com.capstone.houseviewingapp.analysis.AnalysisFlow.SOURCE_MANUAL)
-                        putExtra(com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_HOUSE_NICKNAME, nickname)
+                        putExtra(
+                            com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_HOUSE_NICKNAME,
+                            nickname
+                        )
+                        putExtra(
+                            com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_SELECTED_FILE_URI,
+                            selectedFileUri
+                        )
+                        putExtra(
+                            com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_ORIGIN_ADDRESS,
+                            originAddress
+                        )
                     }
                     startActivity(intent)
                     finish()
@@ -120,42 +168,23 @@ class HouseRegistrationActivity : AppCompatActivity() {
                 // 기존 집 등록 플로우
                 vm.updateStep3(step3.getSelectedFileUriString())
                 val draft = vm.draft.value
-
-                // NOTE : 시간 대신 로컬 목록 기준 다음 ID 생성
-                val nextHouseId = HouseLocalStore.getHouseSummaries(this)
-                    .mapNotNull { it.houseId }
-                    .maxOrNull()
-                    ?.plus(1L) ?: 1L
-                val detailItem = HouseDetailItem(
-                    houseId = nextHouseId,
-                    homeName = draft.nickname,
-                    originAddress = draft.originAddress,
-                    detailAddress = draft.detailAddress,
-                    contractType = draft.contractType.name,
-                    deposit = draft.deposit,
-                    monthlyAmount = draft.monthlyAmount,
-                    maintenanceFee = draft.maintenanceFee,
-                    moveDate = draft.moveDate,
-                    confirmDate = draft.confirmDate,
-                    ltv = null
-                )
-                HouseLocalStore.addHouseDetail(this, detailItem)
-                setResult(RESULT_OK)
-                finish()
+                startHouseRegisterParsingFlow(draft)
             }
             updateStepUi()
         }
 
         binding.backButton.setOnClickListener {
             if (isQuickDiagnosisMode) {
-                finish()
+                if (supportFragmentManager.backStackEntryCount > 0) {
+                    supportFragmentManager.popBackStack()
+                } else {
+                    finish()
+                }
                 return@setOnClickListener
             }
 
             if (supportFragmentManager.backStackEntryCount > 0) {
                 supportFragmentManager.popBackStack()
-                currentStep = (currentStep - 1).coerceAtLeast(1)
-                updateStepUi()
             } else {
                 finish()
             }
@@ -165,11 +194,28 @@ class HouseRegistrationActivity : AppCompatActivity() {
 
     private fun updateStepUi() {
         if (isQuickDiagnosisMode) {
-            binding.registrationProgressBar.visibility = View.GONE
-            binding.stepTextView.visibility = View.GONE
+            binding.registrationProgressBar.visibility = View.VISIBLE
+            binding.registrationProgressBar.max = 100
+            binding.stepTextView.visibility = View.VISIBLE
             binding.toolBarTextView.text = "빠른 진단"
-            binding.nextButton.text = "분석 시작"
-            setNextButtonEnabled(false) // Step3에서 파일 선택 시 Fragment가 true로 바꿔줌
+            when (currentStep) {
+                1 -> {
+                    binding.stepTextView.text = "1 / 2 단계"
+                    binding.registrationProgressBar.progress = 50
+                    binding.nextButton.text = "다음"
+                    // Step1에서 입력 유효성에 따라 버튼 활성화
+                }
+                3 -> {
+                    binding.stepTextView.text = "2 / 2 단계"
+                    binding.registrationProgressBar.progress = 100
+                    binding.nextButton.text = "분석 시작"
+                    setNextButtonEnabled(false) // Step3에서 PDF 선택 시 활성화
+                }
+                else -> {
+                    binding.stepTextView.text = ""
+                    binding.nextButton.text = "다음"
+                }
+            }
             return
         }
 
@@ -209,5 +255,47 @@ class HouseRegistrationActivity : AppCompatActivity() {
 
         binding.nextButton.backgroundTintList =
             android.content.res.ColorStateList.valueOf(colorInt) // 버튼 배경 색상 변경
+    }
+
+    private fun startHouseRegisterParsingFlow(draft: HouseRegistrationDraft) {
+        if (pendingFinalizeRunnable != null) return
+        setNextButtonEnabled(false)
+        RegistrationParsingDialogFragment()
+            .show(supportFragmentManager, RegistrationParsingDialogFragment.TAG)
+
+        // NOTE: 백엔드 OCR 파싱 대기 구간 시뮬레이션 (약 10초)
+        val runnable = Runnable {
+            val nextHouseId = HouseLocalStore.getHouseSummaries(this)
+                .mapNotNull { it.houseId }
+                .maxOrNull()
+                ?.plus(1L) ?: 1L
+            val detailItem = HouseDetailItem(
+                houseId = nextHouseId,
+                homeName = draft.nickname,
+                originAddress = draft.originAddress,
+                detailAddress = draft.detailAddress,
+                documentUri = draft.documentUri,
+                contractType = draft.contractType.name,
+                deposit = draft.deposit,
+                monthlyAmount = draft.monthlyAmount,
+                maintenanceFee = draft.maintenanceFee,
+                moveDate = draft.moveDate,
+                confirmDate = draft.confirmDate,
+                ltv = null
+            )
+            HouseLocalStore.addHouseDetail(this, detailItem)
+            (supportFragmentManager.findFragmentByTag(RegistrationParsingDialogFragment.TAG) as? RegistrationParsingDialogFragment)
+                ?.dismissAllowingStateLoss()
+            setResult(RESULT_OK)
+            finish()
+        }
+        pendingFinalizeRunnable = runnable
+        mainHandler.postDelayed(runnable, 10_000L)
+    }
+
+    override fun onDestroy() {
+        pendingFinalizeRunnable?.let { mainHandler.removeCallbacks(it) }
+        pendingFinalizeRunnable = null
+        super.onDestroy()
     }
 }
