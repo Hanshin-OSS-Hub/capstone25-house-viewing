@@ -27,7 +27,7 @@
             android:layout_marginTop="10dp"
             app:chipBackgroundColor="@color/green"
             app:chipCornerRadius="14dp"
-            app:chipStrokeColor="@color/green"
+            app:chipStrokeWidth="0dp"
             android:focusable="false"
             android:clickable="false"
             app:layout_constraintStart_toStartOf="parent"
