@@ -139,32 +139,15 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/detailButton"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="42dp"
-                android:layout_weight="1"
-                android:text="대응 리포트"
+                android:text="상세 리포트 확인"
                 android:textColor="@color/blue"
-                android:textSize="14sp"
+                android:textSize="15sp"
                 app:backgroundTint="@android:color/transparent"
-                app:cornerRadius="20dp"
+                app:cornerRadius="24dp"
                 app:strokeColor="@color/blue"
                 app:strokeWidth="1dp" />
-
-            <Space
-                android:layout_width="8dp"
-                android:layout_height="1dp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/parsedPdfButton"
-                android:layout_width="0dp"
-                android:layout_height="42dp"
-                android:layout_weight="1"
-                android:text="파싱 검증"
-                android:textColor="@color/white"
-                android:textSize="14sp"
-                app:backgroundTint="@color/blue"
-                app:cornerRadius="20dp"
-                app:strokeWidth="0dp" />
         </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>
