@@ -104,32 +104,34 @@ class AnalysisLoadingFragment : Fragment() {
             val manualAddress = arguments?.getString(AnalysisFlow.ARG_ORIGIN_ADDRESS)
                 ?: primaryHouse?.address
                 ?: "주소 수신 대기"
+            val manualTitle = arguments?.getString(AnalysisFlow.ARG_HOUSE_NICKNAME)?.trim()?.takeIf { it.isNotBlank() }
+                ?: "무료 1회 진단"
             val level = when (source) {
                 RecordSource.AUTO -> RiskLevel.RED
                 RecordSource.MANUAL -> RiskLevel.AMBER
             }
             val accessToken = AuthTokenLocalStore.getAccessToken(requireContext()).orEmpty()
-            val downloadUrl = runCatching {
+            val analysisPdf = runCatching {
                 when (source) {
                     RecordSource.MANUAL -> {
                         val fileUri = arguments?.getString(AnalysisFlow.ARG_SELECTED_FILE_URI).orEmpty()
                         AnalysisRepositoryProvider.repository.preContractDiagnoses(
                             accessToken = accessToken,
                             fileUri = fileUri,
-                            request = PreContractDiagnosisRequest(address = manualAddress)
-                        ).getOrThrow().downloadUrl
+                            request = PreContractDiagnosisRequest(
+                                nickname = manualTitle,
+                                address = manualAddress
+                            )
+                        ).getOrThrow()
                     }
                     RecordSource.AUTO -> {
                         val houseId = primaryHouse?.houseId ?: 1L
                         AnalysisRepositoryProvider.repository.changeDiagnoses(houseId)
                             .getOrThrow()
-                            .downloadUrl
                     }
                 }
             }.getOrNull()
 
-            val manualTitle = arguments?.getString(AnalysisFlow.ARG_HOUSE_NICKNAME)?.trim()?.takeIf { it.isNotBlank() }
-                ?: "무료 1회 진단"
             val sourcePdfUri = arguments?.getString(AnalysisFlow.ARG_SELECTED_FILE_URI)?.trim()?.ifBlank { null }
             val record = AnalysisRecordItem(
                 title = when (source) {
@@ -144,15 +146,15 @@ class AnalysisLoadingFragment : Fragment() {
                     RecordSource.MANUAL ->
                         manualAddress
                 },
-                riskSummary = if (downloadUrl.isNullOrBlank()) {
+                riskSummary = if (analysisPdf == null) {
                     "분석 결과 수신 대기"
                 } else {
-                    "리포트 생성 완료"
+                    "리포트 생성 완료 (#${analysisPdf.pdfReportId})"
                 },
                 level = level, //TODO: 백엔드에서 실제값 매핑
                 source = source,
                 ltv = null,
-                sourcePdfUri = sourcePdfUri
+                sourcePdfUri = sourcePdfUri ?: analysisPdf?.filePath
             )
             // TODO(backend): 실제 API 응답값으로 title/address/riskSummary/level/ltv 매핑
             com.capstone.houseviewingapp.data.local.AnalysisLocalStore.addRecord(requireContext(), record)
