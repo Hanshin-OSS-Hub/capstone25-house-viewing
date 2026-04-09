@@ -102,15 +102,6 @@ class AnalysisFragment : Fragment(R.layout.fragment_analysis) {
                     Intent(requireContext(), PdfViewerActivity::class.java).apply {
                         putExtra(PdfViewerActivity.EXTRA_URI, uri.toString())
                         putExtra(PdfViewerActivity.EXTRA_TITLE, "${item.title} 상세 대응 리포트")
-                    }
-                )
-            },
-            onParsedPdfClick = { item ->
-                val uri = ParsedPdfDummyFactory.createOrGet(requireContext(), item)
-                startActivity(
-                    Intent(requireContext(), PdfViewerActivity::class.java).apply {
-                        putExtra(PdfViewerActivity.EXTRA_URI, uri.toString())
-                        putExtra(PdfViewerActivity.EXTRA_TITLE, "${item.title} 파싱 검증 PDF")
                         putExtra(PdfViewerActivity.EXTRA_SHOW_REPORT_BUTTON, true)
                     }
                 )
