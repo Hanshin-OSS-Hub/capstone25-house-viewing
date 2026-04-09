@@ -9,8 +9,7 @@ import com.capstone.houseviewingapp.databinding.ItemAnalysisRecordBinding
 
 class AnalysisRecordAdapter(
     private val onLongClickDelete: (item: AnalysisRecordItem) -> Unit,
-    private val onDetailClick: (item: AnalysisRecordItem) -> Unit,
-    private val onParsedPdfClick: (item: AnalysisRecordItem) -> Unit
+    private val onDetailClick: (item: AnalysisRecordItem) -> Unit
 ) : RecyclerView.Adapter<AnalysisRecordAdapter.RecordVH>() {
     private data class UiSpec(
         val badgeText: String,
@@ -93,9 +92,8 @@ class AnalysisRecordAdapter(
             binding.riskIconView.setColorFilter(c)
 
             binding.scoreTextView.text = item.ltv?.toInt()?.let { "${it}점" } ?: "--점"
-            binding.detailButton.text = "대응 리포트"
+            binding.detailButton.text = "상세 리포트 확인"
             binding.detailButton.setOnClickListener { onDetailClick(item) }
-            binding.parsedPdfButton.setOnClickListener { onParsedPdfClick(item) }
         }
     }
 }
