@@ -14,7 +14,12 @@ import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.databinding.ActivityResetPasswordBinding
 
 class ResetPasswordActivity : AppCompatActivity() {
+    companion object {
+        const val EXTRA_RESET_TOKEN = "extra_reset_token"
+    }
+
     private lateinit var binding: ActivityResetPasswordBinding
+    private var resetToken: String = ""
 
     private fun setConfirmEnabled(enabled: Boolean) {
         binding.confirmButton.isEnabled = enabled
@@ -42,6 +47,12 @@ class ResetPasswordActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         binding = ActivityResetPasswordBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
+        resetToken = intent.getStringExtra(EXTRA_RESET_TOKEN).orEmpty()
+        if (resetToken.isBlank()) {
+            Toast.makeText(this, "인증 정보가 없습니다. 비밀번호 찾기부터 다시 진행해 주세요.", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
         enableEdgeToEdge()
         setContentView(binding.root)
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
@@ -58,6 +69,7 @@ class ResetPasswordActivity : AppCompatActivity() {
         //NOTE : 비밀번호 변경 완료 버튼
         binding.confirmButton.setOnClickListener {
             val request = ResetPasswordRequest(
+                resetToken = resetToken,
                 password = binding.passwordEditText.text?.toString().orEmpty()
             )
             val result = AuthRepositoryProvider.repository.resetPassword(request)
