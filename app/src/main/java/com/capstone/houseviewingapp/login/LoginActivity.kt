@@ -32,16 +32,21 @@ class LoginActivity : AppCompatActivity() {
         gotoMain()
     }
 
-    private fun setLoginEnabled(enabled: Boolean) {
-        binding.loginButton.isEnabled = enabled
-        val color = ContextCompat.getColor(this, if (enabled) R.color.blue else R.color.icongray)
-        binding.loginButton.backgroundTintList = android.content.res.ColorStateList.valueOf(color)
-    }
+    private fun validateRequiredInputs(): Boolean {
+        val loginId = binding.idEditText.text?.toString()?.trim().orEmpty()
+        val password = binding.passwordEditText.text?.toString().orEmpty()
 
-    private fun validateInputs() {
-        val idOk = binding.idEditText.text?.toString()?.trim().orEmpty().isNotBlank()
-        val pwOk = binding.passwordEditText.text?.toString().orEmpty().isNotBlank()
-        setLoginEnabled(idOk && pwOk)
+        if (loginId.isBlank()) {
+            binding.idTextInputLayout.error = "아이디를 입력해주세요."
+            binding.idEditText.requestFocus()
+            return false
+        }
+        if (password.isBlank()) {
+            binding.passwordTextInputLayout.error = "비밀번호를 입력해주세요."
+            binding.passwordEditText.requestFocus()
+            return false
+        }
+        return true
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,9 +71,19 @@ class LoginActivity : AppCompatActivity() {
         binding.findPWTextView.setOnClickListener {
             startActivity(Intent(this, FindPasswordActivity::class.java))
         }
-        binding.idEditText.addTextChangedListener { validateInputs() }
-        binding.passwordEditText.addTextChangedListener { validateInputs() }
+        binding.idEditText.addTextChangedListener {
+            if (binding.idEditText.text?.toString()?.trim().orEmpty().isNotBlank()) {
+                binding.idTextInputLayout.error = null
+            }
+        }
+        binding.passwordEditText.addTextChangedListener {
+            if (binding.passwordEditText.text?.toString().orEmpty().isNotBlank()) {
+                binding.passwordTextInputLayout.error = null
+            }
+        }
         binding.loginButton.setOnClickListener {
+            if (!validateRequiredInputs()) return@setOnClickListener
+
             val request = LoginRequest(
                 loginId = binding.idEditText.text?.toString()?.trim().orEmpty(),
                 password = binding.passwordEditText.text?.toString().orEmpty()
@@ -94,7 +109,10 @@ class LoginActivity : AppCompatActivity() {
             }
             gotoMain()
         }
-        validateInputs()
+        binding.loginButton.isEnabled = true
+        binding.loginButton.backgroundTintList = android.content.res.ColorStateList.valueOf(
+            ContextCompat.getColor(this, R.color.blue)
+        )
     }
 
     private fun gotoMain() {
