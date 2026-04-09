@@ -9,7 +9,6 @@ import androidx.core.widget.addTextChangedListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.capstone.houseviewingapp.auth.AuthRepositoryProvider
-import com.capstone.houseviewingapp.auth.model.FindIdRequest
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.databinding.ActivityFindPasswordBinding
 
@@ -54,22 +53,24 @@ class FindPasswordActivity : AppCompatActivity() {
         binding.emailEditText.addTextChangedListener { validateInputs() }
 
         binding.confirmButton.setOnClickListener {
-            val request = FindIdRequest(
-                name = binding.nameEditText.text?.toString()?.trim().orEmpty(),
-                email = binding.emailEditText.text?.toString()?.trim().orEmpty()
-            )
+            val inputName = binding.nameEditText.text?.toString()?.trim().orEmpty()
+            val inputEmail = binding.emailEditText.text?.toString()?.trim().orEmpty()
             val inputLoginId = binding.idEditText.text?.toString()?.trim().orEmpty()
 
-            val result = AuthRepositoryProvider.repository.findId(request)
-            result.onSuccess { res ->
-                if (res.loginId == inputLoginId) {
-                    startActivity(Intent(this, ResetPasswordActivity::class.java))
-                } else {
-                    Toast.makeText(this, "입력한 아이디 정보가 일치하지 않습니다.", Toast.LENGTH_SHORT).show()
-                }
+            val result = AuthRepositoryProvider.repository.issueResetToken(
+                loginId = inputLoginId,
+                name = inputName,
+                email = inputEmail
+            )
+            result.onSuccess { resetToken ->
+                startActivity(
+                    Intent(this, ResetPasswordActivity::class.java).apply {
+                        putExtra(ResetPasswordActivity.EXTRA_RESET_TOKEN, resetToken)
+                    }
+                )
             }.onFailure {
-                Toast.makeText(this, "일치하는 계정을 찾지 못했습니다.", Toast.LENGTH_SHORT).show()
-            }
+                Toast.makeText(this, "입력 정보가 일치하지 않습니다.", Toast.LENGTH_SHORT).show()
+                }
         }
         validateInputs()
     }
