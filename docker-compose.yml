@@ -1,7 +1,6 @@
 services:
   app:
     build: ./backend
-    container_name: house-viewing-server
     restart: unless-stopped
     depends_on:
       db:
@@ -27,7 +26,6 @@ services:
 
   db:
     image: mysql:8.0
-    container_name: mysql-house-viewing
     restart: unless-stopped
     environment:
       MYSQL_ROOT_PASSWORD: 1234
@@ -47,7 +45,6 @@ services:
 
   redis:
     image: redis:7-alpine
-    container_name: house-viewing-redis
     restart: unless-stopped
     ports:
       - "6379:6379"
