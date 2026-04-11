@@ -41,10 +41,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         String token = null;
         String loginId = null;
 
-        try{
-            if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")){
-                token = authorizationHeader.substring(7);
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")){
+            token = authorizationHeader.substring(7);
 
+            try {
                 if(tokenBlacklistService.isBlacklisted(token)){
                     writeErrorResponse(response, ExceptionCode.INVALID_TOKEN);
                     return;
@@ -52,26 +52,29 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 jwtTokenProvider.validateToken(token);
                 loginId = jwtTokenProvider.getLoginId(token);
+            } catch (Exception e){
+                log.error("Token validation failed: ", e);
+                writeErrorResponse(response, ExceptionCode.INVALID_TOKEN);
+                return;
             }
-            if (loginId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = customUserDetailsService.loadUserByUsername(loginId);
-
-                UsernamePasswordAuthenticationToken authenticationToken =
-                        new UsernamePasswordAuthenticationToken(
-                                userDetails,
-                                null,
-                                userDetails.getAuthorities()
-                        );
-                authenticationToken.setDetails(
-                        new WebAuthenticationDetailsSource().buildDetails(request)
-                );
-                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-            }
-            filterChain.doFilter(request, response);
-        } catch (Exception e){
-            log.error("Token validation failed: ", e); // 에러 원인을 콘솔에 상세히 찍어줌
-            writeErrorResponse(response, ExceptionCode.INVALID_TOKEN);
         }
+
+        if (loginId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            UserDetails userDetails = customUserDetailsService.loadUserByUsername(loginId);
+
+            UsernamePasswordAuthenticationToken authenticationToken =
+                    new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+            authenticationToken.setDetails(
+                    new WebAuthenticationDetailsSource().buildDetails(request)
+            );
+            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+        }
+
+        filterChain.doFilter(request, response);
     }
 
     private void writeErrorResponse(HttpServletResponse response, ExceptionCode exceptionCode) throws IOException {

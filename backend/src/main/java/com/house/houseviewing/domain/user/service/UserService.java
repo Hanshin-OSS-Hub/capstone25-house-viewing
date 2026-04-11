@@ -27,6 +27,8 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class UserService {
 
+    private static final String PASSWORD_RESET_PREFIX = "PW_RESET_ALLOWED:";
+
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final StringRedisTemplate stringRedisTemplate;
@@ -66,7 +68,7 @@ public class UserService {
                 .orElseThrow(() -> new AppException(ExceptionCode.VERIFY_PASSWORD_FAILED));
         String resetToken = UUID.randomUUID().toString();
 
-        String key = "PW_RESET_TOKEN:" + resetToken;
+        String key = PASSWORD_RESET_PREFIX + resetToken;
         stringRedisTemplate.opsForValue().set(key, user.getLoginId(), Duration.ofMinutes(5));
 
         return resetToken;
@@ -74,7 +76,7 @@ public class UserService {
 
     @Transactional
     public void passwordReset(UserResetPasswordRequest request){
-        String key = "PW_RESET_ALLOWED:" + request.getRefreshToken();
+        String key = PASSWORD_RESET_PREFIX + request.getRefreshToken();
         String loginId = stringRedisTemplate.opsForValue().get(key);
 
         if(loginId == null){

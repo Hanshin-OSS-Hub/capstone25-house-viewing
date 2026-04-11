@@ -2,6 +2,7 @@ package com.house.houseviewing.domain.user;
 
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.dto.request.UserFindIdRequest;
+import com.house.houseviewing.domain.user.dto.request.UserResetPasswordRequest;
 import com.house.houseviewing.domain.user.dto.request.UserVerifyPasswordRequest;
 import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;
 import com.house.houseviewing.domain.user.repository.UserRepository;
@@ -11,6 +12,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -22,6 +24,8 @@ public class UserServiceIntegrationTest {
     @Autowired UserService userService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Test
     @DisplayName("회원가입")
@@ -55,6 +59,26 @@ public class UserServiceIntegrationTest {
                 .build();
         String result = userService.passwordVerify(request);
         assertThat(result).isNotNull();
+    }
+
+    @Test
+    @DisplayName("비밀번호 재설정")
+    void 비밀번호_재설정(){
+        UserEntity user = getUserEntity();
+        String resetToken = userService.passwordVerify(UserVerifyPasswordRequest.builder()
+                .email(user.getEmail())
+                .loginId(user.getLoginId())
+                .name(user.getName())
+                .build());
+
+        userService.passwordReset(UserResetPasswordRequest.builder()
+                .refreshToken(resetToken)
+                .newPassword("new-password123")
+                .confirmPassword("new-password123")
+                .build());
+
+        UserEntity updated = userRepository.findByLoginId(user.getLoginId()).orElseThrow();
+        assertThat(passwordEncoder.matches("new-password123", updated.getPassword())).isTrue();
     }
 
     @Test

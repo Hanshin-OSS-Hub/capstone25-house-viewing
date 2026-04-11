@@ -1,6 +1,7 @@
 package com.house.houseviewing.domain.user;
 
 import com.house.houseviewing.domain.user.dto.request.UserFindIdRequest;
+import com.house.houseviewing.domain.user.dto.request.UserResetPasswordRequest;
 import com.house.houseviewing.domain.user.dto.request.UserVerifyPasswordRequest;
 import com.house.houseviewing.domain.user.dto.request.UserRegisterRequest;
 import com.house.houseviewing.domain.user.dto.response.UserFindIdResponse;
@@ -161,6 +162,27 @@ class UserServiceTest {
                     .isInstanceOf(AppException.class)
                     .extracting("exceptionCode")
                     .isEqualTo(ExceptionCode.VERIFY_PASSWORD_FAILED);
+        }
+
+        @Test
+        @DisplayName("재설정 성공")
+        void 재설정_성공(){
+            UserEntity user = UserFixture.createDefault().build();
+            UserResetPasswordRequest request = UserResetPasswordRequest.builder()
+                    .refreshToken("reset-token")
+                    .newPassword("new-password123")
+                    .confirmPassword("new-password123")
+                    .build();
+
+            given(stringRedisTemplate.opsForValue()).willReturn(valueOperations);
+            given(valueOperations.get("PW_RESET_ALLOWED:reset-token")).willReturn(user.getLoginId());
+            given(userRepository.findByLoginId(user.getLoginId())).willReturn(Optional.of(user));
+            given(passwordEncoder.encode("new-password123")).willReturn("encoded-new-password");
+
+            userService.passwordReset(request);
+
+            then(stringRedisTemplate).should().delete("PW_RESET_ALLOWED:reset-token");
+            assertThat(user.getPassword()).isEqualTo("encoded-new-password");
         }
     }
 
