@@ -57,6 +57,12 @@ out/
 .vscode/
 
 ############################
+# Android SDK (로컬 경로)
+############################
+local.properties
+**/local.properties
+
+############################
 # Environment / Secrets
 ############################
 .env
@@ -94,5 +100,8 @@ caches/
 daemon/
 native/
 wrapper/
+# Android 앱 모듈 Gradle wrapper는 저장소에 포함 (위 wrapper/ 예외)
+!app/gradle/wrapper/
+!app/gradle/wrapper/**
 build/
 out/
