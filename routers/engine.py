@@ -11,13 +11,13 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
 
 from dto import (
-    GeneratePdfRequest, GenerateDiffPdfRequest, GenerateVerifyPdfRequest,
+    GeneratePdfRequest, GenerateDiffPdfRequest,
     RiskAnalysisRequest, RecoveryRenderData,
 )
 from html_generator import generate_html_report
 from recovery_html_generator import generate_recovery_html_report
 from diff_html_generator import generate_diff_html_report
-from verification_html_generator import generate_verification_html_report
+from verification_html_generator import build_snapshot_page
 
 router = APIRouter(prefix="/engine", tags=["Engine"])
 
@@ -170,6 +170,11 @@ async def generate_pdf(request: GeneratePdfRequest) -> Response:
             if "429" in err or "RESOURCE_EXHAUSTED" in err:
                 raise HTTPException(status_code=429, detail="AI API 호출 한도 초과. 잠시 후 다시 시도하세요.")
             raise HTTPException(status_code=503, detail=f"보고서 HTML 생성 실패: {err}")
+        # 마지막 페이지에 OCR 파싱 데이터 요약 추가
+        snapshot = raw.get("snapshot") or {}
+        if snapshot:
+            snap_page = build_snapshot_page(snapshot)
+            html_content = html_content.replace("</body>", f"{snap_page}</body>")
         filename = f"report_{render_data.user_name}.pdf"
 
     ai_time   = time.perf_counter() - t0
@@ -228,52 +233,6 @@ async def generate_diff_pdf(request: GenerateDiffPdfRequest) -> Response:
         media_type="application/pdf",
         headers={
             "Content-Disposition": f"attachment; filename=\"diff_report.pdf\"; filename*=UTF-8''{encoded_name}",
-            "Content-Length": str(len(pdf_bytes)),
-        },
-    )
-
-
-@router.post(
-    "/generate-pdf/verify",
-    summary="OCR 파싱 검증 PDF 생성",
-    description=(
-        "원본 등기부등본 이미지와 OCR 파싱 결과를 나란히 배치한 검증용 PDF를 반환합니다.\n\n"
-        "`rawData`는 `/engine/analyze` 응답값을 그대로 전달하면 됩니다 (image_files 포함)."
-    ),
-    responses={
-        200: {"content": {"application/pdf": {}}, "description": "검증 PDF 파일 반환"},
-        422: {"description": "rawData 형식 오류"},
-        500: {"description": "PDF 변환 실패"},
-    },
-)
-async def generate_verify_pdf(request: GenerateVerifyPdfRequest) -> Response:
-    try:
-        raw: dict = json_lib.loads(request.rawData)
-    except ValueError:
-        raise HTTPException(status_code=422, detail="rawData가 유효한 JSON 문자열이 아닙니다.")
-
-    snapshot    = raw.get("snapshot") or {}
-    image_files = raw.get("image_files") or []
-
-    missing = [p for p in image_files if not os.path.exists(p)]
-    if missing:
-        raise HTTPException(
-            status_code=422,
-            detail=f"이미지 파일을 찾을 수 없습니다: {missing}",
-        )
-
-    try:
-        html_content = generate_verification_html_report(snapshot, image_files)
-    except Exception as e:
-        raise HTTPException(status_code=503, detail=f"검증 보고서 HTML 생성 실패: {e}")
-
-    pdf_bytes    = _pdf_bytes(html_content)
-    encoded_name = quote(f"verify_{request.snapshotName}.pdf", safe="")
-    return Response(
-        content=pdf_bytes,
-        media_type="application/pdf",
-        headers={
-            "Content-Disposition": f"attachment; filename=\"verify_report.pdf\"; filename*=UTF-8''{encoded_name}",
             "Content-Length": str(len(pdf_bytes)),
         },
     )

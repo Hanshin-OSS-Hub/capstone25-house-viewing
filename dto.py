@@ -77,15 +77,6 @@ class GenerateDiffPdfRequest(BaseModel):
     confirmDate: str = Field(..., description="확정일자 (YYYY-MM-DD)")
 
 
-class GenerateVerifyPdfRequest(BaseModel):
-    """OCR 검증 PDF 생성 DTO (Java 서버 → FastAPI)
-
-    /engine/analyze 응답의 rawData를 그대로 전달.
-    rawData 내 image_files 필드에서 이미지 경로를 추출한다.
-    """
-    snapshotName: str = Field(..., description="등기부 제목/파일명")
-    rawData: str = Field(..., description="분석 원본 데이터 JSON 문자열 (image_files 포함)")
-
 
 class RecoveryRenderData(BaseModel):
     """PDF 2 내부 렌더링 DTO (recovery_html_generator 전용)"""
