@@ -1,9 +1,7 @@
 package com.capstone.houseviewingapp.auth.model
 
 /**
- * NOTE:
- * - 백엔드 스펙의 JSON 키와 1:1로 맞춘 DTO
- * - (name, email, loginId, password, userId ...) 키를 그대로 사용
+ * 백엔드 JSON 키와 동일한 DTO (users, auth 도메인)
  */
 
 data class RegisterRequest(
@@ -13,10 +11,6 @@ data class RegisterRequest(
     val password: String
 )
 
-data class RegisterResponse(
-    val userId: Long
-)
-
 data class LoginRequest(
     val loginId: String,
     val password: String
@@ -24,26 +18,35 @@ data class LoginRequest(
 
 data class LoginResponse(
     val accessToken: String,
-    val refreshToken: String
+    val refreshToken: String,
+    val userId: Long,
+    val loginId: String,
+    val name: String
 )
 
 data class FindIdRequest(
-    val name: String,
-    val email: String
+    val email: String,
+    val name: String
 )
 
 data class FindIdResponse(
     val loginId: String
 )
 
+/** 백엔드 UserVerifyPasswordRequest — 비밀번호 필드 없음, 본인 확인 후 resetToken 문자열 응답 */
 data class VerifyPasswordRequest(
-    val loginId: String,
-    val password: String
+    val email: String,
+    val name: String,
+    val loginId: String
 )
 
+/**
+ * 백엔드 UserResetPasswordRequest — 필드명이 refreshToken 이지만 값은 password/verify 로 받은 재설정 토큰
+ */
 data class ResetPasswordRequest(
-    val resetToken: String,
-    val password: String
+    val refreshToken: String,
+    val newPassword: String,
+    val confirmPassword: String
 )
 
 data class ReissueRequest(
@@ -51,21 +54,21 @@ data class ReissueRequest(
 )
 
 data class ReissueResponse(
-    val accessToken: String,
-    val refreshToken: String
+    val accessToken: String
 )
 
+data class SubscriptionMeResponse(
+    val planType: String
+)
+
+/** 백엔드 UserMeResponse — loginId 없음 (로컬 AuthTokenLocalStore 등에서 보관) */
 data class MeResponse(
     val name: String,
     val email: String,
-    val loginId: String
+    val subscription: SubscriptionMeResponse?
 )
 
-/**
- * 백엔드 에러 표준 응답이 정해지면 그 스펙으로 교체
- */
 data class ApiErrorResponse(
     val code: String? = null,
     val message: String? = null
 )
-

@@ -7,6 +7,7 @@ import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.core.widget.addTextChangedListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -15,6 +16,7 @@ import com.capstone.houseviewingapp.auth.model.RegisterRequest
 import com.capstone.houseviewingapp.data.local.UserProfileLocalStore
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.databinding.ActivitySignUpBinding
+import kotlinx.coroutines.launch
 
 class SignUpActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySignUpBinding
@@ -204,36 +206,39 @@ class SignUpActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val idAvailable = AuthRepositoryProvider.repository
-                .isLoginIdAvailable(loginId)
-                .getOrElse {
-                    setIdStatus("아이디 확인에 실패했습니다. 다시 시도해 주세요.", false)
-                    return@setOnClickListener
+            lifecycleScope.launch {
+                val idAvailable = AuthRepositoryProvider.repository
+                    .isLoginIdAvailable(loginId)
+                    .getOrElse {
+                        setIdStatus("아이디 확인에 실패했습니다. 다시 시도해 주세요.", false)
+                        validateInputs()
+                        return@launch
+                    }
+                if (idAvailable) {
+                    setIdStatus("사용 가능한 아이디입니다.", true)
+                    isLoginIdAvailableChecked = true
+                    lastCheckedLoginId = loginId
+                } else {
+                    setIdStatus("이미 사용 중인 아이디입니다.", false)
+                    isLoginIdAvailableChecked = false
+                    lastCheckedLoginId = ""
                 }
-            if (idAvailable) {
-                setIdStatus("사용 가능한 아이디입니다.", true)
-                isLoginIdAvailableChecked = true
-                lastCheckedLoginId = loginId
-            } else {
-                setIdStatus("이미 사용 중인 아이디입니다.", false)
-                isLoginIdAvailableChecked = false
-                lastCheckedLoginId = ""
-            }
 
-            val emailAvailable = AuthRepositoryProvider.repository
-                .isEmailAvailable(email)
-                .getOrElse {
-                    setEmailStatus("이메일 확인에 실패했습니다. 다시 시도해 주세요.", false)
-                    validateInputs()
-                    return@setOnClickListener
+                val emailAvailable = AuthRepositoryProvider.repository
+                    .isEmailAvailable(email)
+                    .getOrElse {
+                        setEmailStatus("이메일 확인에 실패했습니다. 다시 시도해 주세요.", false)
+                        validateInputs()
+                        return@launch
+                    }
+                if (emailAvailable) {
+                    setEmailStatus("사용 가능한 이메일입니다.", true)
+                } else {
+                    setEmailStatus("이미 사용 중인 이메일입니다.", false)
                 }
-            if (emailAvailable) {
-                setEmailStatus("사용 가능한 이메일입니다.", true)
-            } else {
-                setEmailStatus("이미 사용 중인 이메일입니다.", false)
-            }
 
-            validateInputs()
+                validateInputs()
+            }
         }
 
         binding.termTextView.setOnClickListener {
@@ -255,24 +260,26 @@ class SignUpActivity : AppCompatActivity() {
                 password = binding.passwordEditText.text?.toString().orEmpty()
             )
 
-            val result = AuthRepositoryProvider.repository.register(request)
-            result.onSuccess {
-                UserProfileLocalStore.save(
-                    context = this,
-                    name = request.name,
-                    email = request.email,
-                    loginId = request.loginId
-                )
-                Toast.makeText(this, "회원가입이 완료되었습니다.", Toast.LENGTH_SHORT).show()
-                startActivity(Intent(this, LoginActivity::class.java))
-                finish()
-            }.onFailure { e ->
-                val msg = when (e.message) {
-                    "DUPLICATE_LOGIN_ID" -> "이미 사용 중인 아이디입니다."
-                    "DUPLICATE_EMAIL" -> "이미 사용 중인 이메일입니다."
-                    else -> "회원가입에 실패했습니다. 잠시 후 다시 시도해 주세요."
+            lifecycleScope.launch {
+                val result = AuthRepositoryProvider.repository.register(request)
+                result.onSuccess {
+                    UserProfileLocalStore.save(
+                        context = this@SignUpActivity,
+                        name = request.name,
+                        email = request.email,
+                        loginId = request.loginId
+                    )
+                    Toast.makeText(this@SignUpActivity, "회원가입이 완료되었습니다.", Toast.LENGTH_SHORT).show()
+                    startActivity(Intent(this@SignUpActivity, LoginActivity::class.java))
+                    finish()
+                }.onFailure { e ->
+                    val msg = when (e.message) {
+                        "DUPLICATE_LOGIN_ID" -> "이미 사용 중인 아이디입니다."
+                        "DUPLICATE_EMAIL" -> "이미 사용 중인 이메일입니다."
+                        else -> "회원가입에 실패했습니다. 잠시 후 다시 시도해 주세요."
+                    }
+                    Toast.makeText(this@SignUpActivity, msg, Toast.LENGTH_SHORT).show()
                 }
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
             }
         }
 

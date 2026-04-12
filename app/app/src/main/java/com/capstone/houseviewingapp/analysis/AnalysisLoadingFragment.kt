@@ -126,7 +126,7 @@ class AnalysisLoadingFragment : Fragment() {
                     }
                     RecordSource.AUTO -> {
                         val houseId = primaryHouse?.houseId ?: 1L
-                        AnalysisRepositoryProvider.repository.changeDiagnoses(houseId)
+                        AnalysisRepositoryProvider.repository.changeDiagnoses(accessToken, houseId)
                             .getOrThrow()
                     }
                 }

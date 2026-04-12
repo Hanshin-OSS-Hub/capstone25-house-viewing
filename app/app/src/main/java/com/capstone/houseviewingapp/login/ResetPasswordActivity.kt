@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.core.widget.addTextChangedListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -12,6 +13,7 @@ import com.capstone.houseviewingapp.auth.AuthRepositoryProvider
 import com.capstone.houseviewingapp.auth.model.ResetPasswordRequest
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.databinding.ActivityResetPasswordBinding
+import kotlinx.coroutines.launch
 
 class ResetPasswordActivity : AppCompatActivity() {
     companion object {
@@ -68,23 +70,29 @@ class ResetPasswordActivity : AppCompatActivity() {
 
         //NOTE : 비밀번호 변경 완료 버튼
         binding.confirmButton.setOnClickListener {
+            val pwd = binding.passwordEditText.text?.toString().orEmpty()
+            val pwdCheck = binding.passwordCheckEditText.text?.toString().orEmpty()
             val request = ResetPasswordRequest(
-                resetToken = resetToken,
-                password = binding.passwordEditText.text?.toString().orEmpty()
+                refreshToken = resetToken,
+                newPassword = pwd,
+                confirmPassword = pwdCheck
             )
-            val result = AuthRepositoryProvider.repository.resetPassword(request)
-            result.onSuccess {
-                val intent = Intent(this, LoginActivity::class.java)
-                intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
-                startActivity(intent)
-                Toast.makeText(this, "비밀번호 변경이 완료되었습니다.", Toast.LENGTH_SHORT).show()
-            }.onFailure { e ->
-                val msg = when (e.message) {
-                    "UNAUTHORIZED" -> "인증이 필요합니다. 다시 로그인해 주세요."
-                    "INVALID_PASSWORD" -> "유효하지 않은 비밀번호입니다."
-                    else -> "비밀번호 변경에 실패했습니다."
+            lifecycleScope.launch {
+                val result = AuthRepositoryProvider.repository.resetPassword(request)
+                result.onSuccess {
+                    val intent = Intent(this@ResetPasswordActivity, LoginActivity::class.java)
+                    intent.flags = Intent.FLAG_ACTIVITY_SINGLE_TOP or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                    startActivity(intent)
+                    Toast.makeText(this@ResetPasswordActivity, "비밀번호 변경이 완료되었습니다.", Toast.LENGTH_SHORT).show()
+                }.onFailure { e ->
+                    val msg = when (e.message) {
+                        "UNAUTHORIZED" -> "인증이 필요합니다. 다시 로그인해 주세요."
+                        "INVALID_PASSWORD" -> "유효하지 않은 비밀번호입니다."
+                        "PASSWORD_MISMATCH" -> "비밀번호가 일치하지 않습니다."
+                        else -> "비밀번호 변경에 실패했습니다."
+                    }
+                    Toast.makeText(this@ResetPasswordActivity, msg, Toast.LENGTH_SHORT).show()
                 }
-                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
             }
         }
         validateInputs()

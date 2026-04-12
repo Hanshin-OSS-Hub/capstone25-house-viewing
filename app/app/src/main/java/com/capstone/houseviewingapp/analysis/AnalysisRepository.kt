@@ -1,7 +1,7 @@
 package com.capstone.houseviewingapp.analysis
 
-import com.capstone.houseviewingapp.analysis.model.AnalysisPdfResponse
-import com.capstone.houseviewingapp.analysis.model.AnalysisSummaryResponse
+import com.capstone.houseviewingapp.analysis.model.AnalysisResponse
+import com.capstone.houseviewingapp.analysis.model.PdfDownloadResponse
 import com.capstone.houseviewingapp.analysis.model.PreContractDiagnosisRequest
 
 interface AnalysisRepository {
@@ -9,18 +9,19 @@ interface AnalysisRepository {
         accessToken: String,
         fileUri: String,
         request: PreContractDiagnosisRequest
-    ): Result<AnalysisPdfResponse>
+    ): Result<PdfDownloadResponse>
 
     fun postContractDiagnoses(
+        accessToken: String,
         houseId: Long,
         fileUri: String
-    ): Result<AnalysisPdfResponse>
+    ): Result<PdfDownloadResponse>
 
     fun changeDiagnoses(
+        accessToken: String,
         houseId: Long
-    ): Result<AnalysisPdfResponse>
+    ): Result<PdfDownloadResponse>
 
-    fun getAnalyses(accessToken: String): Result<List<AnalysisSummaryResponse>>
-    fun getDiffAnalyses(accessToken: String): Result<List<AnalysisSummaryResponse>>
+    fun getAnalyses(accessToken: String): Result<List<AnalysisResponse>>
+    fun getDiffAnalyses(accessToken: String): Result<List<AnalysisResponse>>
 }
-

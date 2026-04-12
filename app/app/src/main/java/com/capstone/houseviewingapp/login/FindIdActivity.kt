@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.core.widget.addTextChangedListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -12,6 +13,7 @@ import com.capstone.houseviewingapp.auth.AuthRepositoryProvider
 import com.capstone.houseviewingapp.auth.model.FindIdRequest
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.databinding.ActivityFindIdBinding
+import kotlinx.coroutines.launch
 
 class FindIdActivity : AppCompatActivity() {
     private lateinit var binding : ActivityFindIdBinding
@@ -58,11 +60,13 @@ class FindIdActivity : AppCompatActivity() {
                 email = binding.emailEditText.text?.toString()?.trim().orEmpty()
             )
 
-            val result = AuthRepositoryProvider.repository.findId(request)
-            result.onSuccess { res ->
-                FindIDResultFragment(res.loginId).show(supportFragmentManager, "FindIDResultTag")
-            }.onFailure {
-                Toast.makeText(this, "일치하는 계정을 찾지 못했습니다.", Toast.LENGTH_SHORT).show()
+            lifecycleScope.launch {
+                val result = AuthRepositoryProvider.repository.findId(request)
+                result.onSuccess { res ->
+                    FindIDResultFragment(res.loginId).show(supportFragmentManager, "FindIDResultTag")
+                }.onFailure {
+                    Toast.makeText(this@FindIdActivity, "일치하는 계정을 찾지 못했습니다.", Toast.LENGTH_SHORT).show()
+                }
             }
         }
         validateInputs()

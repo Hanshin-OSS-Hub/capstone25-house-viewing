@@ -1,13 +1,22 @@
 package com.capstone.houseviewingapp.contract.model
 
-data class RegisterContractRequest(
+enum class ContractType {
+    JEONSE,
+    MONTHLY
+}
+
+/** ContractRegisterRequest — 날짜는 "yyyy-MM-dd" 문자열 */
+data class ContractRegisterRequest(
     val houseId: Long,
-    val contractType: String,
-    val contractDate: String
+    val contractType: ContractType,
+    val deposit: Long,
+    val monthlyAmount: Long,
+    val maintenanceFee: Long,
+    val moveDate: String,
+    val confirmDate: String
 )
 
-data class RegisterContractResponse(
+data class ContractRegisterResponse(
     val houseId: Long,
     val contractId: Long
 )
-

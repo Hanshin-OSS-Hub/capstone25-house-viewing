@@ -1,23 +1,21 @@
 package com.capstone.houseviewingapp.contract
 
-import com.capstone.houseviewingapp.contract.model.RegisterContractRequest
-import com.capstone.houseviewingapp.contract.model.RegisterContractResponse
+import com.capstone.houseviewingapp.contract.model.ContractRegisterRequest
+import com.capstone.houseviewingapp.contract.model.ContractRegisterResponse
 import java.util.concurrent.atomic.AtomicLong
 
 class MockContractRepository : ContractRepository {
     private val contractIdGen = AtomicLong(1L)
-    private val contracts = mutableMapOf<Long, RegisterContractResponse>()
+    private val contracts = mutableMapOf<Long, ContractRegisterResponse>()
 
     override fun registerContract(
         accessToken: String,
-        request: RegisterContractRequest
-    ): Result<RegisterContractResponse> {
+        request: ContractRegisterRequest
+    ): Result<ContractRegisterResponse> {
         if (accessToken.isBlank()) return Result.failure(IllegalStateException("UNAUTHORIZED"))
         if (request.houseId <= 0L) return Result.failure(NoSuchElementException("HOUSE_NOT_FOUND"))
-        if (request.contractType.isBlank()) return Result.failure(IllegalArgumentException("CONTRACT_TYPE_REQUIRED"))
-        if (request.contractDate.isBlank()) return Result.failure(IllegalArgumentException("CONTRACT_DATE_REQUIRED"))
 
-        val response = RegisterContractResponse(
+        val response = ContractRegisterResponse(
             houseId = request.houseId,
             contractId = contractIdGen.getAndIncrement()
         )
@@ -27,8 +25,8 @@ class MockContractRepository : ContractRepository {
 
     override fun deleteContract(accessToken: String, contractId: Long): Result<Unit> {
         if (accessToken.isBlank()) return Result.failure(IllegalStateException("UNAUTHORIZED"))
-        contracts.remove(contractId) ?: return Result.failure(NoSuchElementException("CONTRACT_NOT_FOUND"))
+        val removed = contracts.remove(contractId) != null
+        if (!removed) return Result.failure(NoSuchElementException("CONTRACT_NOT_FOUND"))
         return Result.success(Unit)
     }
 }
-

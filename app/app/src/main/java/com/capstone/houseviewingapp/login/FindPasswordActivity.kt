@@ -5,12 +5,15 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.core.widget.addTextChangedListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.capstone.houseviewingapp.auth.AuthRepositoryProvider
 import com.capstone.houseviewingapp.R
+import com.capstone.houseviewingapp.auth.model.VerifyPasswordRequest
 import com.capstone.houseviewingapp.databinding.ActivityFindPasswordBinding
+import kotlinx.coroutines.launch
 
 class FindPasswordActivity : AppCompatActivity() {
     private lateinit var binding: ActivityFindPasswordBinding
@@ -57,20 +60,24 @@ class FindPasswordActivity : AppCompatActivity() {
             val inputEmail = binding.emailEditText.text?.toString()?.trim().orEmpty()
             val inputLoginId = binding.idEditText.text?.toString()?.trim().orEmpty()
 
-            val result = AuthRepositoryProvider.repository.issueResetToken(
-                loginId = inputLoginId,
-                name = inputName,
-                email = inputEmail
-            )
-            result.onSuccess { resetToken ->
-                startActivity(
-                    Intent(this, ResetPasswordActivity::class.java).apply {
-                        putExtra(ResetPasswordActivity.EXTRA_RESET_TOKEN, resetToken)
-                    }
+            lifecycleScope.launch {
+                val result = AuthRepositoryProvider.repository.verifyPassword(
+                    VerifyPasswordRequest(
+                        email = inputEmail,
+                        name = inputName,
+                        loginId = inputLoginId
+                    )
                 )
-            }.onFailure {
-                Toast.makeText(this, "입력 정보가 일치하지 않습니다.", Toast.LENGTH_SHORT).show()
+                result.onSuccess { resetToken ->
+                    startActivity(
+                        Intent(this@FindPasswordActivity, ResetPasswordActivity::class.java).apply {
+                            putExtra(ResetPasswordActivity.EXTRA_RESET_TOKEN, resetToken)
+                        }
+                    )
+                }.onFailure {
+                    Toast.makeText(this@FindPasswordActivity, "입력 정보가 일치하지 않습니다.", Toast.LENGTH_SHORT).show()
                 }
+            }
         }
         validateInputs()
     }

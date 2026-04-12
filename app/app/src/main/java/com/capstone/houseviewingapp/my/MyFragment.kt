@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.capstone.houseviewingapp.MainActivity
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.auth.AuthRepositoryProvider
@@ -13,6 +14,7 @@ import com.capstone.houseviewingapp.data.local.AuthTokenLocalStore
 import com.capstone.houseviewingapp.data.local.BillingLocalStore
 import com.capstone.houseviewingapp.data.local.UserProfileLocalStore
 import com.capstone.houseviewingapp.databinding.FragmentMyBinding
+import kotlinx.coroutines.launch
 
 class MyFragment : Fragment(R.layout.fragment_my) {
     private var _binding: FragmentMyBinding? = null
@@ -73,23 +75,28 @@ class MyFragment : Fragment(R.layout.fragment_my) {
     private fun renderProfileState() {
         val context = requireContext()
         val accessToken = AuthTokenLocalStore.getAccessToken(context).orEmpty()
-        val me = if (accessToken.isBlank()) {
-            null
-        } else {
-            AuthRepositoryProvider.repository.me(accessToken).getOrNull()
-        }
-
-        if (me != null) {
-            binding.profileNameTextView.text = me.name
-            binding.profileEmailTextView.text = me.email
-            UserProfileLocalStore.save(context, me.name, me.email, me.loginId)
+        if (accessToken.isBlank()) {
+            val localName = UserProfileLocalStore.getName(context)
+            val localEmail = UserProfileLocalStore.getEmail(context)
+            binding.profileNameTextView.text = if (localName.isBlank()) "사용자" else localName
+            binding.profileEmailTextView.text = if (localEmail.isBlank()) "-" else localEmail
             return
         }
 
-        val localName = UserProfileLocalStore.getName(context)
-        val localEmail = UserProfileLocalStore.getEmail(context)
-        binding.profileNameTextView.text = if (localName.isBlank()) "사용자" else localName
-        binding.profileEmailTextView.text = if (localEmail.isBlank()) "-" else localEmail
+        viewLifecycleOwner.lifecycleScope.launch {
+            val me = AuthRepositoryProvider.repository.me(accessToken).getOrNull()
+            if (me != null) {
+                val loginId = AuthTokenLocalStore.getLoginId(context).orEmpty()
+                binding.profileNameTextView.text = me.name
+                binding.profileEmailTextView.text = me.email
+                UserProfileLocalStore.save(context, me.name, me.email, loginId)
+            } else {
+                val localName = UserProfileLocalStore.getName(context)
+                val localEmail = UserProfileLocalStore.getEmail(context)
+                binding.profileNameTextView.text = if (localName.isBlank()) "사용자" else localName
+                binding.profileEmailTextView.text = if (localEmail.isBlank()) "-" else localEmail
+            }
+        }
     }
     
     override fun onDestroyView() {

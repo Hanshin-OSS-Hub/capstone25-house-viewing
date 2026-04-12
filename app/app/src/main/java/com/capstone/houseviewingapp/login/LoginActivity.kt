@@ -12,6 +12,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
 import androidx.core.widget.addTextChangedListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
@@ -22,6 +23,7 @@ import com.capstone.houseviewingapp.auth.model.LoginRequest
 import com.capstone.houseviewingapp.data.local.AuthTokenLocalStore
 import com.capstone.houseviewingapp.data.local.UserProfileLocalStore
 import com.capstone.houseviewingapp.databinding.ActivityLoginBinding
+import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
@@ -80,26 +82,35 @@ class LoginActivity : AppCompatActivity() {
                 loginId = binding.idEditText.text?.toString()?.trim().orEmpty(),
                 password = binding.passwordEditText.text?.toString().orEmpty()
             )
-            val result = AuthRepositoryProvider.repository.login(request)
-            val token = result.getOrElse {
-                Toast.makeText(this, "로그인에 실패했습니다.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            AuthTokenLocalStore.saveTokens(this, token.accessToken, token.refreshToken)
-            AuthTokenLocalStore.saveLoginId(this, request.loginId)
-            AuthRepositoryProvider.repository.me(token.accessToken).getOrNull()?.let { me ->
-                UserProfileLocalStore.save(this, me.name, me.email, me.loginId)
-            }
-
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.POST_NOTIFICATIONS)
-                    != PackageManager.PERMISSION_GRANTED
-                ) {
-                    notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-                    return@setOnClickListener
+            lifecycleScope.launch {
+                val result = AuthRepositoryProvider.repository.login(request)
+                val token = result.getOrElse {
+                    Toast.makeText(this@LoginActivity, "로그인에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    return@launch
                 }
+                AuthTokenLocalStore.saveTokens(this@LoginActivity, token.accessToken, token.refreshToken)
+                AuthTokenLocalStore.saveLoginId(this@LoginActivity, token.loginId)
+                AuthRepositoryProvider.repository.me(token.accessToken).getOrNull()?.let { me ->
+                    UserProfileLocalStore.save(
+                        this@LoginActivity,
+                        me.name,
+                        me.email,
+                        token.loginId
+                    )
+                }
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    if (ContextCompat.checkSelfPermission(
+                            this@LoginActivity,
+                            android.Manifest.permission.POST_NOTIFICATIONS
+                        ) != PackageManager.PERMISSION_GRANTED
+                    ) {
+                        notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                        return@launch
+                    }
+                }
+                gotoMain()
             }
-            gotoMain()
         }
         binding.loginButton.isEnabled = true
         binding.loginButton.backgroundTintList = android.content.res.ColorStateList.valueOf(
