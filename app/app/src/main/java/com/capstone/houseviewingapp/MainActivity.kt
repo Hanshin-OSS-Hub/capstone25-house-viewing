@@ -4,6 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.os.bundleOf
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavController
@@ -19,6 +20,8 @@ class MainActivity : AppCompatActivity() {
         const val EXTRA_SHOW_NOTIFICATION_ACCESS_GUIDE = "show_notification_access_guide"
         const val EXTRA_SHOW_REGISTRY_CHANGE_DIALOG = "show_registry_change_dialog"
         const val EXTRA_SHOW_ANALYSIS_LOADING = "show_analysis_loading"
+        const val RESULT_BOTTOM_REFRESH = "result_bottom_refresh"
+        const val RESULT_KEY_TARGET_ID = "target_id"
     }
 
     private lateinit var binding: ActivityMainBinding
@@ -72,8 +75,16 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        fun notifyBottomRefresh(targetId: Int) {
+            supportFragmentManager.setFragmentResult(
+                RESULT_BOTTOM_REFRESH,
+                bundleOf(RESULT_KEY_TARGET_ID to targetId)
+            )
+        }
+
         binding.navigationBar.setOnItemSelectedListener { item ->
             navigateBottom(item.itemId)
+            notifyBottomRefresh(item.itemId)
             true
         }
 
@@ -89,6 +100,7 @@ class MainActivity : AppCompatActivity() {
                 val popped = navController.popBackStack(R.id.nav_home, false)
                 if (!popped) navController.navigate(R.id.nav_home)
             }
+            notifyBottomRefresh(item.itemId)
         }
 
         // NOTE: 최초 실행(onCreate) 시 전달된 extra 처리
