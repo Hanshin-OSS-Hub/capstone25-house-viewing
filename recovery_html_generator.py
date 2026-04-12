@@ -59,7 +59,7 @@ def generate_recovery_html_report(data: RecoveryRenderData) -> str:
         compare_color = "#d35400"
 
     signals_html = build_signals_html(data.signals) or (
-        '<li style="padding:6px 0;font-size:9pt;color:#9ca3af;">감지된 위험 시그널이 없습니다.</li>'
+        '<div style="padding:6px 0;font-size:9pt;color:#9ca3af;">감지된 위험 시그널이 없습니다.</div>'
     )
 
     return f"""<!DOCTYPE html>
@@ -247,22 +247,24 @@ def generate_recovery_html_report(data: RecoveryRenderData) -> str:
     <div class="section-title">대항력 · 우선변제권 현황</div>
     <div class="status-row">
       <div class="status-card">
-        <div class="status-icon" style="color:{residency_color};">
-          {"&#10003;" if data.has_residency else "&#9888;"}
+        <div class="status-icon" style="color:{residency_color};font-size:16pt;font-weight:700;">
+          {"O" if data.has_residency else "X"}
         </div>
         <div class="status-label">전입신고</div>
         <div class="status-value" style="color:{residency_color};">{residency_label}</div>
       </div>
       <div class="status-card">
-        <div class="status-icon" style="color:{confirmed_color};">
-          {"&#10003;" if data.confirmed_date else "&#9888;"}
+        <div class="status-icon" style="color:{confirmed_color};font-size:16pt;font-weight:700;">
+          {"O" if data.confirmed_date else "X"}
         </div>
         <div class="status-label">확정일자</div>
         <div class="status-value" style="color:{confirmed_color};">{confirmed_label}</div>
         <div style="font-size:8pt;color:#9ca3af;margin-top:2px;">{data.confirmed_date or "미입력"}</div>
       </div>
       <div class="status-card">
-        <div class="status-icon" style="color:{right["color"]};">{right["icon"]}</div>
+        <div class="status-icon" style="color:{right["color"]};font-size:16pt;font-weight:700;">
+          {"O" if data.has_priority_right else "X"}
+        </div>
         <div class="status-label">우선변제권</div>
         <div class="status-value" style="color:{right["color"]};">{"확보" if data.has_priority_right else "미확보"}</div>
       </div>
@@ -290,7 +292,7 @@ def generate_recovery_html_report(data: RecoveryRenderData) -> str:
 
   <div class="section">
     <div class="section-title">등기부 위험 시그널</div>
-    <ul class="check-list">{signals_html}</ul>
+    <div class="check-list">{signals_html}</div>
   </div>
 
   <div class="disclaimer">

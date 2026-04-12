@@ -28,14 +28,17 @@ def build_signals_html(signals: list) -> str:
             badge_bg, badge_text, item_bg, item_border = "#c0392b", "고위험", "#fff5f5", "#fecaca"
         else:
             badge_bg, badge_text, item_bg, item_border = "#d35400", "주의",   "#fff8f0", "#fed7aa"
+        # <li> 대신 <div> 사용: wkhtmltopdf에서 display:table + <li> 조합 시
+        # list bullet이 깨진 네모로 표시되는 문제 방지
         html += (
-            f'<li style="background:{item_bg};border:1px solid {item_border};'
-            f'padding:0;overflow:hidden;display:table;width:100%;margin-bottom:5px;border-radius:3px;">'
+            f'<div style="background:{item_bg};border:1px solid {item_border};'
+            f'padding:0;display:table;width:100%;margin-bottom:5px;border-radius:3px;'
+            f'page-break-inside:avoid;">'
             f'<span style="display:table-cell;width:54px;background:{badge_bg};color:#ffffff;'
             f'font-size:7.5pt;font-weight:700;text-align:center;padding:8px 4px;vertical-align:middle;">'
             f'{badge_text}</span>'
             f'<span style="display:table-cell;font-size:9pt;color:#374151;padding:7px 10px;'
             f'vertical-align:middle;line-height:1.6;">{explain}</span>'
-            f'</li>'
+            f'</div>'
         )
     return html

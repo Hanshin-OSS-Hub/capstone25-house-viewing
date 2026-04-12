@@ -96,8 +96,15 @@ def _fallback_content(data: RiskAnalysisRequest) -> dict:
 def _build_checklist_html(data: RiskAnalysisRequest) -> str:
     if data.signals:
         return build_signals_html(data.signals)
+    # signals 없을 때 fallback — <div>로 list bullet 깨짐 방지
     return "".join(
-        f'<li><span class="chk-icon">&#10007;</span>{item}</li>'
+        f'<div style="display:table;width:100%;padding:6px 10px;margin-bottom:4px;'
+        f'background:#fff5f5;border:1px solid #fecaca;border-radius:3px;'
+        f'font-size:9pt;page-break-inside:avoid;">'
+        f'<span style="display:table-cell;width:14px;color:#c0392b;font-weight:700;'
+        f'padding-right:6px;vertical-align:middle;">-</span>'
+        f'<span style="display:table-cell;vertical-align:middle;">{item}</span>'
+        f'</div>'
         for item in data.checklist
     )
 
@@ -182,7 +189,13 @@ def _render_template(data: RiskAnalysisRequest, content: dict) -> str:
     max_claim_fmt  = f"{data.max_claim_amount:,}"
 
     action_items_html = "".join(
-        f'<li><span class="bullet">&#10148;</span>{item}</li>'
+        f'<div style="display:table;width:100%;padding:7px 10px;margin-bottom:5px;'
+        f'background:#fff8f0;border:1px solid #fed7aa;border-radius:3px;font-size:9.5pt;'
+        f'page-break-inside:avoid;">'
+        f'<span style="display:table-cell;width:16px;color:#d35400;font-weight:700;'
+        f'padding-right:6px;vertical-align:top;">&gt;</span>'
+        f'<span style="display:table-cell;vertical-align:top;line-height:1.6;">{item}</span>'
+        f'</div>'
         for item in content.get("action_items", data.checklist)
     )
     checklist_html = _build_checklist_html(data)
@@ -372,12 +385,12 @@ def _render_template(data: RiskAnalysisRequest, content: dict) -> str:
 
   <div class="section">
     <div class="section-title">즉시 조치사항</div>
-    <ul class="action-list">{action_items_html}</ul>
+    <div class="action-list">{action_items_html}</div>
   </div>
 
   <div class="section">
     <div class="section-title">주의사항 체크리스트</div>
-    <ul class="check-list">{checklist_html}</ul>
+    <div class="check-list">{checklist_html}</div>
   </div>
 
   <div class="section">

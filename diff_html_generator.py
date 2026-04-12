@@ -113,7 +113,7 @@ def generate_diff_html_report(
     # 현재 위험 시그널
     new_signals  = new_risk.get("signals", [])
     signals_html = build_signals_html(new_signals) or (
-        '<li style="padding:6px 0;font-size:9pt;color:#9ca3af;">감지된 위험 시그널이 없습니다.</li>'
+        '<div style="padding:6px 0;font-size:9pt;color:#9ca3af;">감지된 위험 시그널이 없습니다.</div>'
     )
 
     contract_label   = "전세" if contract_type == "JEONSE" else "월세"
@@ -269,7 +269,7 @@ def generate_diff_html_report(
 
   <div class="section">
     <div class="section-title">현재 위험 시그널</div>
-    <ul class="check-list">{signals_html}</ul>
+    <div class="check-list">{signals_html}</div>
   </div>
 
   <div class="disclaimer">
