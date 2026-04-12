@@ -1,3 +1,7 @@
+# Android(Kotlin) 클라이언트 이미지는 프로필 android 로만 빌드/실행 (기본 up 에는 포함 안 됨)
+#   docker compose --profile android build android
+#   docker compose --profile android run --rm android
+
 services:
   app:
     build: ./backend
@@ -24,6 +28,18 @@ services:
       - PYTHON_API_URL=http://host.docker.internal:8000
     networks:
       - app-network
+
+  android:
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+      args:
+        KOTLIN_VERSION: "2.0.21"
+        AGP_VERSION: "8.12.3"
+        COMPILE_SDK: "36"
+    image: capstone-android:local
+    profiles:
+      - android
 
   db:
     image: mysql:8.0
