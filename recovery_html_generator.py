@@ -10,9 +10,9 @@ def generate_recovery_html_report(data: RecoveryRenderData) -> str:
     now = datetime.now().strftime("%Y년 %m월 %d일  %H:%M")
 
     _RISK_META = {
-        "High":   {"label": "HIGH · 위험",   "color": "#c0392b", "icon": "&#9888;"},
-        "Medium": {"label": "MEDIUM · 주의", "color": "#d35400", "icon": "&#9685;"},
-        "Low":    {"label": "LOW · 안전",    "color": "#1e8449", "icon": "&#10003;"},
+        "High":   {"label": "HIGH · 위험",   "color": "#c0392b", "icon": ""},
+        "Medium": {"label": "MEDIUM · 주의", "color": "#d35400", "icon": ""},
+        "Low":    {"label": "LOW · 안전",    "color": "#1e8449", "icon": ""},
     }
     meta = _RISK_META[data.risk_score]
 
@@ -205,7 +205,7 @@ def generate_recovery_html_report(data: RecoveryRenderData) -> str:
       <div class="subtitle">임차인 배당 순위 및 회수 가능성 평가 &nbsp;|&nbsp; {now} 생성</div>
     </div>
     <div class="header-badge">
-      <span class="badge">{meta["icon"]} &nbsp;{meta["label"]}</span>
+      <span class="badge">{meta["icon"]}{meta["label"]}</span>
     </div>
   </div>
 

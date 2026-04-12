@@ -18,7 +18,7 @@ _RISK_META: dict[str, dict] = {
         "color": "#c0392b",
         "light": "#fff5f5",
         "border": "#e74c3c",
-        "icon": "&#9888;",
+        "icon": "",
         "bar_color": "#c0392b",
     },
     "Medium": {
@@ -26,7 +26,7 @@ _RISK_META: dict[str, dict] = {
         "color": "#d35400",
         "light": "#fff8f0",
         "border": "#e67e22",
-        "icon": "&#9685;",
+        "icon": "",
         "bar_color": "#e67e22",
     },
     "Low": {
@@ -34,15 +34,15 @@ _RISK_META: dict[str, dict] = {
         "color": "#1e8449",
         "light": "#f0fff4",
         "border": "#27ae60",
-        "icon": "&#10003;",
+        "icon": "",
         "bar_color": "#27ae60",
     },
 }
 
 _PRIORITY_META = {
-    "IMMEDIATE": {"label": "즉시 대응 필요",    "color": "#c0392b", "icon": "&#9888;"},
-    "SOON":      {"label": "계약 전 확인 필요", "color": "#d35400", "icon": "&#9888;"},
-    "NORMAL":    {"label": "기본 확인",         "color": "#1e8449", "icon": "&#10003;"},
+    "IMMEDIATE": {"label": "즉시 대응 필요",    "color": "#c0392b", "icon": ""},
+    "SOON":      {"label": "계약 전 확인 필요", "color": "#d35400", "icon": ""},
+    "NORMAL":    {"label": "기본 확인",         "color": "#1e8449", "icon": ""},
 }
 
 _LEGAL_TERMS = [
@@ -337,7 +337,7 @@ def _render_template(data: RiskAnalysisRequest, content: dict) -> str:
       <div class="subtitle">임차인 보증금 위험도 평가 &nbsp;|&nbsp; {now} 생성</div>
     </div>
     <div class="header-badge">
-      <span class="badge">{meta["icon"]} &nbsp;{meta["label"]}</span>
+      <span class="badge">{meta["icon"]}{meta["label"]}</span>
     </div>
   </div>
 
@@ -360,7 +360,7 @@ def _render_template(data: RiskAnalysisRequest, content: dict) -> str:
   <div class="section">
     <div class="section-title">핵심 위험 분석</div>
     <div class="risk-card">
-      <div class="risk-headline">{meta["icon"]} &nbsp;{content.get("risk_headline", data.analysis_summary[:30])}</div>
+      <div class="risk-headline">{meta["icon"]}{content.get("risk_headline", data.analysis_summary[:30])}</div>
       <div class="risk-body">{content.get("main_analysis", data.analysis_summary)}</div>
     </div>
   </div>

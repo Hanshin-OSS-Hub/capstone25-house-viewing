@@ -18,9 +18,9 @@ except ImportError:
 
 _LEVEL_MAP = {"HIGH": "High", "MEDIUM": "Medium", "LOW": "Low"}
 _RISK_META = {
-    "High":   {"label": "HIGH · 위험",   "color": "#c0392b", "icon": "&#9888;"},
-    "Medium": {"label": "MEDIUM · 주의", "color": "#d35400", "icon": "&#9685;"},
-    "Low":    {"label": "LOW · 안전",    "color": "#1e8449", "icon": "&#10003;"},
+    "High":   {"label": "HIGH · 위험",   "color": "#c0392b", "icon": ""},
+    "Medium": {"label": "MEDIUM · 주의", "color": "#d35400", "icon": ""},
+    "Low":    {"label": "LOW · 안전",    "color": "#1e8449", "icon": ""},
 }
 
 
@@ -211,7 +211,7 @@ def generate_diff_html_report(
       <div class="subtitle">등기부 변동 감지 및 위험도 재평가 &nbsp;|&nbsp; {now} 생성</div>
     </div>
     <div class="header-badge">
-      <span class="badge">{new_meta["icon"]} &nbsp;{new_meta["label"]}</span>
+      <span class="badge">{new_meta["icon"]}{new_meta["label"]}</span>
     </div>
   </div>
 
