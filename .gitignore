@@ -1,3 +1,118 @@
+# .gitignore 파일 맨 위에 넣으세요
+/.gradle/
+/build/
+/out/
+/caches/
+/daemon/
+/native/
+/wrapper/
+/.idea/
+
+############################
+# OS
+############################
+.DS_Store
+Thumbs.db
+
+############################
+# Logs
+############################
+*.log
+logs/
+
+############################
+# Runtime
+############################
+*.pid
+*.seed
+*.pid.lock
+
+############################
+# Gradle (Build)
+############################
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+
+############################
+# Java (Build Output)
+############################
+*.class
+*.jar
+*.war
+*.ear
+hs_err_pid*
+*.hprof
+
+############################
+# IntelliJ
+############################
+.idea/
+*.iml
+out/
+
+############################
+# VSCode
+############################
+.vscode/
+
+############################
+# Android SDK (로컬 경로)
+############################
+local.properties
+**/local.properties
+
+############################
+# Android
+############################
+captures/
+.externalNativeBuild/
+.cxx/
+
+############################
+# Environment / Secrets
+############################
+.env
+.env.*
+*.env
+
+############################
+# Spring Profiles (환경별 설정 숨김)
+############################
+src/main/resources/application-local.yml
+src/main/resources/application-dev.yml
+src/main/resources/application-prod.yml
+
+############################
+# Upload / Files
+############################
+uploads/
+*.tmp
+
+############################
+# Test / Coverage
+############################
+coverage/
+*.coverage
+
+############################
+# Node (프론트 대비)
+############################
+node_modules/
+dist/
+
+# Gradle 찌꺼기들 확실히 차단
+.gradle/
+caches/
+daemon/
+native/
+wrapper/
+# Android 앱 모듈 Gradle wrapper는 저장소에 포함 (위 wrapper/ 예외)
+!app/gradle/wrapper/
+!app/gradle/wrapper/**
+build/
+out/
+
 # ── API 키 / 환경변수 (절대 올리면 안 됨) ──
 .env
 
@@ -30,6 +145,3 @@ baseline_snapshot.json
 # ── IDE 설정 ──
 .vscode/
 .idea/
-
-# ── AI 도구 설정 (올리면 안 됨) ──
-.claude/
