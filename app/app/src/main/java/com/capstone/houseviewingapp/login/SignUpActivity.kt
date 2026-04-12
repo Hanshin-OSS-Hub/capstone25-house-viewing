@@ -99,6 +99,44 @@ class SignUpActivity : AppCompatActivity() {
         binding.idStatusTextView.visibility = android.view.View.GONE
     }
 
+    private fun firstSignUpValidationError(): String? {
+        val name = binding.nameEditText.text?.toString()?.trim().orEmpty()
+        if (name.isBlank()) return "이름을 입력해 주세요."
+
+        val id = binding.idEditText.text?.toString()?.trim().orEmpty()
+        if (id.isBlank()) return "아이디를 입력해 주세요."
+        if (!isLoginIdAvailableChecked || id != lastCheckedLoginId) {
+            return "아이디 중복 확인을 해 주세요."
+        }
+
+        val email = binding.emailEditText.text?.toString()?.trim().orEmpty()
+        if (email.isBlank()) return "이메일을 입력해 주세요."
+        if (!isEmailFormatValid(email)) return "이메일 형식이 올바르지 않습니다."
+
+        val password = binding.passwordEditText.text?.toString().orEmpty()
+        if (password.isBlank()) return "비밀번호를 입력해 주세요."
+        val pwdReasons = passwordValidationReasons(password)
+        if (pwdReasons.isNotEmpty()) return pwdReasons.joinToString(" ")
+
+        val passwordCheck = binding.passwordCheckEditText.text?.toString().orEmpty()
+        if (passwordCheck.isBlank()) return "비밀번호 확인을 입력해 주세요."
+        if (password != passwordCheck) return "비밀번호가 일치하지 않습니다."
+
+        if (!binding.termOfServieceCheckBox.isChecked || !binding.infoCheckBox.isChecked) {
+            return "필수 약관에 동의해 주세요."
+        }
+        return null
+    }
+
+    private fun setCheckButtonStyle(enabled: Boolean) {
+        binding.checkButton.isEnabled = enabled
+        val color = ContextCompat.getColor(
+            this,
+            if (enabled) R.color.blue else R.color.icongray
+        )
+        binding.checkButton.backgroundTintList = ColorStateList.valueOf(color)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         binding = ActivitySignUpBinding.inflate(layoutInflater)
         super.onCreate(savedInstanceState)
@@ -148,6 +186,9 @@ class SignUpActivity : AppCompatActivity() {
                     idDuplicateOk &&
                     requiredTermsOk
             )
+
+            // 중복 확인: 아이디·이메일 입력 및 이메일 형식 통과 시에만 파란색
+            setCheckButtonStyle(idOk && email.isNotBlank() && isEmailFormatValid(email))
         }
 
         // 약관 체크박스 동기화: 전체 동의 ↔ 개별 동의
@@ -253,6 +294,11 @@ class SignUpActivity : AppCompatActivity() {
         }
 
         binding.confirmButton.setOnClickListener {
+            firstSignUpValidationError()?.let { msg ->
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val request = RegisterRequest(
                 name = binding.nameEditText.text?.toString()?.trim().orEmpty(),
                 email = binding.emailEditText.text?.toString()?.trim().orEmpty(),
