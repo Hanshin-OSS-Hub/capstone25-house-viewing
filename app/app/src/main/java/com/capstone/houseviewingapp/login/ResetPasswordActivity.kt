@@ -1,6 +1,7 @@
 package com.capstone.houseviewingapp.login
 
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -23,13 +24,23 @@ class ResetPasswordActivity : AppCompatActivity() {
     private lateinit var binding: ActivityResetPasswordBinding
     private var resetToken: String = ""
 
+    private fun firstValidationError(): String? {
+        val password = binding.passwordEditText.text?.toString().orEmpty()
+        val passwordCheck = binding.passwordCheckEditText.text?.toString().orEmpty()
+        if (password.isBlank()) return "비밀번호를 입력해 주세요."
+        if (password.length < 8) return "비밀번호는 8자 이상으로 입력해 주세요."
+        if (passwordCheck.isBlank()) return "비밀번호 확인을 입력해 주세요."
+        if (password != passwordCheck) return "비밀번호가 일치하지 않습니다."
+        return null
+    }
+
     private fun setConfirmEnabled(enabled: Boolean) {
         binding.confirmButton.isEnabled = enabled
         val color = androidx.core.content.ContextCompat.getColor(
             this,
             if (enabled) R.color.blue else R.color.icongray
         )
-        binding.confirmButton.backgroundTintList = android.content.res.ColorStateList.valueOf(color)
+        binding.confirmButton.backgroundTintList = ColorStateList.valueOf(color)
     }
 
     private fun validateInputs() {
@@ -70,6 +81,11 @@ class ResetPasswordActivity : AppCompatActivity() {
 
         //NOTE : 비밀번호 변경 완료 버튼
         binding.confirmButton.setOnClickListener {
+            firstValidationError()?.let { msg ->
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val pwd = binding.passwordEditText.text?.toString().orEmpty()
             val pwdCheck = binding.passwordCheckEditText.text?.toString().orEmpty()
             val request = ResetPasswordRequest(

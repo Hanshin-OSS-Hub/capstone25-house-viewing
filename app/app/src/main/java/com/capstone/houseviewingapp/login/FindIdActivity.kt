@@ -1,6 +1,6 @@
 package com.capstone.houseviewingapp.login
 
-import android.content.Intent
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -18,18 +18,31 @@ import kotlinx.coroutines.launch
 class FindIdActivity : AppCompatActivity() {
     private lateinit var binding : ActivityFindIdBinding
 
+    private fun isEmailFormatValid(email: String): Boolean =
+        android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()
+
+    private fun firstValidationError(): String? {
+        val name = binding.nameEditText.text?.toString()?.trim().orEmpty()
+        if (name.isBlank()) return "이름을 입력해 주세요."
+        val email = binding.emailEditText.text?.toString()?.trim().orEmpty()
+        if (email.isBlank()) return "이메일을 입력해 주세요."
+        if (!isEmailFormatValid(email)) return "이메일 형식이 올바르지 않습니다."
+        return null
+    }
+
     private fun setConfirmEnabled(enabled: Boolean) {
         binding.confirmButton.isEnabled = enabled
         val color = androidx.core.content.ContextCompat.getColor(
             this,
             if (enabled) R.color.blue else R.color.icongray
         )
-        binding.confirmButton.backgroundTintList = android.content.res.ColorStateList.valueOf(color)
+        binding.confirmButton.backgroundTintList = ColorStateList.valueOf(color)
     }
 
     private fun validateInputs() {
         val nameOk = binding.nameEditText.text?.toString()?.trim().orEmpty().isNotBlank()
-        val emailOk = binding.emailEditText.text?.toString()?.trim().orEmpty().isNotBlank()
+        val email = binding.emailEditText.text?.toString()?.trim().orEmpty()
+        val emailOk = email.isNotBlank() && isEmailFormatValid(email)
         setConfirmEnabled(nameOk && emailOk)
     }
 
@@ -55,6 +68,11 @@ class FindIdActivity : AppCompatActivity() {
         binding.emailEditText.addTextChangedListener { validateInputs() }
 
         binding.confirmButton.setOnClickListener {
+            firstValidationError()?.let { msg ->
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             val request = FindIdRequest(
                 name = binding.nameEditText.text?.toString()?.trim().orEmpty(),
                 email = binding.emailEditText.text?.toString()?.trim().orEmpty()
