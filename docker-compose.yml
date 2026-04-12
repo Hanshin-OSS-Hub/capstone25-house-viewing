@@ -1,11 +1,96 @@
 version: "3.8"
 
 services:
+  app:
+    build: ./backend
+    restart: unless-stopped
+    image: house-viewing-app
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://db:3306/house_viewing
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=1234
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      - KAKAO_REST_API_KEY=${KAKAO_REST_API_KEY}
+      - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
+      - AWS_SECRET_KEY=${AWS_SECRET_KEY}
+      - PYTHON_API_URL=http://host.docker.internal:8000
+    networks:
+      - app-network
+
+  android:
+    platform: linux/amd64
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+      args:
+        KOTLIN_VERSION: "2.0.21"
+        AGP_VERSION: "8.12.3"
+        COMPILE_SDK: "36"
+    image: android:local
+    profiles:
+      - android
+
+  db:
+    image: mysql:8.0
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: house_viewing
+    ports:
+      - "3307:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-p1234"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks:
+      - app-network
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+    networks:
+      - app-network
+
+  # 파이썬 서버가 하나의 services 아래로 정상적으로 통합되었습니다.
   python-server:
-    build: .
+    build: ./python  # 폴더를 옮겼으므로 경로 수정 완료
     container_name: python-server
     ports:
       - "8000:8000"
     env_file:
-      - .env
+      - ./python/.env  # env 파일도 파이썬 폴더 안에 있다면 경로를 맞춰줍니다.
     restart: unless-stopped
+    networks:
+      - app-network  # 백엔드(app)와 통신하기 위해 같은 네트워크에 묶어줍니다.
+
+networks:
+  app-network:
+    driver: bridge
+
+volumes:
+  db-data:
+  redis-data:
