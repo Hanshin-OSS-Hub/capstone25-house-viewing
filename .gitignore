@@ -112,3 +112,36 @@ wrapper/
 !app/gradle/wrapper/**
 build/
 out/
+
+# ── API 키 / 환경변수 (절대 올리면 안 됨) ──
+.env
+
+# ── Python 자동 생성 파일 ──
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# ── 가상환경 ──
+venv/
+.venv/
+env/
+
+# ── 테스트/런타임 임시 파일 ──
+*.pdf
+test_*.json
+*.html
+
+# ── OCR 런타임 생성 파일 ──
+uploads/
+pdf_pages/
+baselines/
+*.json
+result_layout.json
+snapshot.json
+final_result.json
+baseline_snapshot.json
+
+# ── IDE 설정 ──
+.vscode/
+.idea/

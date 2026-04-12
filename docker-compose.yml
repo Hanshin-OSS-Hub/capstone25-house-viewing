@@ -1,6 +1,4 @@
-# Android(Kotlin) 클라이언트 이미지는 프로필 android 로만 빌드/실행 (기본 up 에는 포함 안 됨)
-#   docker compose --profile android build android
-#   docker compose --profile android run --rm android
+version: "3.8"
 
 services:
   app:
@@ -25,11 +23,12 @@ services:
       - KAKAO_REST_API_KEY=${KAKAO_REST_API_KEY}
       - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
       - AWS_SECRET_KEY=${AWS_SECRET_KEY}
-      - PYTHON_API_URL=http://host.docker.internal:8000
+      - PYTHON_API_URL=http://python-server:8000
     networks:
       - app-network
 
   android:
+    platform: linux/amd64
     build:
       context: ./app
       dockerfile: Dockerfile
@@ -37,7 +36,7 @@ services:
         KOTLIN_VERSION: "2.0.21"
         AGP_VERSION: "8.12.3"
         COMPILE_SDK: "36"
-    image: capstone-android:local
+    image: android:local
     profiles:
       - android
 
@@ -75,6 +74,18 @@ services:
       start_period: 5s
     networks:
       - app-network
+
+  # 파이썬 서버가 하나의 services 아래로 정상적으로 통합되었습니다.
+  python-server:
+    build: ./python  # 폴더를 옮겼으므로 경로 수정 완료
+    container_name: python-server
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./python/.env  # env 파일도 파이썬 폴더 안에 있다면 경로를 맞춰줍니다.
+    restart: unless-stopped
+    networks:
+      - app-network  # 백엔드(app)와 통신하기 위해 같은 네트워크에 묶어줍니다.
 
 networks:
   app-network:

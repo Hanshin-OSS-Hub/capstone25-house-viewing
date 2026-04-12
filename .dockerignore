@@ -49,3 +49,15 @@ HELP.md
 # 애플리케이션 실행 중 로컬에서 생성될 수 있는 로그 파일들을 제외합니다.
 *.log
 logs/
+
+.env
+.git
+__pycache__
+*.pyc
+*.pyo
+uploads/
+pdf_pages/
+*.pdf
+*.json
+test_*.html
+ocr.gitignore
