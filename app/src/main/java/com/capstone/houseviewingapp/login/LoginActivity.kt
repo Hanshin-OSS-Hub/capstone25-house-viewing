@@ -37,12 +37,12 @@ class LoginActivity : AppCompatActivity() {
         val password = binding.passwordEditText.text?.toString().orEmpty()
 
         if (loginId.isBlank()) {
-            binding.idTextInputLayout.error = "아이디를 입력해주세요."
+            Toast.makeText(this, "아이디를 입력해주세요.", Toast.LENGTH_SHORT).show()
             binding.idEditText.requestFocus()
             return false
         }
         if (password.isBlank()) {
-            binding.passwordTextInputLayout.error = "비밀번호를 입력해주세요."
+            Toast.makeText(this, "비밀번호를 입력해주세요.", Toast.LENGTH_SHORT).show()
             binding.passwordEditText.requestFocus()
             return false
         }
@@ -71,16 +71,8 @@ class LoginActivity : AppCompatActivity() {
         binding.findPWTextView.setOnClickListener {
             startActivity(Intent(this, FindPasswordActivity::class.java))
         }
-        binding.idEditText.addTextChangedListener {
-            if (binding.idEditText.text?.toString()?.trim().orEmpty().isNotBlank()) {
-                binding.idTextInputLayout.error = null
-            }
-        }
-        binding.passwordEditText.addTextChangedListener {
-            if (binding.passwordEditText.text?.toString().orEmpty().isNotBlank()) {
-                binding.passwordTextInputLayout.error = null
-            }
-        }
+        binding.idEditText.addTextChangedListener { }
+        binding.passwordEditText.addTextChangedListener { }
         binding.loginButton.setOnClickListener {
             if (!validateRequiredInputs()) return@setOnClickListener
 
