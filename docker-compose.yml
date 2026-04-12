@@ -30,6 +30,7 @@ services:
       - app-network
 
   android:
+    platform: linux/amd64
     build:
       context: ./app
       dockerfile: Dockerfile

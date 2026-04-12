@@ -4,12 +4,14 @@
 ARG KOTLIN_VERSION=2.0.21
 ARG AGP_VERSION=8.12.3
 ARG COMPILE_SDK=36
+ARG TARGETPLATFORM=linux/amd64
 
-FROM eclipse-temurin:17-jdk-jammy AS builder
+FROM --platform=${TARGETPLATFORM} eclipse-temurin:17-jdk-jammy AS builder
 
 ARG KOTLIN_VERSION
 ARG AGP_VERSION
 ARG COMPILE_SDK
+ARG TARGETPLATFORM
 
 LABEL org.opencontainers.image.description="houseViewingApp Android (Kotlin ${KOTLIN_VERSION}, AGP ${AGP_VERSION}, compileSdk ${COMPILE_SDK})"
 
@@ -47,7 +49,9 @@ COPY app ./app
 RUN chmod +x gradlew \
     && ./gradlew :app:assembleDebug --no-daemon --stacktrace
 
-FROM eclipse-temurin:17-jre-jammy
+FROM --platform=${TARGETPLATFORM} eclipse-temurin:17-jre-jammy
+
+ARG TARGETPLATFORM
 
 WORKDIR /out
 
