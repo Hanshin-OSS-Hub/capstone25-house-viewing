@@ -1,7 +1,7 @@
 """PDF 3: 등기부 변동 비교 보고서 HTML 생성"""
 from __future__ import annotations
 from datetime import datetime
-from utils import fmt_krw, build_signals_html
+from utils import fmt_krw, build_signals_html, build_guidelines_html
 
 try:
     from engines.diff_engine import diff_snapshots
@@ -109,6 +109,9 @@ def generate_diff_html_report(
 
     # 변경 항목 HTML
     changes_html = _build_changes_html(diff)
+
+    # 대응 가이드라인
+    guidelines_html = build_guidelines_html(new_level, "diff")
 
     # 현재 위험 시그널
     new_signals  = new_risk.get("signals", [])
@@ -270,6 +273,11 @@ def generate_diff_html_report(
   <div class="section">
     <div class="section-title">현재 위험 시그널</div>
     <div class="check-list">{signals_html}</div>
+  </div>
+
+  <div style="margin-bottom:18px;page-break-inside:auto;">
+    <div class="section-title">대응 가이드라인</div>
+    {guidelines_html}
   </div>
 
   <div class="disclaimer">

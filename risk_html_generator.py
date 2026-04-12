@@ -6,7 +6,7 @@ import os
 from datetime import datetime
 
 from dto import RiskAnalysisRequest
-from utils import build_signals_html, fmt_krw
+from utils import build_guidelines_html, build_signals_html, fmt_krw
 
 logger = logging.getLogger(__name__)
 
@@ -198,9 +198,10 @@ def _render_template(data: RiskAnalysisRequest, content: dict) -> str:
         f'</div>'
         for item in content.get("action_items", data.checklist)
     )
-    checklist_html = _build_checklist_html(data)
-    playbook_html  = _build_playbook_html(data, meta)
-    legal_terms_html = "".join(
+    checklist_html    = _build_checklist_html(data)
+    playbook_html     = _build_playbook_html(data, meta)
+    guidelines_html   = build_guidelines_html(data.risk_score, "risk")
+    legal_terms_html  = "".join(
         f'<tr><td class="term-name">{term}</td><td class="term-desc">{desc}</td></tr>'
         for term, desc in _LEGAL_TERMS
     )
@@ -393,8 +394,13 @@ def _render_template(data: RiskAnalysisRequest, content: dict) -> str:
     <div class="check-list">{checklist_html}</div>
   </div>
 
-  <div class="section">
+  <div style="margin-bottom:18px;page-break-inside:auto;">
     <div class="section-title">대응 가이드라인</div>
+    {guidelines_html}
+  </div>
+
+  <div style="margin-bottom:18px;page-break-inside:auto;">
+    <div class="section-title">단계별 분석 플랜</div>
     {playbook_html}
   </div>
 
