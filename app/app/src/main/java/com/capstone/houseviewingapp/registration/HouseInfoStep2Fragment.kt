@@ -1,19 +1,17 @@
 package com.capstone.houseviewingapp.registration
 
-import android.app.DatePickerDialog
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.DatePicker
+import android.widget.EditText
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.databinding.FragmentHouseInfoStep2Binding
 import com.google.android.material.datepicker.MaterialDatePicker
-import java.util.Calendar
 
 class HouseInfoStep2Fragment : Fragment(R.layout.fragment_house_info_step2) {
     private var _binding: FragmentHouseInfoStep2Binding? = null
@@ -196,37 +194,63 @@ class HouseInfoStep2Fragment : Fragment(R.layout.fragment_house_info_step2) {
         picker.show(parentFragmentManager, "MOVE_IN_DATE_PICKER")
     }
 
+    /**
+     * yyyy-MM-dd 자동 하이픈 후 커서가 하이픈 **앞**에 남아 다음 글자가 이상하게 들어가는 문제 방지:
+     * 방금 입력한 자릿수 기준으로, 필요하면 하이픈까지 건너뛴 위치에 커서를 둔다.
+     */
+    private fun cursorAfterDigits(formatted: String, digitCountBeforeCursor: Int): Int {
+        if (digitCountBeforeCursor <= 0) return 0
+        var seen = 0
+        for (i in formatted.indices) {
+            if (formatted[i].isDigit()) {
+                seen++
+                if (seen >= digitCountBeforeCursor) {
+                    var pos = i + 1
+                    while (pos < formatted.length && formatted[pos] == '-') pos++
+                    return pos
+                }
+            }
+        }
+        return formatted.length
+    }
+
+    private fun applyYyyyMmDdMask(editText: EditText, s: Editable?, formatting: () -> Boolean, setFormatting: (Boolean) -> Unit) {
+        if (formatting()) return
+        val str = s?.toString().orEmpty()
+        val sel = editText.selectionStart.coerceIn(0, str.length)
+        val digitsBeforeCursor = str.take(sel).count { it.isDigit() }
+        val digitsOnly = str.filter { it.isDigit() }.take(8)
+        val formatted = buildString {
+            digitsOnly.forEachIndexed { index, c ->
+                append(c)
+                if (index == 3 || index == 5) append('-')
+            }
+        }
+        if (str == formatted) return
+
+        setFormatting(true)
+        try {
+            editText.setText(formatted)
+            val newPos = cursorAfterDigits(formatted, digitsBeforeCursor.coerceIn(0, digitsOnly.length))
+            editText.setSelection(newPos.coerceIn(0, formatted.length))
+        } finally {
+            setFormatting(false)
+        }
+    }
+
     // NOTE : 전입일 EditText에 yyyy-MM-dd 형식 자동 포맷팅 적용하는 함수
     private fun setupMoveInDateInputFormat() {
-        binding.moveInDateEditText.addTextChangedListener(object : TextWatcher{
+        binding.moveInDateEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
 
-
             override fun afterTextChanged(s: Editable?) {
-                if (isFormattingMoveInDate) return
-                isFormattingMoveInDate = true
-                val str = s.toString()
-                val digitsBeforeCursor = str.take(binding.moveInDateEditText.selectionStart.coerceAtMost(str.length)).count { it.isDigit() }
-                val digitsOnly = str.filter { it.isDigit() }.take(8)
-                val formatted = buildString {
-                    digitsOnly.forEachIndexed { index, c ->
-                        append(c)
-                        if (index == 3 || index == 5) append('-')
-                    }
-                }
-                if (str != formatted) {
-                    binding.moveInDateEditText.setText(formatted)
-                    var newPos = 0
-                    var digitCount = 0
-                    for (i in formatted.indices) {
-                        if (digitCount >= digitsBeforeCursor) break
-                        if (formatted[i].isDigit()) digitCount++
-                        newPos = i + 1
-                    }
-                    binding.moveInDateEditText.setSelection(newPos.coerceIn(0, formatted.length))
-                }
-                isFormattingMoveInDate = false
+                applyYyyyMmDdMask(
+                    binding.moveInDateEditText,
+                    s,
+                    { isFormattingMoveInDate },
+                    { isFormattingMoveInDate = it }
+                )
             }
         })
     }
@@ -247,35 +271,17 @@ class HouseInfoStep2Fragment : Fragment(R.layout.fragment_house_info_step2) {
 
     // NOTE : 확정일자 EditText에 yyyy-MM-dd 형식 자동 포맷팅 적용하는 함수
     private fun setupConfirmDateInputFormat() {
-        binding.confirmDateEditText.addTextChangedListener(object : TextWatcher{
+        binding.confirmDateEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
 
-
             override fun afterTextChanged(s: Editable?) {
-                if (isFormattingConfirmDate) return
-                isFormattingConfirmDate = true
-                val str = s.toString()
-                val digitsBeforeCursor = str.take(binding.confirmDateEditText.selectionStart.coerceAtMost(str.length)).count { it.isDigit() }
-                val digitsOnly = str.filter { it.isDigit() }.take(8)
-                val formatted = buildString {
-                    digitsOnly.forEachIndexed { index, c ->
-                        append(c)
-                        if (index == 3 || index == 5) append('-')
-                    }
-                }
-                if (str != formatted) {
-                    binding.confirmDateEditText.setText(formatted)
-                    var newPos = 0
-                    var digitCount = 0
-                    for (i in formatted.indices) {
-                        if (digitCount >= digitsBeforeCursor) break
-                        if (formatted[i].isDigit()) digitCount++
-                        newPos = i + 1
-                    }
-                    binding.confirmDateEditText.setSelection(newPos.coerceIn(0, formatted.length))
-                }
-                isFormattingConfirmDate = false
+                applyYyyyMmDdMask(
+                    binding.confirmDateEditText,
+                    s,
+                    { isFormattingConfirmDate },
+                    { isFormattingConfirmDate = it }
+                )
             }
         })
     }
