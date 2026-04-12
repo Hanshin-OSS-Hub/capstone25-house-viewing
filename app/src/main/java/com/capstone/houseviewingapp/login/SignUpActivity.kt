@@ -64,10 +64,11 @@ class SignUpActivity : AppCompatActivity() {
         binding.idStatusTextView.setTextColor(ContextCompat.getColor(this, color))
     }
 
-    private fun setEmailStatus(text: String) {
+    private fun setEmailStatus(text: String, isPositive: Boolean) {
         binding.emailStatusTextView.visibility = android.view.View.VISIBLE
         binding.emailStatusTextView.text = text
-        binding.emailStatusTextView.setTextColor(ContextCompat.getColor(this, R.color.red))
+        val color = if (isPositive) R.color.blue else R.color.red
+        binding.emailStatusTextView.setTextColor(ContextCompat.getColor(this, color))
     }
 
     private fun hideEmailStatus() {
@@ -198,7 +199,7 @@ class SignUpActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
             if (!isEmailFormatValid(email)) {
-                setEmailStatus("이메일 형식이 올바르지 않습니다.")
+                setEmailStatus("이메일 형식이 올바르지 않습니다.", false)
                 validateInputs()
                 return@setOnClickListener
             }
@@ -217,6 +218,19 @@ class SignUpActivity : AppCompatActivity() {
                 setIdStatus("이미 사용 중인 아이디입니다.", false)
                 isLoginIdAvailableChecked = false
                 lastCheckedLoginId = ""
+            }
+
+            val emailAvailable = AuthRepositoryProvider.repository
+                .isEmailAvailable(email)
+                .getOrElse {
+                    setEmailStatus("이메일 확인에 실패했습니다. 다시 시도해 주세요.", false)
+                    validateInputs()
+                    return@setOnClickListener
+                }
+            if (emailAvailable) {
+                setEmailStatus("사용 가능한 이메일입니다.", true)
+            } else {
+                setEmailStatus("이미 사용 중인 이메일입니다.", false)
             }
 
             validateInputs()
