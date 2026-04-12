@@ -23,7 +23,7 @@ services:
       - KAKAO_REST_API_KEY=${KAKAO_REST_API_KEY}
       - AWS_ACCESS_KEY=${AWS_ACCESS_KEY}
       - AWS_SECRET_KEY=${AWS_SECRET_KEY}
-      - PYTHON_API_URL=http://host.docker.internal:8000
+      - PYTHON_API_URL=http://python-server:8000
     networks:
       - app-network
 
