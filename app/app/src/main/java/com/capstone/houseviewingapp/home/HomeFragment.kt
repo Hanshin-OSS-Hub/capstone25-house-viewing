@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.capstone.houseviewingapp.MainActivity
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.data.local.AuthTokenLocalStore
 import com.capstone.houseviewingapp.data.local.BillingLocalStore
@@ -42,6 +43,17 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        parentFragmentManager.setFragmentResultListener(
+            MainActivity.RESULT_BOTTOM_REFRESH,
+            viewLifecycleOwner
+        ) { _, result ->
+            val targetId = result.getInt(MainActivity.RESULT_KEY_TARGET_ID, -1)
+            if (targetId == R.id.nav_home) {
+                loadAndShowCards()
+                refreshQuickDiagnosisBanner()
+            }
+        }
 
         parentFragmentManager.setFragmentResultListener(
             EditHouseBottomSheetFragment.RESULT_KEY,

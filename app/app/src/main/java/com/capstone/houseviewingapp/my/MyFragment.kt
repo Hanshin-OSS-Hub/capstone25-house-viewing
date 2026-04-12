@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import com.capstone.houseviewingapp.MainActivity
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.auth.AuthRepositoryProvider
 import com.capstone.houseviewingapp.data.local.AuthTokenLocalStore
@@ -28,6 +29,16 @@ class MyFragment : Fragment(R.layout.fragment_my) {
     
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        parentFragmentManager.setFragmentResultListener(
+            MainActivity.RESULT_BOTTOM_REFRESH,
+            viewLifecycleOwner
+        ) { _, result ->
+            val targetId = result.getInt(MainActivity.RESULT_KEY_TARGET_ID, -1)
+            if (targetId == R.id.nav_my) {
+                renderFeeState()
+                renderProfileState()
+            }
+        }
         renderFeeState()
         renderProfileState()
 

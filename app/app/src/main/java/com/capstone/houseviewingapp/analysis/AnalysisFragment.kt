@@ -7,6 +7,7 @@ import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
+import com.capstone.houseviewingapp.MainActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.data.local.AnalysisLocalStore
@@ -27,6 +28,17 @@ class AnalysisFragment : Fragment(R.layout.fragment_analysis) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         _binding = FragmentAnalysisBinding.bind(view)
+
+        parentFragmentManager.setFragmentResultListener(
+            MainActivity.RESULT_BOTTOM_REFRESH,
+            viewLifecycleOwner
+        ) { _, result ->
+            val targetId = result.getInt(MainActivity.RESULT_KEY_TARGET_ID, -1)
+            if (targetId == R.id.nav_analysis) {
+                allRecords = AnalysisLocalStore.getRecords(requireContext())
+                applyFilters()
+            }
+        }
 
         setupRecycler()
         setupTabs()

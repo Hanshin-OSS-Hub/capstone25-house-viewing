@@ -1,12 +1,9 @@
 package com.capstone.houseviewingapp.home
 
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -82,44 +79,6 @@ class HouseDetailFragment : Fragment(R.layout.fragment_house_detail) {
         }
 
         bindLtv(detail.ltv)
-
-        val hasDocument = !detail.documentUri.isNullOrBlank()
-        binding.viewOriginalPdfButton.isEnabled = hasDocument
-        binding.viewOriginalPdfButton.alpha = if (hasDocument) 1f else 0.45f
-        binding.documentHintTextView.text = if (hasDocument) {
-            "원본 등기부등본 PDF를 앱 안에서 확인할 수 있어요."
-        } else {
-            "아직 연결된 원본 PDF가 없어요."
-        }
-
-        binding.viewOriginalPdfButton.setOnClickListener {
-            val documentUri = detail.documentUri
-            if (documentUri.isNullOrBlank()) {
-                Toast.makeText(requireContext(), "등록된 원본 PDF가 없습니다.", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-            startActivity(
-                Intent(requireContext(), PdfViewerActivity::class.java).apply {
-                    putExtra(PdfViewerActivity.EXTRA_URI, documentUri)
-                    putExtra(PdfViewerActivity.EXTRA_TITLE, "${detail.homeName} 원본 등기부등본")
-                }
-            )
-        }
-
-        binding.reportIssueButton.setOnClickListener {
-            val title = Uri.encode("[집좀보자] 문서 이상 신고")
-            val body = Uri.encode(
-                "집 이름: ${detail.homeName}\n주소: ${detail.fullAddress()}\n문서 URI: ${detail.documentUri.orEmpty()}\n\n이상 내용을 작성해 주세요."
-            )
-            val intent = Intent(Intent.ACTION_SENDTO).apply {
-                data = Uri.parse("mailto:support@houseviewing.app?subject=$title&body=$body")
-            }
-            if (intent.resolveActivity(requireContext().packageManager) != null) {
-                startActivity(intent)
-            } else {
-                Toast.makeText(requireContext(), "메일 앱을 찾을 수 없습니다.", Toast.LENGTH_SHORT).show()
-            }
-        }
     }
 
     private fun bindLtv(ltv: Int?) {
