@@ -2,6 +2,7 @@ services:
   app:
     build: ./backend
     restart: unless-stopped
+    image: house-viewing-app
     depends_on:
       db:
         condition: service_healthy
