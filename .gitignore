@@ -63,6 +63,13 @@ local.properties
 **/local.properties
 
 ############################
+# Android
+############################
+captures/
+.externalNativeBuild/
+.cxx/
+
+############################
 # Environment / Secrets
 ############################
 .env
