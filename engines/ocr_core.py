@@ -999,7 +999,8 @@ def run(pdf_path: str, tenant_info: dict | None = None):
         "ltv": ltv_info,
         "diff": diff,
         "risk": risk,
-        "recovery": recovery
+        "recovery": recovery,
+        "image_files": [os.path.abspath(p) for p in image_files],
     }
 
     with open(FINAL_RESULT_PATH, "w", encoding="utf-8") as f:
