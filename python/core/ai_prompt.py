@@ -1,7 +1,7 @@
 """AI 분석 공통 프롬프트 — gemini_client, groq_client에서 공유"""
 from __future__ import annotations
 
-from dto import RiskAnalysisRequest
+from schemas.dto import RiskAnalysisRequest
 
 SYSTEM_PROMPT = """당신은 부동산 임대차 전문 법무사이자 리스크 분석 전문가입니다.
 임차인의 보증금 안전성을 분석하고, 전문적이면서도 임차인이 이해하기 쉬운 한국어로 분석 내용을 작성합니다.

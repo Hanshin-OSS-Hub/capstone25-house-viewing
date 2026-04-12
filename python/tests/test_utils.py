@@ -1,6 +1,6 @@
 """utils.py 및 HTML 생성기 단위 테스트"""
 import pytest
-from utils import fmt_krw, build_signals_html, build_guidelines_html
+from core.utils import fmt_krw, build_signals_html, build_guidelines_html
 
 
 # ── fmt_krw ──────────────────────────────────────────────────────────────────
@@ -100,8 +100,8 @@ class TestHtmlGenerators:
     def test_risk_html_생성(self):
         import os
         os.environ["GEMINI_FALLBACK_ENABLED"] = "true"
-        from dto import RiskAnalysisRequest
-        from risk_html_generator import generate_html_report
+        from schemas.dto import RiskAnalysisRequest
+        from generators.risk_html_generator import generate_html_report
         data = RiskAnalysisRequest(
             user_name="홍길동",
             address="경기도 오산시",
@@ -119,8 +119,8 @@ class TestHtmlGenerators:
         assert "STEP 1" in html
 
     def test_recovery_html_생성(self):
-        from dto import RecoveryRenderData
-        from recovery_html_generator import generate_recovery_html_report
+        from schemas.dto import RecoveryRenderData
+        from generators.recovery_html_generator import generate_recovery_html_report
         data = RecoveryRenderData(
             user_name="홍길동",
             address="경기도 오산시",
@@ -139,7 +139,7 @@ class TestHtmlGenerators:
 
     def test_diff_html_생성(self):
         from tests.conftest import RAW_LOW, RAW_HIGH
-        from diff_html_generator import generate_diff_html_report
+        from generators.diff_html_generator import generate_diff_html_report
         html = generate_diff_html_report(
             snapshot_name="에덴하우스 105호",
             origin_raw=RAW_LOW,

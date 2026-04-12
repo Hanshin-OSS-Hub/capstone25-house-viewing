@@ -7,9 +7,9 @@ import os
 from dotenv import load_dotenv
 from openai import OpenAI
 
-from ai_prompt import SYSTEM_PROMPT, build_prompt
-from dto import RiskAnalysisRequest
-from utils import extract_json
+from core.ai_prompt import SYSTEM_PROMPT, build_prompt
+from schemas.dto import RiskAnalysisRequest
+from core.utils import extract_json
 
 load_dotenv()
 logger = logging.getLogger(__name__)

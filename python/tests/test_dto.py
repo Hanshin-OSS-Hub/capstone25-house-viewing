@@ -3,7 +3,7 @@ import json
 import pytest
 from pydantic import ValidationError
 
-from dto import (
+from schemas.dto import (
     GeneratePdfRequest,
     GenerateDiffPdfRequest,
     RiskAnalysisRequest,

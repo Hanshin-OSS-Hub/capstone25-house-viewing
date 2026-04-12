@@ -5,8 +5,8 @@ import logging
 import os
 from datetime import datetime
 
-from dto import RiskAnalysisRequest
-from utils import build_guidelines_html, build_signals_html, fmt_krw
+from schemas.dto import RiskAnalysisRequest
+from core.utils import build_guidelines_html, build_signals_html, fmt_krw
 
 logger = logging.getLogger(__name__)
 
@@ -430,7 +430,7 @@ def _render_template(data: RiskAnalysisRequest, content: dict) -> str:
 def generate_html_report(data: RiskAnalysisRequest) -> str:
     """AI 텍스트 + 고정 템플릿으로 HTML 보고서 생성. AI 실패 시 fallback 사용."""
     try:
-        from groq_client import generate_analysis_content
+        from core.groq_client import generate_analysis_content
         content = generate_analysis_content(data)
         logger.info("AI 콘텐츠 생성 성공")
     except Exception as exc:

@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 from datetime import datetime
-from dto import RecoveryRenderData
-from utils import fmt_krw, build_signals_html
+from schemas.dto import RecoveryRenderData
+from core.utils import fmt_krw, build_signals_html
 
 
 def generate_recovery_html_report(data: RecoveryRenderData) -> str:

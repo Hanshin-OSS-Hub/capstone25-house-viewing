@@ -10,14 +10,14 @@ import pdfkit
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
 
-from dto import (
+from schemas.dto import (
     GeneratePdfRequest, GenerateDiffPdfRequest,
     RiskAnalysisRequest, RecoveryRenderData,
 )
-from risk_html_generator import generate_html_report
-from recovery_html_generator import generate_recovery_html_report
-from diff_html_generator import generate_diff_html_report
-from verification_html_generator import build_snapshot_page
+from generators.risk_html_generator import generate_html_report
+from generators.recovery_html_generator import generate_recovery_html_report
+from generators.diff_html_generator import generate_diff_html_report
+from generators.verification_html_generator import build_snapshot_page
 
 router = APIRouter(prefix="/engine", tags=["Engine"])
 

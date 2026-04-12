@@ -8,7 +8,7 @@ import uuid
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
 
-from dto import AnalyzeResponseDTO
+from schemas.dto import AnalyzeResponseDTO
 from engines.ocr_core import run
 
 router = APIRouter(prefix="/engine", tags=["OCR"])
