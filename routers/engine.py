@@ -14,18 +14,22 @@ from dto import (
     GeneratePdfRequest, GenerateDiffPdfRequest,
     RiskAnalysisRequest, RecoveryRenderData,
 )
-from html_generator import generate_html_report
+from risk_html_generator import generate_html_report
 from recovery_html_generator import generate_recovery_html_report
 from diff_html_generator import generate_diff_html_report
 from verification_html_generator import build_snapshot_page
 
 router = APIRouter(prefix="/engine", tags=["Engine"])
 
-_WKHTMLTOPDF_PATH = r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe"
+# wkhtmltopdf 경로: 환경변수 우선, 없으면 OS별 기본 경로로 fallback
+_WKHTMLTOPDF_PATH = os.getenv(
+    "WKHTMLTOPDF_PATH",
+    r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe",  # Windows 기본값
+)
 _PDFKIT_CONFIG = (
     pdfkit.configuration(wkhtmltopdf=_WKHTMLTOPDF_PATH)
     if os.path.exists(_WKHTMLTOPDF_PATH)
-    else None
+    else None  # Linux(Docker)에서는 PATH에 있으면 None으로 동작
 )
 
 _PDFKIT_OPTIONS: dict = {

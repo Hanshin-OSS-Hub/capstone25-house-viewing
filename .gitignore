@@ -12,9 +12,20 @@ venv/
 .venv/
 env/
 
-# ── 테스트용 임시 파일 ──
+# ── 테스트/런타임 임시 파일 ──
 *.pdf
 test_*.json
+*.html
+
+# ── OCR 런타임 생성 파일 ──
+uploads/
+pdf_pages/
+baselines/
+*.json
+result_layout.json
+snapshot.json
+final_result.json
+baseline_snapshot.json
 
 # ── IDE 설정 ──
 .vscode/

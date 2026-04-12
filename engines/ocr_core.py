@@ -6,24 +6,24 @@ import xml.etree.ElementTree as ET
 from dotenv import load_dotenv
 from datetime import datetime, timezone, timedelta
 
-from diff_engine import diff_snapshots
-from risk_engine import compute_ltv_info, compute_risk
-from recovery_engine import compute_recovery
+try:
+    from diff_engine import diff_snapshots
+    from risk_engine import compute_ltv_info, compute_risk
+    from recovery_engine import compute_recovery
+except ImportError:
+    from engines.diff_engine import diff_snapshots
+    from engines.risk_engine import compute_ltv_info, compute_risk
+    from engines.recovery_engine import compute_recovery
 
 load_dotenv()
 
-api_url = os.getenv("API_URL")
-secret_key = os.getenv("SECRET_KEY")
-rtms_service_key = os.getenv("RTMS_SERVICE_KEY")
+# 환경 변수는 run() 호출 시점에 검증 (서버 시작을 막지 않음)
+api_url           = os.getenv("API_URL")
+secret_key        = os.getenv("SECRET_KEY")
+rtms_service_key  = os.getenv("RTMS_SERVICE_KEY")
 FORCE_PROPERTY_TYPE = (os.getenv("PROPERTY_TYPE") or "").strip().upper()
 rtms_rh_trade_url = os.getenv("RTMS_RH_TRADE_URL")
 rtms_sh_trade_url = os.getenv("RTMS_SH_TRADE_URL")
-
-if not api_url or not secret_key:
-    raise RuntimeError("❌ .env에 API_URL / SECRET_KEY가 없어. (.env 확인)")
-
-if not rtms_service_key:
-    raise RuntimeError("❌ .env에 RTMS_SERVICE_KEY가 없어. (공공데이터포털 serviceKey)")
 
 PDF_DPI = 300
 Y_MERGE_FACTOR = 0.55
@@ -936,6 +936,11 @@ def estimate_price_by_median_rh_sh(snapshot: dict, df_lawd, lookback_months: int
 
 
 def run(pdf_path: str, tenant_info: dict | None = None):
+    if not api_url or not secret_key:
+        raise RuntimeError("❌ .env에 API_URL / SECRET_KEY가 없어. (.env 확인)")
+    if not rtms_service_key:
+        raise RuntimeError("❌ .env에 RTMS_SERVICE_KEY가 없어. (공공데이터포털 serviceKey)")
+
     image_files = get_image_files(pdf_path)
 
     layout_result = {"pages": []}

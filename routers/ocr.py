@@ -7,21 +7,14 @@ import shutil
 import uuid
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
-from pydantic import BaseModel
 
+from dto import AnalyzeResponseDTO
 from engines.ocr_core import run
 
 router = APIRouter(prefix="/engine", tags=["OCR"])
 
 UPLOAD_DIR = "uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
-
-
-class AnalyzeResponseDTO(BaseModel):
-    riskLevel: str
-    rawData: str
-    mainReason: str
-    ltvScore: int
 
 
 def _convert_risk_level(result: dict) -> str:
