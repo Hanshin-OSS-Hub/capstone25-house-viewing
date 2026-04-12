@@ -164,7 +164,7 @@ def _build_playbook_html(data: RiskAnalysisRequest, meta: dict) -> str:
             f'</div>'
             f'<div style="padding:12px 14px;background:#ffffff;">'
             f'<div style="font-size:7.5pt;font-weight:700;color:#9ca3af;'
-            f'letter-spacing:0.8px;margin-bottom:8px;">&#128221; 수행 방법</div>'
+            f'letter-spacing:0.8px;margin-bottom:8px;">&#9654; 수행 방법</div>'
             f'{how_items_html}{output_html}'
             f'</div>'
             f'</div>'
@@ -234,10 +234,11 @@ def _render_template(data: RiskAnalysisRequest, content: dict) -> str:
       font-size: 11pt; font-weight: 700; padding: 8px 20px; border-radius: 4px; letter-spacing: 0.3px;
     }}
 
-    .section {{ margin-bottom: 18px; }}
+    .section {{ margin-bottom: 18px; page-break-inside: avoid; }}
     .section-title {{
       font-size: 9.5pt; font-weight: 700; color: #1c2333; text-transform: uppercase;
       letter-spacing: 0.8px; border-bottom: 1.5px solid #e5e7eb; padding-bottom: 5px; margin-bottom: 10px;
+      page-break-after: avoid;
     }}
 
     .info-table {{ width: 100%; border-collapse: collapse; }}
@@ -268,7 +269,7 @@ def _render_template(data: RiskAnalysisRequest, content: dict) -> str:
     .col-left {{ display: table-cell; width: 55%; vertical-align: top; padding-right: 10px; }}
     .col-right {{ display: table-cell; width: 45%; vertical-align: top; }}
 
-    .recovery-card {{ background: #1c2333; color: #ffffff; border-radius: 6px; padding: 16px 18px; }}
+    .recovery-card {{ background: #1c2333; color: #ffffff; border-radius: 6px; padding: 16px 18px; page-break-inside: avoid; }}
     .recovery-card .card-label {{ font-size: 8.5pt; color: #8d97aa; margin-bottom: 6px; }}
     .recovery-card .amount {{ font-size: 16pt; font-weight: 700; color: #ffffff; margin-bottom: 10px; letter-spacing: -0.5px; }}
     .recovery-card .comment {{ font-size: 8.5pt; line-height: 1.7; color: #c5cad5; border-top: 1px solid #3a4255; padding-top: 8px; }}
@@ -277,6 +278,7 @@ def _render_template(data: RiskAnalysisRequest, content: dict) -> str:
     .action-list li {{
       display: table; width: 100%; padding: 7px 10px; margin-bottom: 5px;
       background: #fff8f0; border: 1px solid #fed7aa; border-radius: 3px; font-size: 9.5pt;
+      page-break-inside: avoid;
     }}
     .bullet {{ display: table-cell; width: 16px; color: #d35400; font-size: 9pt; padding-right: 6px; vertical-align: top; }}
 
@@ -284,10 +286,11 @@ def _render_template(data: RiskAnalysisRequest, content: dict) -> str:
     .check-list li {{
       display: table; width: 100%; padding: 6px 10px; margin-bottom: 4px;
       background: #fff5f5; border: 1px solid #fecaca; border-radius: 3px; font-size: 9pt;
+      page-break-inside: avoid;
     }}
     .chk-icon {{ display: table-cell; width: 14px; color: #c0392b; font-weight: 700; padding-right: 6px; }}
 
-    .playbook-step {{ border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 10px; overflow: hidden; }}
+    .playbook-step {{ border: 1px solid #e5e7eb; border-radius: 6px; margin-bottom: 10px; page-break-inside: avoid; }}
 
     .term-table {{ width: 100%; border-collapse: collapse; font-size: 8.5pt; }}
     .term-table tr {{ border-bottom: 1px solid #f3f4f6; }}

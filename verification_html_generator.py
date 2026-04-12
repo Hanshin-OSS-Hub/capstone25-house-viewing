@@ -96,7 +96,7 @@ _PAGE_CSS = """
 }
 .snap-header h2 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
 .snap-header p  { font-size: 10px; color: #a8b2c1; }
-.snap-section { margin-bottom: 18px; }
+.snap-section { margin-bottom: 18px; page-break-inside: avoid; }
 .snap-section-title {
   font-size: 11px;
   font-weight: 700;
@@ -104,6 +104,7 @@ _PAGE_CSS = """
   border-left: 3px solid #e74c3c;
   padding-left: 8px;
   margin-bottom: 8px;
+  page-break-after: avoid;
 }
 .snap-table {
   width: 100%;

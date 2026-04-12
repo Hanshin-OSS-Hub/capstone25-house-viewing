@@ -153,11 +153,11 @@ def generate_diff_html_report(
       display: inline-block; background: {risk_change_color}; color: #ffffff;
       font-size: 11pt; font-weight: 700; padding: 8px 20px; border-radius: 4px;
     }}
-    .section {{ margin-bottom: 18px; }}
+    .section {{ margin-bottom: 18px; page-break-inside: avoid; }}
     .section-title {{
       font-size: 9.5pt; font-weight: 700; color: #1c2333; text-transform: uppercase;
       letter-spacing: 0.8px; border-bottom: 1.5px solid #e5e7eb;
-      padding-bottom: 5px; margin-bottom: 10px;
+      padding-bottom: 5px; margin-bottom: 10px; page-break-after: avoid;
     }}
     .info-table {{ width: 100%; border-collapse: collapse; }}
     .info-table td {{ padding: 7px 10px; font-size: 9.5pt; border-bottom: 1px solid #f3f4f6; }}
@@ -167,7 +167,7 @@ def generate_diff_html_report(
     }}
     .risk-compare {{
       display: table; width: 100%; border: 1px solid #e5e7eb;
-      border-radius: 6px; overflow: hidden; margin-bottom: 10px;
+      border-radius: 6px; margin-bottom: 10px; page-break-inside: avoid;
     }}
     .risk-cell {{ display: table-cell; width: 40%; padding: 16px 20px; vertical-align: middle; text-align: center; }}
     .risk-cell.before {{ background: #f9fafb; }}

@@ -96,11 +96,11 @@ def generate_recovery_html_report(data: RecoveryRenderData) -> str:
       display: inline-block; background: {meta["color"]}; color: #ffffff;
       font-size: 11pt; font-weight: 700; padding: 8px 20px; border-radius: 4px;
     }}
-    .section {{ margin-bottom: 18px; }}
+    .section {{ margin-bottom: 18px; page-break-inside: avoid; }}
     .section-title {{
       font-size: 9.5pt; font-weight: 700; color: #1c2333; text-transform: uppercase;
       letter-spacing: 0.8px; border-bottom: 1.5px solid #e5e7eb;
-      padding-bottom: 5px; margin-bottom: 10px;
+      padding-bottom: 5px; margin-bottom: 10px; page-break-after: avoid;
     }}
     .info-table {{ width: 100%; border-collapse: collapse; }}
     .info-table td {{ padding: 7px 10px; font-size: 9.5pt; border-bottom: 1px solid #f3f4f6; }}
@@ -115,7 +115,7 @@ def generate_recovery_html_report(data: RecoveryRenderData) -> str:
     .status-card {{
       display: table-cell; width: 33%; padding: 12px 14px;
       border: 1.5px solid #e5e7eb; border-radius: 6px; vertical-align: top;
-      text-align: center;
+      text-align: center; page-break-inside: avoid;
     }}
     .status-icon {{ font-size: 14pt; margin-bottom: 4px; }}
     .status-label {{ font-size: 8pt; color: #6b7280; margin-bottom: 2px; }}
@@ -123,7 +123,7 @@ def generate_recovery_html_report(data: RecoveryRenderData) -> str:
     .priority-card {{
       border-radius: 6px; padding: 14px 18px;
       border: 1.5px solid {right["color"]}; border-left: 5px solid {right["color"]};
-      margin-bottom: 14px;
+      margin-bottom: 14px; page-break-inside: avoid;
     }}
     .priority-headline {{
       font-size: 11pt; font-weight: 700; color: {right["color"]}; margin-bottom: 6px;
@@ -131,7 +131,7 @@ def generate_recovery_html_report(data: RecoveryRenderData) -> str:
     .priority-desc {{ font-size: 9.5pt; color: #374151; line-height: 1.8; }}
     .compare-card {{
       display: table; width: 100%; border: 1px solid #e5e7eb;
-      border-radius: 6px; overflow: hidden; margin-bottom: 4px;
+      border-radius: 6px; margin-bottom: 4px; page-break-inside: avoid;
     }}
     .compare-cell {{
       display: table-cell; width: 50%; padding: 12px 16px; vertical-align: middle;
@@ -285,7 +285,7 @@ def generate_recovery_html_report(data: RecoveryRenderData) -> str:
         <div class="compare-cell-value">{fmt_krw(data.deposit_amount)}</div>
       </div>
     </div>
-    <div class="compare-note">&#9432; {compare_text}</div>
+    <div class="compare-note">&#9654; {compare_text}</div>
   </div>
 
   <div class="section">
