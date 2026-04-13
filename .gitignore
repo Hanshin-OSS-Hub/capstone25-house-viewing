@@ -5,7 +5,6 @@
 /caches/
 /daemon/
 /native/
-/wrapper/
 /.idea/
 
 ############################
@@ -33,6 +32,7 @@ logs/
 .gradle/
 build/
 !gradle/wrapper/gradle-wrapper.jar
+!gradle/wrapper/gradle-wrapper.properties
 
 ############################
 # Java (Build Output)
@@ -106,7 +106,6 @@ dist/
 caches/
 daemon/
 native/
-wrapper/
 # Android 앱 모듈 Gradle wrapper는 저장소에 포함 (위 wrapper/ 예외)
 !app/gradle/wrapper/
 !app/gradle/wrapper/**
