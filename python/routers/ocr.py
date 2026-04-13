@@ -54,9 +54,9 @@ def _extract_ltv_score(result: dict) -> int:
 @router.post("/analyze", response_model=AnalyzeResponseDTO)
 async def analyze_registry(
     file: UploadFile = File(...),
-    deposit: int = Form(...),
-    move_in_date: str = Form(...),
-    fixed_date: str = Form(...),
+    deposit: int = Form(0),
+    move_in_date: str = Form(""),
+    fixed_date: str = Form(""),
 ):
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="PDF 파일만 업로드 가능")
