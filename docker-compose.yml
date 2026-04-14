@@ -5,7 +5,7 @@ services:
     build: ./backend
     restart: unless-stopped
     image: house-viewing-spring
-    container_name: spirng-server
+    container_name: spring-server
     depends_on:
       db:
         condition: service_healthy
