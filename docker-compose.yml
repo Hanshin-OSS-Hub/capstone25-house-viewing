@@ -4,7 +4,7 @@ services:
   app:
     build: ./backend
     restart: unless-stopped
-    image: house-viewing-spirng
+    image: house-viewing-spring
     container_name: spirng-server
     depends_on:
       db:
