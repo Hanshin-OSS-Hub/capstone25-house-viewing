@@ -32,12 +32,14 @@ public enum ExceptionCode {
     FIND_LOGIN_ID_FAILED("VP001",HttpStatus.BAD_REQUEST, "이메일 또는 아이디가 틀렸습니다."),
     VERIFY_PASSWORD_FAILED("VP002", HttpStatus.BAD_REQUEST, "유효하지 않은 파일입니다."),
     VERIFY_FILE_FAILED("VP003", HttpStatus.BAD_REQUEST, "유효하지 않은 파일입니다"),
+    INVALID_PDF_REQUEST("VP004", HttpStatus.BAD_REQUEST, "PDF 생성 요청이 올바르지 않습니다."),
 
     // ER
     FILE_SAVE_FAILED("ER001", HttpStatus.BAD_REQUEST, "파일 저장에 실패했습니다."),
     ANALYSIS_FAILED("ER002", HttpStatus.INTERNAL_SERVER_ERROR, "등기부 분석에 실패했습니다."),
     PDF_SAVE_FAILED("ER003", HttpStatus.BAD_REQUEST, "PDF 저장에 실패했습니다."),
     S3_UPLOAD_FAILED("ER004", HttpStatus.INTERNAL_SERVER_ERROR, "S3 서버로의 파일 업로드에 실패했습니다."),
+    PDF_GENERATION_FAILED("ER005", HttpStatus.BAD_GATEWAY, "PDF 생성 서버 호출에 실패했습니다."),
 
     // NF
     USER_NOT_FOUND("NF001", HttpStatus.NOT_FOUND, "해당 사용자는 존재하지 않습니다."),

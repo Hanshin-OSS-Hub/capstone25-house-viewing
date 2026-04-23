@@ -14,10 +14,10 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AppException.class)
     public ResponseEntity<ErrorResponse> handleDuplicateLoginId(AppException e){
         ExceptionCode code = e.getExceptionCode();
-        ErrorResponse errorResponse = new ErrorResponse(code.getCode(), code.getMessage());
+        ErrorResponse errorResponse = new ErrorResponse(code.getCode(), e.getMessage());
         log.info("status = "+code.getStatus());
         log.info("code  = "+code.getCode());
-        log.info("message = "+code.getMessage());
+        log.info("message = "+e.getMessage());
         return ResponseEntity.status(code.getStatus()).body(errorResponse);
     }
 

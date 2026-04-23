@@ -43,6 +43,19 @@ class TestGeneratePdfRequest:
         with pytest.raises(ValidationError):
             GeneratePdfRequest(snapshotName="테스트")
 
+    def test_계약후_필수필드_누락시_ValidationError(self):
+        with pytest.raises(ValidationError) as exc_info:
+            GeneratePdfRequest(
+                snapshotName="테스트",
+                rawData=RAW_HIGH_STR,
+                deposit=200_000_000,
+            )
+        assert "contractType" in str(exc_info.value)
+
+    def test_snapshotName_공백이면_ValidationError(self):
+        with pytest.raises(ValidationError):
+            GeneratePdfRequest(snapshotName="   ", rawData=RAW_HIGH_STR)
+
 
 # ── GenerateDiffPdfRequest ──────────────────────────────────────────────────
 
@@ -65,6 +78,20 @@ class TestGenerateDiffPdfRequest:
     def test_필수필드_누락시_ValidationError(self):
         with pytest.raises(ValidationError):
             GenerateDiffPdfRequest(snapshotName="테스트")
+
+    def test_snapshotName_공백시_ValidationError(self):
+        with pytest.raises(ValidationError):
+            GenerateDiffPdfRequest(
+                snapshotName=" ",
+                originData=RAW_HIGH_STR,
+                newData=RAW_HIGH_STR,
+                contractType="JEONSE",
+                deposit=200_000_000,
+                monthlyAmount=0,
+                maintenanceFee=0,
+                moveDate="2025-05-01",
+                confirmDate="2025-05-01",
+            )
 
 
 # ── RiskAnalysisRequest ─────────────────────────────────────────────────────

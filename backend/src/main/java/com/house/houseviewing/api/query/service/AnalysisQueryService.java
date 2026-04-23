@@ -1,6 +1,7 @@
 package com.house.houseviewing.api.query.service;
 
 import com.house.houseviewing.domain.analysis.postanalysis.dto.response.AnalysisResponse;
+import com.house.houseviewing.domain.analysis.postanalysis.dto.response.PostContractDiagnosisResponse;
 import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
 import com.house.houseviewing.domain.analysis.postanalysis.service.PostAnalysisService;
 import com.house.houseviewing.domain.analysis.preanalysis.entity.PreAnalysisEntity;
@@ -10,6 +11,7 @@ import com.house.houseviewing.domain.report.postreport.entity.PostReportEntity;
 import com.house.houseviewing.domain.report.postreport.service.PostReportService;
 import com.house.houseviewing.domain.report.prereport.entity.PreReportEntity;
 import com.house.houseviewing.domain.report.prereport.service.PreReportService;
+import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.file.pdf.dto.PdfDownloadResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,14 +29,15 @@ public class AnalysisQueryService {
     private final PostReportService postReportService;
     private final PreReportService preReportService;
 
-    public PdfDownloadResponse executePostContractDiagnosis(Long houseId, MultipartFile snapshot){
+    public PostContractDiagnosisResponse executePostContractDiagnosis(Long houseId, MultipartFile snapshot){
         PostAnalysisEntity analyze = postAnalysisService.postRegister(houseId, snapshot);
-        PostReportEntity pdfReport = postReportService.postRegister(analyze);
 
-        return PdfDownloadResponse.builder()
-                .pdfReportId(pdfReport.getId())
-                .filePath(pdfReport.getPdfPath())
-                .build();
+        try {
+            PostReportEntity pdfReport = postReportService.postRegister(analyze, snapshot.getOriginalFilename());
+            return PostContractDiagnosisResponse.success(analyze, pdfReport);
+        } catch (AppException e) {
+            return PostContractDiagnosisResponse.pdfFailed(analyze, e);
+        }
     }
 
     public PdfDownloadResponse executePreContractDiagnosis(Long userId, PreContractDiagnosisRequest request, MultipartFile snapshot){

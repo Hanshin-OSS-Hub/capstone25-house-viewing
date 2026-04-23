@@ -18,6 +18,7 @@ import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.global.file.pdf.dto.PdfUploadResult;
 import com.house.houseviewing.global.file.pdf.service.PdfReportTransferAndReceiveService;
+import org.mockito.ArgumentCaptor;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -70,11 +71,39 @@ class PostReportServiceTest {
             given(pdfReportTransferAndReceiveService.postTransferAndReceive(any())).willReturn(uploadResult);
             given(postReportRepository.save(any(PostReportEntity.class))).willAnswer(invocation -> invocation.getArgument(0));
 
-            PostReportEntity result = postReportService.postRegister(analysis);
+            PostReportEntity result = postReportService.postRegister(analysis, "등기부등본.pdf");
 
             assertThat(result).isNotNull();
             assertThat(result.getPdfKey()).isEqualTo("post-key");
             verify(postReportRepository).save(any(PostReportEntity.class));
+        }
+
+        @Test
+        @DisplayName("snapshotName을 PDF 요청에 포함")
+        void snapshotName_포함(){
+            UserEntity user = UserFixture.createDefaultWithId(1L);
+            HouseEntity house = HouseFixture.createWithUserAndId(user, 1L);
+            ContractEntity contract = ContractFixture.createWithHouseAndId(house, 1L);
+            PostAnalysisEntity analysis = PostAnalysisFixture.createWithId(house, 1L);
+            analysis.addContract(contract);
+
+            PdfUploadResult uploadResult = PdfUploadResult.builder()
+                    .pdfKey("post-key")
+                    .pdfPath("/post/path")
+                    .pdfName("post.pdf")
+                    .pdfSizeBytes(2048L)
+                    .build();
+            ArgumentCaptor<com.house.houseviewing.global.file.pdf.dto.PdfPostReportRequest> captor =
+                    ArgumentCaptor.forClass(com.house.houseviewing.global.file.pdf.dto.PdfPostReportRequest.class);
+
+            given(contractRepository.findById(anyLong())).willReturn(java.util.Optional.of(contract));
+            given(pdfReportTransferAndReceiveService.postTransferAndReceive(any())).willReturn(uploadResult);
+            given(postReportRepository.save(any(PostReportEntity.class))).willAnswer(invocation -> invocation.getArgument(0));
+
+            postReportService.postRegister(analysis, "등기부등본.pdf");
+
+            verify(pdfReportTransferAndReceiveService).postTransferAndReceive(captor.capture());
+            assertThat(captor.getValue().getSnapshotName()).isEqualTo("등기부등본.pdf");
         }
 
         @Test
@@ -89,7 +118,7 @@ class PostReportServiceTest {
 
             given(contractRepository.findById(anyLong())).willReturn(java.util.Optional.empty());
 
-            assertThatThrownBy(() -> postReportService.postRegister(analysis))
+            assertThatThrownBy(() -> postReportService.postRegister(analysis, "등기부등본.pdf"))
                     .isInstanceOf(AppException.class)
                     .extracting("exceptionCode")
                     .isEqualTo(ExceptionCode.CONTRACT_NOT_FOUND);

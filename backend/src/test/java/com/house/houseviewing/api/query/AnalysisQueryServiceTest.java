@@ -2,6 +2,8 @@ package com.house.houseviewing.api.query;
 
 import com.house.houseviewing.api.query.service.AnalysisQueryService;
 import com.house.houseviewing.domain.analysis.postanalysis.dto.response.AnalysisResponse;
+import com.house.houseviewing.domain.analysis.postanalysis.dto.response.PdfGenerationStatus;
+import com.house.houseviewing.domain.analysis.postanalysis.dto.response.PostContractDiagnosisResponse;
 import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
 import com.house.houseviewing.domain.analysis.postanalysis.service.PostAnalysisService;
 import com.house.houseviewing.domain.analysis.preanalysis.entity.PreAnalysisEntity;
@@ -11,6 +13,8 @@ import com.house.houseviewing.domain.report.postreport.entity.PostReportEntity;
 import com.house.houseviewing.domain.report.postreport.service.PostReportService;
 import com.house.houseviewing.domain.report.prereport.entity.PreReportEntity;
 import com.house.houseviewing.domain.report.prereport.service.PreReportService;
+import com.house.houseviewing.global.exception.AppException;
+import com.house.houseviewing.global.exception.ExceptionCode;
 import com.house.houseviewing.global.file.pdf.dto.PdfDownloadResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -28,6 +32,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.Mockito.RETURNS_DEEP_STUBS;
 import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -48,22 +53,53 @@ class AnalysisQueryServiceTest {
         @Test
         @DisplayName("성공")
         void 성공(){
-            PostAnalysisEntity analysis = mock(PostAnalysisEntity.class);
+            PostAnalysisEntity analysis = mock(PostAnalysisEntity.class, RETURNS_DEEP_STUBS);
             when(analysis.getId()).thenReturn(1L);
+            when(analysis.getHouse().getNickname()).thenReturn("자취방");
+            when(analysis.getHouse().getAddress().getAddressName()).thenReturn("서울시 강남구");
+            when(analysis.getMainReason()).thenReturn("안전");
+            when(analysis.getLtvScore()).thenReturn(82);
             PostReportEntity report = PostReportEntity.builder()
+                    .id(11L)
                     .pdfPath("/test/path")
                     .build();
 
             given(postAnalysisService.postRegister(anyLong(), any(MultipartFile.class))).willReturn(analysis);
-            given(postReportService.postRegister(any(PostAnalysisEntity.class))).willReturn(report);
+            given(postReportService.postRegister(any(PostAnalysisEntity.class), anyString())).willReturn(report);
 
             MultipartFile file = new MockMultipartFile("file", "test.jpg", "image/jpeg", "data".getBytes());
-            PdfDownloadResponse result = analysisQueryService.executePostContractDiagnosis(1L, file);
+            PostContractDiagnosisResponse result = analysisQueryService.executePostContractDiagnosis(1L, file);
 
             assertThat(result).isNotNull();
             assertThat(result.getFilePath()).isEqualTo("/test/path");
+            assertThat(result.getPdfStatus()).isEqualTo(PdfGenerationStatus.SUCCESS);
+            assertThat(result.getAnalysisId()).isEqualTo(1L);
             verify(postAnalysisService).postRegister(anyLong(), any(MultipartFile.class));
-            verify(postReportService).postRegister(any(PostAnalysisEntity.class));
+            verify(postReportService).postRegister(any(PostAnalysisEntity.class), anyString());
+        }
+
+        @Test
+        @DisplayName("PDF 실패여도 분석 성공 응답 반환")
+        void pdf_실패_분리(){
+            PostAnalysisEntity analysis = mock(PostAnalysisEntity.class, RETURNS_DEEP_STUBS);
+            when(analysis.getId()).thenReturn(1L);
+            when(analysis.getHouse().getNickname()).thenReturn("자취방");
+            when(analysis.getHouse().getAddress().getAddressName()).thenReturn("서울시 강남구");
+            when(analysis.getMainReason()).thenReturn("안전");
+            when(analysis.getLtvScore()).thenReturn(82);
+
+            given(postAnalysisService.postRegister(anyLong(), any(MultipartFile.class))).willReturn(analysis);
+            given(postReportService.postRegister(any(PostAnalysisEntity.class), anyString()))
+                    .willThrow(new AppException(ExceptionCode.INVALID_PDF_REQUEST, "snapshotName 필드는 필수입니다."));
+
+            MultipartFile file = new MockMultipartFile("file", "test.jpg", "image/jpeg", "data".getBytes());
+            PostContractDiagnosisResponse result = analysisQueryService.executePostContractDiagnosis(1L, file);
+
+            assertThat(result.getAnalysisId()).isEqualTo(1L);
+            assertThat(result.getLtvScore()).isEqualTo(82);
+            assertThat(result.getPdfStatus()).isEqualTo(PdfGenerationStatus.FAILED);
+            assertThat(result.getPdfErrorCode()).isEqualTo(ExceptionCode.INVALID_PDF_REQUEST.getCode());
+            assertThat(result.getPdfErrorMessage()).contains("snapshotName");
         }
     }
 

@@ -82,7 +82,7 @@ services:
 
   # 파이썬 서버가 하나의 services 아래로 정상적으로 통합되었습니다.
   python-server:
-    build: ./python  # 폴더를 옮겼으므로 경로 수정 완료
+    build: ./python # 폴더를 옮겼으므로 경로 수정 완료
     image: house-viewing-python
     container_name: python-server
     ports:
@@ -91,7 +91,7 @@ services:
       - ./.env
     restart: unless-stopped
     networks:
-      - app-network  # 백엔드(app)와 통신하기 위해 같은 네트워크에 묶어줍니다.
+      - app-network # 백엔드(app)와 통신하기 위해 같은 네트워크에 묶어줍니다.
 
 networks:
   app-network:

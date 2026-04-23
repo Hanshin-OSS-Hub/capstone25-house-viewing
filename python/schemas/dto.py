@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from typing import List, Literal, Optional
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 
 # ─────────────────────────────────────────────
@@ -38,27 +38,62 @@ class GeneratePdfRequest(BaseModel):
     계약전: snapshotName + rawData 만 전달
     계약후: deposit 포함 시 계약후로 판단
     """
-    snapshotName:    str            = Field(...,  description="등기부 제목/파일명")
-    rawData:         str            = Field(...,  description="분석 원본 데이터 JSON 문자열")
+    snapshotName:    str            = Field(...,  description="등기부 제목/파일명", min_length=1)
+    rawData:         str            = Field(...,  description="분석 원본 데이터 JSON 문자열", min_length=1)
     contractType:    Optional[str]  = Field(None, description="계약 유형 (JEONSE / MONTHLY)")
-    deposit:         Optional[int]  = Field(None, description="보증금 (원)")
-    monthlyAmount:   Optional[int]  = Field(None, description="월세 (원)")
-    maintenanceFee:  Optional[int]  = Field(None, description="관리비 (원)")
+    deposit:         Optional[int]  = Field(None, description="보증금 (원)", ge=0)
+    monthlyAmount:   Optional[int]  = Field(None, description="월세 (원)", ge=0)
+    maintenanceFee:  Optional[int]  = Field(None, description="관리비 (원)", ge=0)
     moveDate:        Optional[str]  = Field(None, description="전입일 (YYYY-MM-DD)")
     confirmDate:     Optional[str]  = Field(None, description="확정일자 (YYYY-MM-DD)")
+
+    @field_validator("snapshotName", "rawData")
+    @classmethod
+    def validate_required_text(cls, value: str, info) -> str:
+        if value is None or not value.strip():
+            raise ValueError(f"{info.field_name} 필드는 비어 있을 수 없습니다.")
+        return value
+
+    @model_validator(mode="after")
+    def validate_post_contract_fields(self) -> "GeneratePdfRequest":
+        if self.deposit is None:
+            return self
+
+        missing_fields: list[str] = []
+        if not self.contractType:
+            missing_fields.append("contractType")
+        if not self.moveDate:
+            missing_fields.append("moveDate")
+        if not self.confirmDate:
+            missing_fields.append("confirmDate")
+        if self.contractType == "MONTHLY" and self.monthlyAmount is None:
+            missing_fields.append("monthlyAmount")
+
+        if missing_fields:
+            fields = ", ".join(missing_fields)
+            raise ValueError(f"계약후 PDF 생성에는 다음 필드가 필요합니다: {fields}")
+
+        return self
 
 
 class GenerateDiffPdfRequest(BaseModel):
     """등기부 변동 비교 PDF 요청 DTO (Java 서버 → FastAPI)"""
-    snapshotName:    str = Field(..., description="등기부 제목")
-    originData:      str = Field(..., description="직전 분석 JSON 문자열")
-    newData:         str = Field(..., description="변동 후 분석 JSON 문자열")
+    snapshotName:    str = Field(..., description="등기부 제목", min_length=1)
+    originData:      str = Field(..., description="직전 분석 JSON 문자열", min_length=1)
+    newData:         str = Field(..., description="변동 후 분석 JSON 문자열", min_length=1)
     contractType:    str = Field(..., description="계약 유형 (JEONSE / MONTHLY)")
-    deposit:         int = Field(..., description="보증금 (원)")
-    monthlyAmount:   int = Field(..., description="월세 (원)")
-    maintenanceFee:  int = Field(..., description="관리비 (원)")
+    deposit:         int = Field(..., description="보증금 (원)", ge=0)
+    monthlyAmount:   int = Field(..., description="월세 (원)", ge=0)
+    maintenanceFee:  int = Field(..., description="관리비 (원)", ge=0)
     moveDate:        str = Field(..., description="전입일 (YYYY-MM-DD)")
     confirmDate:     str = Field(..., description="확정일자 (YYYY-MM-DD)")
+
+    @field_validator("snapshotName", "originData", "newData", "contractType", "moveDate", "confirmDate")
+    @classmethod
+    def validate_non_blank_text(cls, value: str, info) -> str:
+        if value is None or not value.strip():
+            raise ValueError(f"{info.field_name} 필드는 비어 있을 수 없습니다.")
+        return value
 
 
 # ─────────────────────────────────────────────

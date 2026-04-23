@@ -10,11 +10,12 @@ from fastapi.testclient import TestClient
 
 os.environ.setdefault("GEMINI_FALLBACK_ENABLED", "true")
 
-from main import app
+from app_factory import create_app
 from tests.conftest import RAW_HIGH, RAW_LOW, RAW_HIGH_STR, RAW_LOW_STR
 
 FAKE_PDF = b"%PDF-1.4 fake pdf bytes"
 
+app = create_app(include_ocr=False)
 client = TestClient(app)
 
 
@@ -87,6 +88,8 @@ class TestGeneratePdfPre:
             "rawData": RAW_HIGH_STR,
         })
         assert res.status_code == 422
+        assert res.json()["code"] == "INVALID_PDF_REQUEST"
+        assert "snapshotName" in res.json()["message"]
 
     def test_LOW_위험도_정상처리(self):
         with _pdf_patch():
@@ -138,6 +141,18 @@ class TestGeneratePdfPost:
         with _pdf_patch():
             res = client.post("/engine/generate-pdf", json=self._req())
         assert "content-disposition" in res.headers
+
+    def test_계약후_필수필드_누락_422(self):
+        res = client.post("/engine/generate-pdf", json=self._req(snapshotName=None))
+        assert res.status_code == 422
+        assert res.json()["code"] == "INVALID_PDF_REQUEST"
+
+    def test_계약후_계약유형_누락_422(self):
+        req = self._req()
+        del req["contractType"]
+        res = client.post("/engine/generate-pdf", json=req)
+        assert res.status_code == 422
+        assert "contractType" in res.json()["message"]
 
 
 # ── POST /engine/generate-pdf/diff ──────────────────────────────────────────
@@ -191,6 +206,7 @@ class TestGenerateDiffPdf:
             "originData": RAW_LOW_STR,
         })
         assert res.status_code == 422
+        assert res.json()["code"] == "INVALID_PDF_REQUEST"
 
 
 # ── 내부 변환 헬퍼 단위 테스트 ────────────────────────────────────────────────
