@@ -65,7 +65,7 @@ class AnalysisQueryServiceTest {
                     .build();
 
             given(postAnalysisService.postRegister(anyLong(), any(MultipartFile.class))).willReturn(analysis);
-            given(postReportService.postRegister(any(PostAnalysisEntity.class), anyString())).willReturn(report);
+            given(postReportService.postRegister(any(PostAnalysisEntity.class))).willReturn(report);
 
             MultipartFile file = new MockMultipartFile("file", "test.jpg", "image/jpeg", "data".getBytes());
             PostContractDiagnosisResponse result = analysisQueryService.executePostContractDiagnosis(1L, file);
@@ -75,7 +75,7 @@ class AnalysisQueryServiceTest {
             assertThat(result.getPdfStatus()).isEqualTo(PdfGenerationStatus.SUCCESS);
             assertThat(result.getAnalysisId()).isEqualTo(1L);
             verify(postAnalysisService).postRegister(anyLong(), any(MultipartFile.class));
-            verify(postReportService).postRegister(any(PostAnalysisEntity.class), anyString());
+            verify(postReportService).postRegister(any(PostAnalysisEntity.class));
         }
 
         @Test
@@ -89,8 +89,8 @@ class AnalysisQueryServiceTest {
             when(analysis.getLtvScore()).thenReturn(82);
 
             given(postAnalysisService.postRegister(anyLong(), any(MultipartFile.class))).willReturn(analysis);
-            given(postReportService.postRegister(any(PostAnalysisEntity.class), anyString()))
-                    .willThrow(new AppException(ExceptionCode.INVALID_PDF_REQUEST, "snapshotName 필드는 필수입니다."));
+            given(postReportService.postRegister(any(PostAnalysisEntity.class)))
+                    .willThrow(new AppException(ExceptionCode.INVALID_PDF_REQUEST, "contractType 필드는 필수입니다."));
 
             MultipartFile file = new MockMultipartFile("file", "test.jpg", "image/jpeg", "data".getBytes());
             PostContractDiagnosisResponse result = analysisQueryService.executePostContractDiagnosis(1L, file);
@@ -99,7 +99,7 @@ class AnalysisQueryServiceTest {
             assertThat(result.getLtvScore()).isEqualTo(82);
             assertThat(result.getPdfStatus()).isEqualTo(PdfGenerationStatus.FAILED);
             assertThat(result.getPdfErrorCode()).isEqualTo(ExceptionCode.INVALID_PDF_REQUEST.getCode());
-            assertThat(result.getPdfErrorMessage()).contains("snapshotName");
+            assertThat(result.getPdfErrorMessage()).contains("contractType");
         }
     }
 

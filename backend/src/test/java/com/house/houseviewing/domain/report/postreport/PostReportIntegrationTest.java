@@ -86,7 +86,7 @@ public class PostReportIntegrationTest {
                         .pdfSizeBytes(2048L)
                         .build());
 
-        PostReportEntity report = postReportService.postRegister(savedAnalysis, "등기부등본.pdf");
+        PostReportEntity report = postReportService.postRegister(savedAnalysis);
 
         assertThat(report).isNotNull();
         assertThat(report.getPdfKey()).isEqualTo("post-key");

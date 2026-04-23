@@ -15,7 +15,6 @@ import com.house.houseviewing.global.file.pdf.service.PdfReportTransferAndReceiv
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 
@@ -30,11 +29,11 @@ public class PostReportService {
     private final PostAnalysisRepository postAnalysisRepository;
 
     @Transactional
-    public PostReportEntity postRegister(PostAnalysisEntity analyze, String snapshotName){
+    public PostReportEntity postRegister(PostAnalysisEntity analyze){
         Long contractId = analyze.getContract().getId();
         ContractEntity contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new AppException(ExceptionCode.CONTRACT_NOT_FOUND));
-        PdfPostReportRequest request = getPdfReportPostRequest(analyze, contract, snapshotName);
+        PdfPostReportRequest request = getPdfReportPostRequest(analyze, contract);
         PdfUploadResult uploadResult = pdfReportTransferAndReceiveService.postTransferAndReceive(request);
         PostReportEntity pdfReport = getPdfReportEntity(uploadResult);
         pdfReport.addRegistryAnalysis(analyze);
@@ -73,9 +72,8 @@ public class PostReportService {
                 .build();
     }
 
-    private static PdfPostReportRequest getPdfReportPostRequest(PostAnalysisEntity analyze, ContractEntity contract, String snapshotName) {
+    private static PdfPostReportRequest getPdfReportPostRequest(PostAnalysisEntity analyze, ContractEntity contract) {
         return PdfPostReportRequest.builder()
-                .snapshotName(resolveSnapshotName(analyze, snapshotName))
                 .rawData(analyze.getRawData())
                 .contractType(contract.getContractType())
                 .deposit(contract.getDeposit())
@@ -88,7 +86,6 @@ public class PostReportService {
 
     private static PdfDiffReportRequest getPdfDiffReportRequest(String originData, PostAnalysisEntity analysis, ContractEntity contract){
         return PdfDiffReportRequest.builder()
-                .snapshotName(resolveSnapshotName(analysis, null))
                 .originData(originData)
                 .newData(analysis.getRawData())
                 .contractType(contract.getContractType())
@@ -98,21 +95,5 @@ public class PostReportService {
                 .moveDate(contract.getMoveDate())
                 .confirmDate(contract.getConfirmDate())
                 .build();
-    }
-
-    private static String resolveSnapshotName(PostAnalysisEntity analysis, String snapshotName) {
-        if (StringUtils.hasText(snapshotName)) {
-            return snapshotName;
-        }
-        if (analysis.getHouse() != null) {
-            if (StringUtils.hasText(analysis.getHouse().getNickname())) {
-                return analysis.getHouse().getNickname();
-            }
-            if (analysis.getHouse().getAddress() != null
-                    && StringUtils.hasText(analysis.getHouse().getAddress().getAddressName())) {
-                return analysis.getHouse().getAddress().getAddressName();
-            }
-        }
-        return "post-analysis-" + analysis.getId();
     }
 }

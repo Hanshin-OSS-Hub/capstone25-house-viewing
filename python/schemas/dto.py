@@ -38,7 +38,7 @@ class GeneratePdfRequest(BaseModel):
     계약전: snapshotName + rawData 만 전달
     계약후: deposit 포함 시 계약후로 판단
     """
-    snapshotName:    str            = Field(...,  description="등기부 제목/파일명", min_length=1)
+    snapshotName:    Optional[str]  = Field(None, description="등기부 제목/파일명")
     rawData:         str            = Field(...,  description="분석 원본 데이터 JSON 문자열", min_length=1)
     contractType:    Optional[str]  = Field(None, description="계약 유형 (JEONSE / MONTHLY)")
     deposit:         Optional[int]  = Field(None, description="보증금 (원)", ge=0)
@@ -47,7 +47,15 @@ class GeneratePdfRequest(BaseModel):
     moveDate:        Optional[str]  = Field(None, description="전입일 (YYYY-MM-DD)")
     confirmDate:     Optional[str]  = Field(None, description="확정일자 (YYYY-MM-DD)")
 
-    @field_validator("snapshotName", "rawData")
+    @field_validator("snapshotName", mode="before")
+    @classmethod
+    def normalize_snapshot_name(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        value = value.strip()
+        return value or None
+
+    @field_validator("rawData")
     @classmethod
     def validate_required_text(cls, value: str, info) -> str:
         if value is None or not value.strip():
@@ -57,6 +65,8 @@ class GeneratePdfRequest(BaseModel):
     @model_validator(mode="after")
     def validate_post_contract_fields(self) -> "GeneratePdfRequest":
         if self.deposit is None:
+            if not self.snapshotName:
+                raise ValueError("계약전 PDF 생성에는 snapshotName 필드가 필요합니다.")
             return self
 
         missing_fields: list[str] = []
@@ -78,7 +88,7 @@ class GeneratePdfRequest(BaseModel):
 
 class GenerateDiffPdfRequest(BaseModel):
     """등기부 변동 비교 PDF 요청 DTO (Java 서버 → FastAPI)"""
-    snapshotName:    str = Field(..., description="등기부 제목", min_length=1)
+    snapshotName:    Optional[str] = Field(None, description="등기부 제목")
     originData:      str = Field(..., description="직전 분석 JSON 문자열", min_length=1)
     newData:         str = Field(..., description="변동 후 분석 JSON 문자열", min_length=1)
     contractType:    str = Field(..., description="계약 유형 (JEONSE / MONTHLY)")
@@ -88,7 +98,15 @@ class GenerateDiffPdfRequest(BaseModel):
     moveDate:        str = Field(..., description="전입일 (YYYY-MM-DD)")
     confirmDate:     str = Field(..., description="확정일자 (YYYY-MM-DD)")
 
-    @field_validator("snapshotName", "originData", "newData", "contractType", "moveDate", "confirmDate")
+    @field_validator("snapshotName", mode="before")
+    @classmethod
+    def normalize_diff_snapshot_name(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        value = value.strip()
+        return value or None
+
+    @field_validator("originData", "newData", "contractType", "moveDate", "confirmDate")
     @classmethod
     def validate_non_blank_text(cls, value: str, info) -> str:
         if value is None or not value.strip():

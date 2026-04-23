@@ -33,7 +33,7 @@ public class AnalysisQueryService {
         PostAnalysisEntity analyze = postAnalysisService.postRegister(houseId, snapshot);
 
         try {
-            PostReportEntity pdfReport = postReportService.postRegister(analyze, snapshot.getOriginalFilename());
+            PostReportEntity pdfReport = postReportService.postRegister(analyze);
             return PostContractDiagnosisResponse.success(analyze, pdfReport);
         } catch (AppException e) {
             return PostContractDiagnosisResponse.pdfFailed(analyze, e);

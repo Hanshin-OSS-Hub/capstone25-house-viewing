@@ -48,6 +48,23 @@ _PDFKIT_OPTIONS: dict = {
 _LEVEL_MAP = {"HIGH": "High", "MEDIUM": "Medium", "LOW": "Low"}
 
 
+def _resolve_snapshot_name(raw: dict, snapshot_name: str | None, fallback: str = "analysis-report") -> str:
+    if snapshot_name:
+        return snapshot_name
+
+    snapshot = raw.get("snapshot", {})
+    address = snapshot.get("address", {})
+    for candidate in (
+        address.get("address"),
+        address.get("addressName"),
+        snapshot.get("snapshotName"),
+    ):
+        if isinstance(candidate, str) and candidate.strip():
+            return candidate.strip()
+
+    return fallback
+
+
 def _extract_raw_info(raw: dict, snapshot_name: str) -> dict:
     """은섭 분석 JSON에서 공통 필드 추출"""
     risk_info = raw.get("risk", {})
@@ -91,7 +108,7 @@ def _build_render_data(snapshot_name: str, raw: dict) -> RiskAnalysisRequest:
 def _build_recovery_render_data(request: GeneratePdfRequest) -> RecoveryRenderData:
     """은섭 분석 JSON → PDF 2 렌더링 데이터 변환"""
     raw  = json_lib.loads(request.rawData)
-    info = _extract_raw_info(raw, request.snapshotName)
+    info = _extract_raw_info(raw, _resolve_snapshot_name(raw, request.snapshotName))
 
     # property_value: ltv 정보 → valuation 순으로 fallback
     ltv_info = raw.get("ltv") or {}
@@ -154,6 +171,8 @@ async def generate_pdf(request: GeneratePdfRequest) -> Response:
     except ValueError:
         raise HTTPException(status_code=422, detail="rawData가 유효한 JSON 문자열이 아닙니다.")
 
+    resolved_snapshot_name = _resolve_snapshot_name(raw, request.snapshotName)
+
     t0 = time.perf_counter()
 
     if request.deposit is not None:
@@ -166,7 +185,7 @@ async def generate_pdf(request: GeneratePdfRequest) -> Response:
         filename = f"recovery_{render_data.user_name}.pdf"
     else:
         # 계약전: 위험 분석 PDF
-        render_data = _build_render_data(request.snapshotName, raw)
+        render_data = _build_render_data(resolved_snapshot_name, raw)
         try:
             html_content = generate_html_report(render_data)
         except Exception as e:
@@ -215,9 +234,11 @@ async def generate_diff_pdf(request: GenerateDiffPdfRequest) -> Response:
     except ValueError:
         raise HTTPException(status_code=422, detail="originData 또는 newData가 유효한 JSON이 아닙니다.")
 
+    snapshot_name = _resolve_snapshot_name(new_raw, request.snapshotName, fallback="diff-analysis")
+
     try:
         html_content = generate_diff_html_report(
-            snapshot_name=request.snapshotName,
+            snapshot_name=snapshot_name,
             origin_raw=origin_raw,
             new_raw=new_raw,
             contract_type=request.contractType,
@@ -231,7 +252,7 @@ async def generate_diff_pdf(request: GenerateDiffPdfRequest) -> Response:
         raise HTTPException(status_code=503, detail=f"변동 보고서 생성 실패: {e}")
 
     pdf_bytes    = _pdf_bytes(html_content)
-    encoded_name = quote(f"diff_{request.snapshotName}.pdf", safe="")
+    encoded_name = quote(f"diff_{snapshot_name}.pdf", safe="")
     return Response(
         content=pdf_bytes,
         media_type="application/pdf",

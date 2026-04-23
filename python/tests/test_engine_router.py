@@ -143,9 +143,9 @@ class TestGeneratePdfPost:
         assert "content-disposition" in res.headers
 
     def test_계약후_필수필드_누락_422(self):
-        res = client.post("/engine/generate-pdf", json=self._req(snapshotName=None))
-        assert res.status_code == 422
-        assert res.json()["code"] == "INVALID_PDF_REQUEST"
+        with _pdf_patch():
+            res = client.post("/engine/generate-pdf", json=self._req(snapshotName=None))
+        assert res.status_code == 200
 
     def test_계약후_계약유형_누락_422(self):
         req = self._req()
@@ -202,7 +202,6 @@ class TestGenerateDiffPdf:
 
     def test_필수필드_누락_422(self):
         res = client.post("/engine/generate-pdf/diff", json={
-            "snapshotName": "테스트",
             "originData": RAW_LOW_STR,
         })
         assert res.status_code == 422

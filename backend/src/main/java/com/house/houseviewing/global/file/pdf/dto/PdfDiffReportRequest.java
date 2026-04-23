@@ -14,8 +14,6 @@ import java.time.LocalDate;
 @NoArgsConstructor
 public class PdfDiffReportRequest {
 
-    private String snapshotName;
-
     private String originData;
 
     private String newData;
