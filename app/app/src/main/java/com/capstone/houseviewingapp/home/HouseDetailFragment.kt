@@ -85,9 +85,15 @@ class HouseDetailFragment : Fragment(R.layout.fragment_house_detail) {
         binding.ltvProgress.max = 100
         val trackColor = ContextCompat.getColor(requireContext(), R.color.textviewgray)
         binding.ltvProgress.trackColor = trackColor
-        // TODO: UI 체크가 끝나면 fallbackLtv 제거하고 ltv가 null일 때 "--" 처리로 되돌리기.
-        val fallbackLtv = 52
-        val safeValue = (ltv ?: fallbackLtv).coerceIn(0, 100)
+        val safeValue = ltv?.coerceIn(0, 100)
+        if (safeValue == null) {
+            binding.ltvValueTextView.text = "--"
+            binding.ltvProgress.progress = 0
+            val neutral = ContextCompat.getColor(requireContext(), R.color.textgray)
+            binding.ltvProgress.setIndicatorColor(neutral)
+            binding.ltvValueTextView.setTextColor(neutral)
+            return
+        }
         binding.ltvValueTextView.text = "$safeValue%"
         binding.ltvProgress.progress = safeValue
 
