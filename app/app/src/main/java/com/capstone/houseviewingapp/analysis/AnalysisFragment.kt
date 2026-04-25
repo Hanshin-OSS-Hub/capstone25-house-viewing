@@ -44,55 +44,8 @@ class AnalysisFragment : Fragment(R.layout.fragment_analysis) {
         setupTabs()
         setupFilterEvents()
 
-        ensureSeedRecordsOnceForDebug() //NOTE: UI 점검용 시드 데이터, 실제론 필요 없을 수 있음
         allRecords = AnalysisLocalStore.getRecords(requireContext())
         applyFilters()
-    }
-
-    private fun ensureSeedRecordsOnceForDebug() {
-        val p = requireContext().getSharedPreferences("analysis_debug_pref", android.content.Context.MODE_PRIVATE)
-        val seeded = p.getBoolean("seeded_once", false)
-        val current = AnalysisLocalStore.getRecords(requireContext())
-
-        if (seeded && current.isNotEmpty()) return
-
-        if (current.isEmpty()) {
-            AnalysisLocalStore.addRecord(
-                requireContext(),
-                AnalysisRecordItem(
-                    title = "강남 전세집",
-                    address = "서울시 강남구 테헤란로 123",
-                    riskSummary = "소유자 정보 불일치",
-                    level = RiskLevel.RED,
-                    source = RecordSource.MANUAL,
-                    ltv = 32.0
-                )
-            )
-            AnalysisLocalStore.addRecord(
-                requireContext(),
-                AnalysisRecordItem(
-                    title = "판교 오피스텔",
-                    address = "경기도 성남시 분당구 판교로 789",
-                    riskSummary = "근저당 확인 필요",
-                    level = RiskLevel.AMBER,
-                    source = RecordSource.MANUAL,
-                    ltv = 58.0
-                )
-            )
-            AnalysisLocalStore.addRecord(
-                requireContext(),
-                AnalysisRecordItem(
-                    title = "해운대 본가",
-                    address = "부산시 해운대구 해운대대로 456",
-                    riskSummary = "권리 관계 양호",
-                    level = RiskLevel.BLUE,
-                    source = RecordSource.MANUAL,
-                    ltv = 82.0
-                )
-            )
-        }
-
-        p.edit().putBoolean("seeded_once", true).apply()
     }
     private fun setupRecycler() {
         recordAdapter = AnalysisRecordAdapter(
@@ -109,10 +62,12 @@ class AnalysisFragment : Fragment(R.layout.fragment_analysis) {
                     .show()
             },
             onDetailClick = { item ->
-                val uri = ReportPdfDummyFactory.createOrGet(requireContext(), item)
+                val uriRaw = item.sourcePdfUri
+                    ?.takeIf { it.isNotBlank() }
+                    ?: ReportPdfDummyFactory.createOrGet(requireContext(), item).toString()
                 startActivity(
                     Intent(requireContext(), PdfViewerActivity::class.java).apply {
-                        putExtra(PdfViewerActivity.EXTRA_URI, uri.toString())
+                        putExtra(PdfViewerActivity.EXTRA_URI, uriRaw)
                         putExtra(PdfViewerActivity.EXTRA_TITLE, "${item.title} 상세 대응 리포트")
                         putExtra(PdfViewerActivity.EXTRA_SHOW_REPORT_BUTTON, true)
                     }
