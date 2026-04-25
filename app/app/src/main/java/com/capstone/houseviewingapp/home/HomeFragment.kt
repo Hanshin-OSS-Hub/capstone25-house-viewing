@@ -9,15 +9,23 @@ import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.capstone.houseviewingapp.MainActivity
 import com.capstone.houseviewingapp.R
+import com.capstone.houseviewingapp.analysis.AnalysisRepositoryProvider
+import com.capstone.houseviewingapp.analysis.model.AnalysisResponse
 import com.capstone.houseviewingapp.data.local.AuthTokenLocalStore
 import com.capstone.houseviewingapp.data.local.BillingLocalStore
 import com.capstone.houseviewingapp.data.local.HouseLocalStore
 import com.capstone.houseviewingapp.data.local.QuickDiagnosisLocalStore
+import com.capstone.houseviewingapp.data.remote.ApiErrorFormatter
 import com.capstone.houseviewingapp.databinding.FragmentHomeBinding
 import com.capstone.houseviewingapp.registration.HouseRegistrationActivity
+import com.capstone.houseviewingapp.subscription.SubscriptionRepositoryProvider
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import android.widget.Toast
 
 class HomeFragment : Fragment (R.layout.fragment_home) {
 
@@ -43,6 +51,7 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        syncHouseLtvFromRemote()
 
         parentFragmentManager.setFragmentResultListener(
             MainActivity.RESULT_BOTTOM_REFRESH,
@@ -50,6 +59,7 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
         ) { _, result ->
             val targetId = result.getInt(MainActivity.RESULT_KEY_TARGET_ID, -1)
             if (targetId == R.id.nav_home) {
+                syncHouseLtvFromRemote()
                 loadAndShowCards()
                 refreshQuickDiagnosisBanner()
             }
@@ -90,7 +100,7 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
         ) { _, result ->
             val shouldContinue = result.getBoolean(PaidQuickDiagnosisDialogFragment.KEY_CONTINUE, false)
             if (shouldContinue) {
-                openQuickDiagnosisFlow()
+                startPaidQuickDiagnosis()
             }
         }
 
@@ -107,7 +117,10 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
         binding.startButton.setOnClickListener {
             val loginId = AuthTokenLocalStore.getLoginId(requireContext()).orEmpty()
             val freeUsed = QuickDiagnosisLocalStore.isFreeUsed(requireContext(), loginId)
-            if (freeUsed) {
+            val isPremium = BillingLocalStore.isPremium(requireContext())
+            if (!freeUsed) {
+                openQuickDiagnosisFlow()
+            } else if (!isPremium) {
                 PaidQuickDiagnosisDialogFragment()
                     .show(parentFragmentManager, "PaidQuickDiagnosisDialog")
             } else {
@@ -158,12 +171,40 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
     private fun refreshQuickDiagnosisBanner() {
         val loginId = AuthTokenLocalStore.getLoginId(requireContext()).orEmpty()
         val freeUsed = QuickDiagnosisLocalStore.isFreeUsed(requireContext(), loginId)
-        if (freeUsed) {
-            binding.bannerTextView.text = "부동산 안전 진단"
+        val isPremium = BillingLocalStore.isPremium(requireContext())
+        if (!freeUsed) {
+            binding.bannerTextView.text = "부동산 무료 안전 진단"
+            binding.startButton.text = "무료 진단하기 ->"
+        } else if (isPremium) {
+            binding.bannerTextView.text = "프리미엄 부동산 안전 진단"
             binding.startButton.text = "진단하기 ->"
         } else {
-            binding.bannerTextView.text = "1회 무료 부동산 안전 진단"
-            binding.startButton.text = "무료 진단하기 ->"
+            binding.bannerTextView.text = "부동산 안전 진단"
+            binding.startButton.text = "진단하기 ->"
+        }
+    }
+
+    private fun startPaidQuickDiagnosis() {
+        val accessToken = AuthTokenLocalStore.getAccessToken(requireContext()).orEmpty()
+        if (accessToken.isBlank()) {
+            Toast.makeText(requireContext(), "로그인이 필요합니다. 다시 로그인해 주세요.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            val result = SubscriptionRepositoryProvider.repository.subscribePremium(accessToken)
+            result.onSuccess {
+                BillingLocalStore.setPremium(requireContext(), true)
+                val loginId = AuthTokenLocalStore.getLoginId(requireContext()).orEmpty()
+                QuickDiagnosisLocalStore.markFreeUsed(requireContext(), loginId)
+                refreshQuickDiagnosisBanner()
+                openQuickDiagnosisFlow()
+            }.onFailure { throwable ->
+                Toast.makeText(
+                    requireContext(),
+                    ApiErrorFormatter.withCode("결제 상태 반영에 실패했습니다.", throwable),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 
@@ -188,9 +229,67 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
     override fun onResume() {
         super.onResume()
         if (_binding != null) {
+            syncHouseLtvFromRemote()
             loadAndShowCards()
             refreshQuickDiagnosisBanner()
         }
+    }
+
+    private fun syncHouseLtvFromRemote() {
+        val accessToken = AuthTokenLocalStore.getAccessToken(requireContext()).orEmpty()
+        if (accessToken.isBlank()) return
+        viewLifecycleOwner.lifecycleScope.launch {
+            val analyses = AnalysisRepositoryProvider.repository
+                .getAnalyses(accessToken)
+                .getOrNull()
+                .orEmpty()
+            if (analyses.isEmpty()) return@launch
+
+            val houses = HouseLocalStore.getHouses(requireContext())
+            houses.forEach { card ->
+                val houseId = card.houseId ?: return@forEach
+                val detail = HouseLocalStore.getHouseDetail(requireContext(), houseId) ?: return@forEach
+                val best = analyses
+                    .asSequence()
+                    .filter { it.ltvScore != null }
+                    .filter { it.nickname == detail.homeName }
+                    .sortedWith(
+                        compareByDescending<AnalysisResponse> { matchAddressScore(it.address, detail.originAddress) }
+                            .thenByDescending { it.ltvScore ?: -1 }
+                    )
+                    .firstOrNull()
+                    ?: return@forEach
+
+                val latestLtv = best.ltvScore
+                if (latestLtv != null && detail.ltv != latestLtv) {
+                    HouseLocalStore.updateHouseDetailById(
+                        requireContext(),
+                        houseId,
+                        detail.copy(ltv = latestLtv)
+                    )
+                }
+            }
+            loadAndShowCards()
+        }
+    }
+
+    private fun matchAddressScore(serverAddress: String, localAddress: String): Int {
+        val a = normalizeAddress(serverAddress)
+        val b = normalizeAddress(localAddress)
+        if (a.isBlank() || b.isBlank()) return 0
+        return when {
+            a == b -> 3
+            a.contains(b) || b.contains(a) -> 2
+            else -> 0
+        }
+    }
+
+    private fun normalizeAddress(value: String): String {
+        return value
+            .lowercase()
+            .replace(Regex("\\s+"), "")
+            .replace("대한민국", "")
+            .replace("경기도", "경기")
     }
 
     override fun onDestroyView() {
