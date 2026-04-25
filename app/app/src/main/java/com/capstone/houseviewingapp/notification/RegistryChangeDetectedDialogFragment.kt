@@ -5,13 +5,15 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.graphics.drawable.toDrawable
 import androidx.fragment.app.DialogFragment
-import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.NavHostFragment
 import com.capstone.houseviewingapp.MainActivity
-import com.capstone.houseviewingapp.R
+import com.capstone.houseviewingapp.analysis.AnalysisFlow
+import com.capstone.houseviewingapp.data.local.HouseLocalStore
 import com.capstone.houseviewingapp.databinding.DialogRegistryChangeDetectedBinding
+import com.capstone.houseviewingapp.registration.HouseRegistrationActivity
+import android.content.Intent
 
 class RegistryChangeDetectedDialogFragment: DialogFragment() {
     private var _binding: DialogRegistryChangeDetectedBinding? = null
@@ -36,16 +38,28 @@ class RegistryChangeDetectedDialogFragment: DialogFragment() {
 
         binding.analysisButton.setOnClickListener {
             dismiss()
-            (requireActivity() as? MainActivity)?.let { activity ->
-                (activity.supportFragmentManager.findFragmentById(R.id.nav_host_fragment) as? NavHostFragment)
-                    ?.navController
-                    ?.navigate(
-                        R.id.nav_analysis_loading,
-                        androidx.core.os.bundleOf(
-                            com.capstone.houseviewingapp.analysis.AnalysisFlow.ARG_ANALYSIS_SOURCE to
-                                    com.capstone.houseviewingapp.analysis.AnalysisFlow.SOURCE_AUTO
-                        )
-                    )
+            val latestHouseId = HouseLocalStore.getHouses(requireContext())
+                .lastOrNull()
+                ?.houseId
+                ?: -1L
+            if (latestHouseId > 0L) {
+                val intent = Intent(requireContext(), MainActivity::class.java).apply {
+                    flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
+                    putExtra(MainActivity.EXTRA_SHOW_ANALYSIS_LOADING, true)
+                    putExtra(MainActivity.EXTRA_ANALYSIS_SOURCE, AnalysisFlow.SOURCE_AUTO)
+                    putExtra(AnalysisFlow.ARG_HOUSE_ID, latestHouseId)
+                }
+                startActivity(intent)
+            } else {
+                Toast.makeText(
+                    requireContext(),
+                    "등록된 집이 없어 빠른 진단으로 이동합니다.",
+                    Toast.LENGTH_SHORT
+                ).show()
+                val intent = Intent(requireContext(), HouseRegistrationActivity::class.java).apply {
+                    putExtra(HouseRegistrationActivity.EXTRA_QUICK_DIAGNOSIS_MODE, true)
+                }
+                startActivity(intent)
             }
         }
         binding.buttonLater.setOnClickListener {
