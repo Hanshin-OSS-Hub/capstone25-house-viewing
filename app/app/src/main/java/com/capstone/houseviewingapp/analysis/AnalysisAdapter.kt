@@ -54,9 +54,18 @@ class AnalysisRecordAdapter(
         fun bind(item: AnalysisRecordItem) {
             binding.titleTextView.text = item.title
             binding.addressTextView.text = item.address
-            binding.riskTextView.text = item.riskSummary
+            binding.riskTextView.text = summarizeRisk(item.riskSummary)
 
-            val (badgeText, badgeBgRes, textColorRes, iconRes) = when (item.level) {
+            val normalizedScore = item.ltv?.toInt()?.coerceIn(0, 100)
+            val displayLevel = normalizedScore?.let { score ->
+                when {
+                    score <= 60 -> RiskLevel.BLUE
+                    score <= 70 -> RiskLevel.AMBER
+                    else -> RiskLevel.RED
+                }
+            } ?: item.level
+
+            val (badgeText, badgeBgRes, textColorRes, iconRes) = when (displayLevel) {
                 RiskLevel.RED -> UiSpec(
                     "고위험",
                     R.drawable.bg_analysis_badge_red,
@@ -91,9 +100,17 @@ class AnalysisRecordAdapter(
             binding.riskIconView.setImageResource(iconRes)
             binding.riskIconView.setColorFilter(c)
 
-            binding.scoreTextView.text = item.ltv?.toInt()?.let { "${it}점" } ?: "--점"
+            binding.scoreTextView.text = normalizedScore?.let { "${it}점" } ?: "--점"
             binding.detailButton.text = "상세 리포트 확인"
             binding.detailButton.setOnClickListener { onDetailClick(item) }
+        }
+
+        private fun summarizeRisk(raw: String): String {
+            val text = raw.trim().replace(Regex("\\s+"), " ")
+            if (text.isBlank()) return "-"
+            val splitToken = listOf(". ", " / ", "; ", "다만 ").firstOrNull { text.contains(it) }
+            val primary = if (splitToken != null) text.substringBefore(splitToken).trim() else text
+            return if (primary.length > 40) primary.take(40).trimEnd() + "..." else primary
         }
     }
 }
