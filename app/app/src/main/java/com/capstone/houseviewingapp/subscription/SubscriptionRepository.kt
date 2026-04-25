@@ -2,5 +2,5 @@ package com.capstone.houseviewingapp.subscription
 
 interface SubscriptionRepository {
     /** POST /subscriptions/premium — 바디 없음 */
-    fun subscribePremium(accessToken: String): Result<Unit>
+    suspend fun subscribePremium(accessToken: String): Result<Unit>
 }
