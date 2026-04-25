@@ -5,16 +5,27 @@ import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.widget.Toast
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.animation.AccelerateDecelerateInterpolator
+import androidx.lifecycle.lifecycleScope
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
 import com.capstone.houseviewingapp.R
+import com.capstone.houseviewingapp.analysis.model.ApiRiskLevel
 import com.capstone.houseviewingapp.analysis.model.PreContractDiagnosisRequest
 import com.capstone.houseviewingapp.data.local.AuthTokenLocalStore
+import com.capstone.houseviewingapp.data.local.BillingLocalStore
+import com.capstone.houseviewingapp.data.local.QuickDiagnosisLocalStore
+import com.capstone.houseviewingapp.data.remote.ApiErrorFormatter
+import com.capstone.houseviewingapp.data.remote.RemoteApiException
 import com.capstone.houseviewingapp.databinding.FragmentAnalysisLoadingBinding
+import com.capstone.houseviewingapp.subscription.SubscriptionRepositoryProvider
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class AnalysisLoadingFragment : Fragment() {
     private var _binding: FragmentAnalysisLoadingBinding? = null
@@ -22,6 +33,10 @@ class AnalysisLoadingFragment : Fragment() {
 
     private val handler = Handler(Looper.getMainLooper())
     private var currentStep = 0
+    private var analysisJob: Job? = null
+    private var visualTickerStartedAt = 0L
+    private var isAnalysisDone = false
+    private var completionPayload: CompletionPayload? = null
 
     private val stepPulseAnimators = mutableMapOf<Int, AnimatorSet>()
 
@@ -30,6 +45,16 @@ class AnalysisLoadingFragment : Fragment() {
         private const val STATUS_PROCESSING = "Processing..."
         private const val STATUS_COMPLETED = "Completed"
     }
+
+    private data class CompletionPayload(
+        val source: RecordSource,
+        val title: String,
+        val address: String,
+        val riskSummary: String,
+        val level: RiskLevel,
+        val ltvScore: Double?,
+        val sourcePdfUri: String?
+    )
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -44,31 +69,357 @@ class AnalysisLoadingFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         binding.buttonCancel.setOnClickListener {
+            analysisJob?.cancel()
             findNavController().popBackStack()
         }
 
         startCenterLoadingAnimation()
         updateStepUi()
-
-        handler.postDelayed({ scheduleNextStep() }, 3000)
+        startVisualTicker()
+        startAnalysisRequest()
     }
 
-    private fun scheduleNextStep() {
-        if (currentStep >= 4) {
-            showCompleteDialog()
+    private fun startVisualTicker() {
+        visualTickerStartedAt = System.currentTimeMillis()
+        handler.post(object : Runnable {
+            override fun run() {
+                if (isAnalysisDone || _binding == null) return
+                val elapsedSec = ((System.currentTimeMillis() - visualTickerStartedAt) / 1000L).toInt()
+                val targetStep = when {
+                    elapsedSec >= 9 -> 3
+                    elapsedSec >= 6 -> 2
+                    elapsedSec >= 3 -> 1
+                    else -> 0
+                }
+                if (targetStep != currentStep) {
+                    currentStep = targetStep
+                    updateStepUi()
+                }
+                handler.postDelayed(this, 300L)
+            }
+        })
+    }
+
+    private fun startAnalysisRequest() {
+        analysisJob = viewLifecycleOwner.lifecycleScope.launch {
+            val sourceRaw = arguments?.getString(AnalysisFlow.ARG_ANALYSIS_SOURCE)
+            val source = if (sourceRaw == AnalysisFlow.SOURCE_AUTO) RecordSource.AUTO else RecordSource.MANUAL
+
+            val houses = com.capstone.houseviewingapp.data.local.HouseLocalStore.getHouses(requireContext())
+            val requestedHouseId = arguments?.getLong(AnalysisFlow.ARG_HOUSE_ID, -1L) ?: -1L
+            val primaryHouse = when {
+                requestedHouseId > 0L -> {
+                    houses.firstOrNull { it.houseId == requestedHouseId }
+                        ?: houses.firstOrNull { (it.houseId ?: -1L) > 0L }
+                }
+                else -> houses.firstOrNull { (it.houseId ?: -1L) > 0L }
+            }
+            val manualAddress = arguments?.getString(AnalysisFlow.ARG_ORIGIN_ADDRESS)
+                ?: primaryHouse?.address
+                ?: "주소 수신 대기"
+            val manualTitle = arguments?.getString(AnalysisFlow.ARG_HOUSE_NICKNAME)
+                ?.trim()
+                ?.takeIf { it.isNotBlank() }
+                ?: "무료 1회 진단"
+            val accessToken = AuthTokenLocalStore.getAccessToken(requireContext()).orEmpty()
+            if (accessToken.isBlank()) {
+                Toast.makeText(requireContext(), "로그인 정보가 만료되었습니다. 다시 로그인해 주세요.", Toast.LENGTH_SHORT).show()
+                findNavController().popBackStack()
+                return@launch
+            }
+
+            val apiResult = when (source) {
+                RecordSource.MANUAL -> {
+                    requestManualDiagnosis(
+                        accessToken = accessToken,
+                        fileUri = arguments?.getString(AnalysisFlow.ARG_SELECTED_FILE_URI).orEmpty(),
+                        manualTitle = manualTitle,
+                        manualAddress = manualAddress
+                    )
+                }
+                RecordSource.AUTO -> {
+                    val houseId = primaryHouse?.houseId
+                    if (houseId == null || houseId <= 0L) {
+                        Toast.makeText(requireContext(), "자동 분석할 집 정보가 없습니다. 집 등록 후 다시 시도해 주세요.", Toast.LENGTH_SHORT).show()
+                        findNavController().popBackStack()
+                        return@launch
+                    }
+                    AnalysisRepositoryProvider.repository.changeDiagnoses(accessToken, houseId)
+                }
+            }
+
+            val pdf = apiResult.getOrElse { throwable ->
+                if (source == RecordSource.AUTO) {
+                    val fallbackPayload = buildAutoFallbackPayload(
+                        accessToken = accessToken,
+                        primaryHouse = primaryHouse
+                    )
+                    if (fallbackPayload != null) {
+                        completionPayload = fallbackPayload
+                        isAnalysisDone = true
+                        currentStep = 4
+                        updateStepUi()
+                        playCheckAppearAnimation(iconForStep(4))
+                        delay(300L)
+                        if (_binding != null) showCompleteDialog()
+                        return@launch
+                    }
+                }
+                val remote = throwable as? RemoteApiException
+                if (remote?.code == "AU005" && source == RecordSource.MANUAL) {
+                    val loginId = AuthTokenLocalStore.getLoginId(requireContext()).orEmpty()
+                    QuickDiagnosisLocalStore.markFreeUsed(requireContext(), loginId)
+                }
+                Toast.makeText(requireContext(), mapAnalysisErrorMessage(throwable, source), Toast.LENGTH_LONG).show()
+                findNavController().popBackStack()
+                return@launch
+            }
+            if (source == RecordSource.MANUAL) {
+                val loginId = AuthTokenLocalStore.getLoginId(requireContext()).orEmpty()
+                QuickDiagnosisLocalStore.markFreeUsed(requireContext(), loginId)
+            }
+
+            val resolvedTitle = if (source == RecordSource.AUTO) {
+                primaryHouse?.homeName ?: "자동 감지 분석"
+            } else {
+                manualTitle
+            }
+            val resolvedAddress = if (source == RecordSource.AUTO) {
+                primaryHouse?.address ?: "등록된 집 정보 없음"
+            } else {
+                manualAddress
+            }
+            val latestMeta = fetchLatestAnalysisMetaWithRetry(
+                accessToken = accessToken,
+                nickname = resolvedTitle,
+                address = resolvedAddress,
+                source = source
+            )
+            completionPayload = CompletionPayload(
+                source = source,
+                title = resolvedTitle,
+                address = resolvedAddress,
+                riskSummary = latestMeta?.mainReason?.takeIf { it.isNotBlank() }
+                    ?: "상세 리포트에서 주요 원인을 확인해 주세요.",
+                level = latestMeta?.riskLevel?.toUiRiskLevel()
+                    ?: RiskLevel.AMBER,
+                ltvScore = latestMeta?.ltvScore?.toDouble(),
+                // 분석 결과 카드의 상세 리포트는 생성된 결과 PDF를 우선 사용
+                sourcePdfUri = pdf.filePath.takeIf { it.isNotBlank() }
+                    ?: arguments?.getString(AnalysisFlow.ARG_SELECTED_FILE_URI)?.trim()?.ifBlank { null }
+            )
+
+            isAnalysisDone = true
+            currentStep = 4
+            updateStepUi()
+            playCheckAppearAnimation(iconForStep(4))
+            delay(500L)
+            if (_binding != null) showCompleteDialog()
+        }
+    }
+
+    private fun showCompleteDialog() {
+        val payload = completionPayload ?: run {
+            Toast.makeText(requireContext(), "분석 결과가 없습니다. 다시 시도해 주세요.", Toast.LENGTH_SHORT).show()
             return
         }
-        currentStep++
-        updateStepUi()
-        playCheckAppearAnimation(iconForStep(currentStep))
+        parentFragmentManager.setFragmentResultListener(
+            AnalysisCompleteDialogFragment.REQUEST_KEY,
+            viewLifecycleOwner
+        ) { _, _ ->
+            val record = AnalysisRecordItem(
+                title = payload.title,
+                address = payload.address,
+                riskSummary = payload.riskSummary,
+                level = payload.level,
+                source = payload.source,
+                ltv = payload.ltvScore,
+                sourcePdfUri = payload.sourcePdfUri
+            )
+            com.capstone.houseviewingapp.data.local.AnalysisLocalStore.addRecord(requireContext(), record)
+            val navController = findNavController()
+            val options = androidx.navigation.navOptions {
+                popUpTo(R.id.nav_analysis_loading) { inclusive = true }
+                launchSingleTop = true
+            }
+            navController.navigate(R.id.nav_analysis, null, options)
 
-        // TODO: 실제 백엔드 연동 시, 각 단계별 완료 신호를 받아서 scheduleNextStep을 호출하도록 변경
-        // TODO: 지금은 시뮬레이션을 위해 3초마다 다음 단계로 넘어가도록 설정, 4단계는 1초
-        if (currentStep < 4) {
-            handler.postDelayed({ scheduleNextStep() }, 3000)
-        } else {
-            handler.postDelayed({ showCompleteDialog() }, 1000)
+            val bottomNav = requireActivity()
+                .findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(
+                    R.id.navigationBar
+                )
+            bottomNav.post {
+                bottomNav.menu.findItem(R.id.nav_analysis).isChecked = true
+            }
         }
+        AnalysisCompleteDialogFragment().show(parentFragmentManager, "AnalysisCompleteDialog")
+    }
+
+    private suspend fun requestManualDiagnosis(
+        accessToken: String,
+        fileUri: String,
+        manualTitle: String,
+        manualAddress: String
+    ): Result<com.capstone.houseviewingapp.analysis.model.PdfDownloadResponse> {
+        val initialResult = AnalysisRepositoryProvider.repository.preContractDiagnoses(
+            context = requireContext(),
+            accessToken = accessToken,
+            fileUri = fileUri,
+            request = PreContractDiagnosisRequest(
+                nickname = manualTitle,
+                address = manualAddress
+            )
+        )
+        val remote = initialResult.exceptionOrNull() as? RemoteApiException
+        val isPremium = BillingLocalStore.isPremium(requireContext())
+        if (remote?.code != "AU005" || !isPremium) return initialResult
+
+        val subscribeResult = SubscriptionRepositoryProvider.repository.subscribePremium(accessToken)
+        if (subscribeResult.isFailure) return initialResult
+
+        return AnalysisRepositoryProvider.repository.preContractDiagnoses(
+            context = requireContext(),
+            accessToken = accessToken,
+            fileUri = fileUri,
+            request = PreContractDiagnosisRequest(
+                nickname = manualTitle,
+                address = manualAddress
+            )
+        )
+    }
+
+    private fun mapAnalysisErrorMessage(throwable: Throwable, source: RecordSource): String {
+        val remote = throwable as? RemoteApiException
+        if (remote?.statusCode == 500 && (remote.code.isNullOrBlank() || remote.code == "UNKNOWN")) {
+            return "분석 엔진(PDF 생성) 처리 중 오류가 발생했습니다. 더미 PDF가 아닌 실제 등기부등본으로 다시 시도해 주세요."
+        }
+        if (remote?.statusCode == 404) {
+            return "분석 API 경로를 찾지 못했습니다(HTTP 404). 서버 재시작 후에도 계속 발생하면 서버 라우트 버전 불일치입니다."
+        }
+        return when (remote?.code) {
+            "AU001", "AU002", "AU003", "AU005", "AU006" ->
+                if (remote.code == "AU005") {
+                    if (source == RecordSource.AUTO) {
+                        "자동 감지 분석은 무료 진단 소진으로 제한됩니다. 진단하기 버튼에서 유료 진단을 진행해 주세요. (코드: AU005)"
+                    } else {
+                        "무료 1회 진단을 이미 사용했습니다. 결제 후 다시 시도해 주세요. (코드: AU005)"
+                    }
+                } else {
+                    "인증이 만료되었습니다. 다시 로그인해 주세요. (코드: ${remote.code})"
+                }
+            "ER002" ->
+                "분석 엔진 처리 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요. (코드: ER002)"
+            "NF001", "NF002" ->
+                "등록된 집/주소를 찾지 못했습니다. 집 정보를 다시 확인해 주세요. (코드: ${remote.code})"
+            else -> ApiErrorFormatter.withCode("분석 요청에 실패했습니다.", throwable)
+        }
+    }
+
+    private suspend fun fetchLatestAnalysisMetaWithRetry(
+        accessToken: String,
+        nickname: String,
+        address: String,
+        source: RecordSource
+    ): com.capstone.houseviewingapp.analysis.model.AnalysisResponse? {
+        repeat(4) { attempt ->
+            val analyses = AnalysisRepositoryProvider.repository
+                .getAnalyses(accessToken)
+                .getOrNull()
+                .orEmpty()
+            val diffAnalyses = AnalysisRepositoryProvider.repository
+                .getDiffAnalyses(accessToken)
+                .getOrNull()
+                .orEmpty()
+            val candidates = when (source) {
+                RecordSource.AUTO -> diffAnalyses + analyses
+                RecordSource.MANUAL -> analyses + diffAnalyses
+            }
+
+            val best = candidates
+                .asSequence()
+                .sortedWith(
+                    compareByDescending<com.capstone.houseviewingapp.analysis.model.AnalysisResponse> {
+                        it.nickname == nickname
+                    }.thenByDescending {
+                        matchAddressScore(it.address, address)
+                    }.thenByDescending {
+                        // 주요 원인을 우선 확보하도록 가중치 부여
+                        it.mainReason?.isNotBlank() == true
+                    }.thenByDescending {
+                        it.riskLevel != null
+                    }.thenByDescending {
+                        it.ltvScore != null
+                    }
+                )
+                .firstOrNull()
+            if (best != null && (best.ltvScore != null || !best.mainReason.isNullOrBlank() || best.riskLevel != null)) {
+                return best
+            }
+            if (attempt < 3) delay(700L)
+        }
+        return null
+    }
+
+    private fun matchAddressScore(serverAddress: String, localAddress: String): Int {
+        val a = normalizeAddress(serverAddress)
+        val b = normalizeAddress(localAddress)
+        if (a.isBlank() || b.isBlank()) return 0
+        return when {
+            a == b -> 3
+            a.contains(b) || b.contains(a) -> 2
+            else -> 0
+        }
+    }
+
+    private fun normalizeAddress(value: String): String {
+        return value
+            .lowercase()
+            .replace(Regex("\\s+"), "")
+            .replace("대한민국", "")
+            .replace("경기도", "경기")
+    }
+
+    private suspend fun buildAutoFallbackPayload(
+        accessToken: String,
+        primaryHouse: com.capstone.houseviewingapp.home.HouseCardItem?
+    ): CompletionPayload? {
+        val houseName = primaryHouse?.homeName.orEmpty()
+        val houseAddress = primaryHouse?.address.orEmpty()
+        val latest = AnalysisRepositoryProvider.repository
+            .getDiffAnalyses(accessToken)
+            .getOrNull()
+            .orEmpty()
+            .asSequence()
+            .sortedWith(
+                compareByDescending<com.capstone.houseviewingapp.analysis.model.AnalysisResponse> {
+                    it.nickname == houseName
+                }.thenByDescending {
+                    matchAddressScore(it.address, houseAddress)
+                }.thenByDescending {
+                    it.mainReason?.isNotBlank() == true
+                }.thenByDescending {
+                    it.ltvScore != null
+                }
+            )
+            .firstOrNull()
+            ?: return null
+
+        return CompletionPayload(
+            source = RecordSource.AUTO,
+            title = primaryHouse?.homeName ?: latest.nickname,
+            address = primaryHouse?.address ?: latest.address,
+            riskSummary = latest.mainReason?.takeIf { it.isNotBlank() }
+                ?: "최근 자동 감지 분석 결과를 불러왔습니다.",
+            level = latest.riskLevel?.toUiRiskLevel() ?: RiskLevel.AMBER,
+            ltvScore = latest.ltvScore?.toDouble(),
+            sourcePdfUri = null
+        )
+    }
+
+    private fun ApiRiskLevel.toUiRiskLevel(): RiskLevel = when (this) {
+        ApiRiskLevel.DANGER -> RiskLevel.RED
+        ApiRiskLevel.WARNING -> RiskLevel.AMBER
+        ApiRiskLevel.SAFE -> RiskLevel.BLUE
     }
 
     private fun iconForStep(step: Int): View = when (step) {
@@ -85,96 +436,6 @@ class AnalysisLoadingFragment : Fragment() {
         3 -> binding.step3PulseRing
         4 -> binding.step4PulseRing
         else -> binding.step1PulseRing
-    }
-
-    private fun showCompleteDialog() {
-        parentFragmentManager.setFragmentResultListener(
-            AnalysisCompleteDialogFragment.REQUEST_KEY,
-            viewLifecycleOwner
-        ) { _, _ ->
-            val sourceRaw = arguments?.getString(AnalysisFlow.ARG_ANALYSIS_SOURCE)
-            val source = if (sourceRaw == AnalysisFlow.SOURCE_AUTO) {
-                RecordSource.AUTO
-            } else {
-                RecordSource.MANUAL
-            }
-
-            val houses = com.capstone.houseviewingapp.data.local.HouseLocalStore.getHouses(requireContext())
-            val primaryHouse = houses.firstOrNull()
-            val manualAddress = arguments?.getString(AnalysisFlow.ARG_ORIGIN_ADDRESS)
-                ?: primaryHouse?.address
-                ?: "주소 수신 대기"
-            val manualTitle = arguments?.getString(AnalysisFlow.ARG_HOUSE_NICKNAME)?.trim()?.takeIf { it.isNotBlank() }
-                ?: "무료 1회 진단"
-            val level = when (source) {
-                RecordSource.AUTO -> RiskLevel.RED
-                RecordSource.MANUAL -> RiskLevel.AMBER
-            }
-            val accessToken = AuthTokenLocalStore.getAccessToken(requireContext()).orEmpty()
-            val analysisPdf = runCatching {
-                when (source) {
-                    RecordSource.MANUAL -> {
-                        val fileUri = arguments?.getString(AnalysisFlow.ARG_SELECTED_FILE_URI).orEmpty()
-                        AnalysisRepositoryProvider.repository.preContractDiagnoses(
-                            accessToken = accessToken,
-                            fileUri = fileUri,
-                            request = PreContractDiagnosisRequest(
-                                nickname = manualTitle,
-                                address = manualAddress
-                            )
-                        ).getOrThrow()
-                    }
-                    RecordSource.AUTO -> {
-                        val houseId = primaryHouse?.houseId ?: 1L
-                        AnalysisRepositoryProvider.repository.changeDiagnoses(accessToken, houseId)
-                            .getOrThrow()
-                    }
-                }
-            }.getOrNull()
-
-            val sourcePdfUri = arguments?.getString(AnalysisFlow.ARG_SELECTED_FILE_URI)?.trim()?.ifBlank { null }
-            val record = AnalysisRecordItem(
-                title = when (source) {
-                    RecordSource.AUTO ->
-                        primaryHouse?.homeName ?: "자동 감지 분석"
-                    RecordSource.MANUAL ->
-                        manualTitle
-                },
-                address = when (source) {
-                    RecordSource.AUTO ->
-                        primaryHouse?.address ?: "등록된 집 정보 없음"
-                    RecordSource.MANUAL ->
-                        manualAddress
-                },
-                riskSummary = if (analysisPdf == null) {
-                    "분석 결과 수신 대기"
-                } else {
-                    "리포트 생성 완료 (#${analysisPdf.pdfReportId})"
-                },
-                level = level, //TODO: 백엔드에서 실제값 매핑
-                source = source,
-                ltv = null,
-                sourcePdfUri = sourcePdfUri ?: analysisPdf?.filePath
-            )
-            // TODO(backend): 실제 API 응답값으로 title/address/riskSummary/level/ltv 매핑
-            com.capstone.houseviewingapp.data.local.AnalysisLocalStore.addRecord(requireContext(), record)
-            val navController = findNavController()
-            val options = androidx.navigation.navOptions {
-                popUpTo(R.id.nav_analysis_loading) { inclusive = true }
-                launchSingleTop = true
-            }
-            navController.navigate(R.id.nav_analysis, null, options)
-
-            // NOTE: 분석 화면으로 이동한 직후 하단바 선택 상태를 분석으로 강제 동기화
-            val bottomNav = requireActivity()
-                .findViewById<com.google.android.material.bottomnavigation.BottomNavigationView>(
-                    R.id.navigationBar
-                )
-            bottomNav.post {
-                bottomNav.menu.findItem(R.id.nav_analysis).isChecked = true
-            }
-        }
-        AnalysisCompleteDialogFragment().show(parentFragmentManager, "AnalysisCompleteDialog")
     }
 
     private fun updateStepUi() {
@@ -302,7 +563,6 @@ class AnalysisLoadingFragment : Fragment() {
         icon.alpha = 1f
     }
 
-    // TODO: 백엔드와 연동 시, 각 단계별 실제 상태에 따라 start/stopStepPulse를 호출하도록 변경
     private fun startStepPulse(step: Int) {
         val pulse = pulseViewForStep(step)
         pulse.visibility = View.VISIBLE
@@ -420,6 +680,7 @@ class AnalysisLoadingFragment : Fragment() {
 
     override fun onDestroyView() {
         super.onDestroyView()
+        analysisJob?.cancel()
         handler.removeCallbacksAndMessages(null)
         stopAllStepPulses()
         _binding = null
