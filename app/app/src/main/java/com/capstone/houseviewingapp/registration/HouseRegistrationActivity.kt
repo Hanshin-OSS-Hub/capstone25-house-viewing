@@ -2,21 +2,29 @@ package com.capstone.houseviewingapp.registration
 
 import android.content.Intent
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.view.View
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.lifecycle.lifecycleScope
 import com.capstone.houseviewingapp.MainActivity
 import com.capstone.houseviewingapp.R
+import com.capstone.houseviewingapp.analysis.AnalysisRepositoryProvider
+import com.capstone.houseviewingapp.analysis.model.AnalysisResponse
 import com.capstone.houseviewingapp.data.local.AuthTokenLocalStore
 import com.capstone.houseviewingapp.data.local.HouseLocalStore
-import com.capstone.houseviewingapp.data.local.QuickDiagnosisLocalStore
 import com.capstone.houseviewingapp.data.local.model.HouseDetailItem
+import com.capstone.houseviewingapp.data.remote.NetworkModule
+import com.capstone.houseviewingapp.data.remote.RemoteApiException
+import com.capstone.houseviewingapp.data.remote.executeApi
 import com.capstone.houseviewingapp.databinding.ActivityHouseRegistrationBinding
+import com.capstone.houseviewingapp.registration.remote.ContractRegisterRequest
+import com.capstone.houseviewingapp.registration.remote.HouseRegisterRequest
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 class HouseRegistrationActivity : AppCompatActivity() {
 
@@ -29,8 +37,7 @@ class HouseRegistrationActivity : AppCompatActivity() {
     private val vm: HouseRegistrationViewModel by viewModels()
     private var currentStep = 1 // TODO: 현재 단계에 따라 이 값을 업데이트
     private var isQuickDiagnosisMode = false
-    private val mainHandler = Handler(Looper.getMainLooper())
-    private var pendingFinalizeRunnable: Runnable? = null
+    private var isSubmittingRegistration = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,8 +45,6 @@ class HouseRegistrationActivity : AppCompatActivity() {
         binding = ActivityHouseRegistrationBinding.inflate(layoutInflater)
         setContentView(binding.root)
         isQuickDiagnosisMode = intent.getBooleanExtra(EXTRA_QUICK_DIAGNOSIS_MODE, false)
-        val editHouseId = intent.getLongExtra(EXTRA_EDIT_HOUSE_ID, -1L)
-        val isEditMode = editHouseId != -1L
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             val ime = insets.getInsets(WindowInsetsCompat.Type.ime())
@@ -141,8 +146,6 @@ class HouseRegistrationActivity : AppCompatActivity() {
                         ?: vm.draft.value.nickname.trim()
                     val selectedFileUri = step3.getSelectedFileUriString().orEmpty()
                     val originAddress = vm.draft.value.originAddress
-                    val loginId = AuthTokenLocalStore.getLoginId(this).orEmpty()
-                    QuickDiagnosisLocalStore.markFreeUsed(this, loginId)
                     val intent = Intent(this, MainActivity::class.java).apply {
                         flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
                         putExtra(MainActivity.EXTRA_SHOW_ANALYSIS_LOADING, true)
@@ -258,19 +261,55 @@ class HouseRegistrationActivity : AppCompatActivity() {
     }
 
     private fun startHouseRegisterParsingFlow(draft: HouseRegistrationDraft) {
-        if (pendingFinalizeRunnable != null) return
+        if (isSubmittingRegistration) return
+        isSubmittingRegistration = true
         setNextButtonEnabled(false)
         RegistrationParsingDialogFragment()
             .show(supportFragmentManager, RegistrationParsingDialogFragment.TAG)
 
-        // NOTE: 백엔드 OCR 파싱 대기 구간 시뮬레이션 (약 10초)
-        val runnable = Runnable {
-            val nextHouseId = HouseLocalStore.getHouseSummaries(this)
-                .mapNotNull { it.houseId }
-                .maxOrNull()
-                ?.plus(1L) ?: 1L
+        lifecycleScope.launch {
+            val token = AuthTokenLocalStore.getAccessToken(this@HouseRegistrationActivity).orEmpty()
+            if (token.isBlank()) {
+                finishRegistrationWithError("로그인 정보가 없습니다. 다시 로그인해 주세요.")
+                return@launch
+            }
+
+            val houseRequest = HouseRegisterRequest(
+                nickname = draft.nickname,
+                originAddress = draft.originAddress
+            )
+            val houseResult = NetworkModule.houseApi
+                .register(bearer(token), houseRequest)
+                .executeApi()
+            val houseResponse = houseResult.getOrElse {
+                finishRegistrationWithError(mapRegistrationErrorMessage(it))
+                return@launch
+            }
+
+            val contractRequest = ContractRegisterRequest(
+                houseId = houseResponse.houseId,
+                contractType = toBackendContractType(draft.contractType),
+                deposit = draft.deposit,
+                monthlyAmount = draft.monthlyAmount,
+                maintenanceFee = draft.maintenanceFee,
+                moveDate = draft.moveDate,
+                confirmDate = draft.confirmDate
+            )
+            val contractResult = NetworkModule.contractApi
+                .register(bearer(token), contractRequest)
+                .executeApi()
+            contractResult.getOrElse {
+                finishRegistrationWithError(mapRegistrationErrorMessage(it))
+                return@launch
+            }
+
+            val analysisMeta = runPostContractAnalysisIfPossible(
+                accessToken = token,
+                houseId = houseResponse.houseId,
+                draft = draft
+            )
             val detailItem = HouseDetailItem(
-                houseId = nextHouseId,
+                houseId = houseResponse.houseId,
                 homeName = draft.nickname,
                 originAddress = draft.originAddress,
                 detailAddress = draft.detailAddress,
@@ -281,21 +320,119 @@ class HouseRegistrationActivity : AppCompatActivity() {
                 maintenanceFee = draft.maintenanceFee,
                 moveDate = draft.moveDate,
                 confirmDate = draft.confirmDate,
-                ltv = null
+                ltv = analysisMeta?.ltvScore
             )
-            HouseLocalStore.addHouseDetail(this, detailItem)
-            (supportFragmentManager.findFragmentByTag(RegistrationParsingDialogFragment.TAG) as? RegistrationParsingDialogFragment)
-                ?.dismissAllowingStateLoss()
+            HouseLocalStore.addHouseDetail(this@HouseRegistrationActivity, detailItem)
+            if (analysisMeta?.ltvScore == null && !draft.documentUri.isNullOrBlank()) {
+                Toast.makeText(
+                    this@HouseRegistrationActivity,
+                    "집 등록은 완료되었지만 LTV 계산은 아직 반영되지 않았습니다. 분석 메뉴에서 다시 시도해 주세요.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+            dismissParsingDialog()
             setResult(RESULT_OK)
             finish()
         }
-        pendingFinalizeRunnable = runnable
-        mainHandler.postDelayed(runnable, 10_000L)
     }
 
-    override fun onDestroy() {
-        pendingFinalizeRunnable?.let { mainHandler.removeCallbacks(it) }
-        pendingFinalizeRunnable = null
-        super.onDestroy()
+    private fun bearer(accessToken: String): String = "Bearer $accessToken"
+
+    private fun toBackendContractType(contractType: ContractType): String {
+        return when (contractType) {
+            ContractType.JEONSE -> "JEONSE"
+            ContractType.WOLSE -> "MONTHLY"
+        }
+    }
+
+    private fun finishRegistrationWithError(message: String) {
+        dismissParsingDialog()
+        isSubmittingRegistration = false
+        setNextButtonEnabled(true)
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun mapRegistrationErrorMessage(throwable: Throwable): String {
+        val remote = throwable as? RemoteApiException
+        return when (remote?.code) {
+            "NF002" -> "주소를 찾을 수 없습니다. 도로명 주소를 정확히 입력해 주세요."
+            "AU001", "AU002", "AU003", "AU005", "AU006" -> "인증이 만료되었습니다. 다시 로그인해 주세요."
+            else -> "등록 처리에 실패했습니다. 잠시 후 다시 시도해 주세요."
+        }
+    }
+
+    private suspend fun runPostContractAnalysisIfPossible(
+        accessToken: String,
+        houseId: Long,
+        draft: HouseRegistrationDraft
+    ): AnalysisResponse? {
+        val fileUri = draft.documentUri?.trim().orEmpty()
+        if (fileUri.isBlank()) return null
+
+        val analysisResult = AnalysisRepositoryProvider.repository.postContractDiagnoses(
+            context = this,
+            accessToken = accessToken,
+            houseId = houseId,
+            fileUri = fileUri
+        )
+        val matched = findLatestMatchedAnalysisWithRetry(
+            accessToken = accessToken,
+            nickname = draft.nickname,
+            originAddress = draft.originAddress
+        )
+
+        if (analysisResult.isFailure && matched?.ltvScore == null) {
+            return null
+        }
+        return matched
+    }
+
+    private suspend fun findLatestMatchedAnalysisWithRetry(
+        accessToken: String,
+        nickname: String,
+        originAddress: String
+    ): AnalysisResponse? {
+        repeat(4) { attempt ->
+            val analyses = AnalysisRepositoryProvider.repository
+                .getAnalyses(accessToken)
+                .getOrNull()
+                .orEmpty()
+            val best = analyses
+                .asSequence()
+                .filter { it.nickname == nickname }
+                .sortedWith(
+                    compareByDescending<AnalysisResponse> { matchAddressScore(it.address, originAddress) }
+                        .thenByDescending { it.ltvScore != null }
+                )
+                .firstOrNull()
+            if (best?.ltvScore != null || attempt == 3) return best
+            delay(800L)
+        }
+        return null
+    }
+
+    private fun matchAddressScore(serverAddress: String, inputAddress: String): Int {
+        val a = serverAddress.trim()
+        val b = inputAddress.trim()
+        if (a.isBlank() || b.isBlank()) return 0
+        return when {
+            a == b -> 3
+            a.contains(b) || b.contains(a) -> 2
+            normalizeAddress(a) == normalizeAddress(b) -> 1
+            else -> 0
+        }
+    }
+
+    private fun normalizeAddress(value: String): String {
+        return value
+            .lowercase()
+            .replace(Regex("\\s+"), "")
+            .replace("대한민국", "")
+            .replace("경기도", "경기")
+    }
+
+    private fun dismissParsingDialog() {
+        (supportFragmentManager.findFragmentByTag(RegistrationParsingDialogFragment.TAG) as? RegistrationParsingDialogFragment)
+            ?.dismissAllowingStateLoss()
     }
 }
