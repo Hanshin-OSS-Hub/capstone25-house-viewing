@@ -8,11 +8,18 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 object AnalysisLocalStore {
-    private const val PREF_NAME = "analysis_local_pref"
+    private const val PREF_NAME_PREFIX = "analysis_local_pref"
     private const val KEY_JSON = "analysis_records_json"
 
     private fun prefs(context: Context) =
-        context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        context.getSharedPreferences(resolvePrefName(context), Context.MODE_PRIVATE)
+
+    private fun resolvePrefName(context: Context): String {
+        val loginId = AuthTokenLocalStore.getLoginId(context).orEmpty()
+            .ifBlank { "guest" }
+        val safeLoginId = loginId.replace(Regex("[^A-Za-z0-9_.-]"), "_")
+        return "${PREF_NAME_PREFIX}_$safeLoginId"
+    }
 
     fun getRecords(context: Context): List<AnalysisRecordItem> {
         val raw = prefs(context).getString(KEY_JSON, null) ?: return emptyList()
