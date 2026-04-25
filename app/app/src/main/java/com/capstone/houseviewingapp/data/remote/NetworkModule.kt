@@ -2,6 +2,11 @@ package com.capstone.houseviewingapp.data.remote
 
 import com.capstone.houseviewingapp.BuildConfig
 import com.capstone.houseviewingapp.data.remote.api.AuthApi
+import com.capstone.houseviewingapp.data.remote.api.ContractApi
+import com.capstone.houseviewingapp.data.remote.api.HouseApi
+import com.capstone.houseviewingapp.data.remote.api.KakaoAddressApi
+import com.capstone.houseviewingapp.data.remote.api.AnalysisApi
+import com.capstone.houseviewingapp.data.remote.api.SubscriptionApi
 import com.capstone.houseviewingapp.data.remote.api.UserApi
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -40,6 +45,17 @@ object NetworkModule {
         .addConverterFactory(GsonConverterFactory.create(gson))
         .build()
 
+    private val kakaoRetrofit: Retrofit = Retrofit.Builder()
+        .baseUrl("https://dapi.kakao.com/")
+        .client(okHttpClient)
+        .addConverterFactory(GsonConverterFactory.create(gson))
+        .build()
+
     val authApi: AuthApi = retrofit.create(AuthApi::class.java)
     val userApi: UserApi = retrofit.create(UserApi::class.java)
+    val houseApi: HouseApi = retrofit.create(HouseApi::class.java)
+    val contractApi: ContractApi = retrofit.create(ContractApi::class.java)
+    val analysisApi: AnalysisApi = retrofit.create(AnalysisApi::class.java)
+    val subscriptionApi: SubscriptionApi = retrofit.create(SubscriptionApi::class.java)
+    val kakaoAddressApi: KakaoAddressApi = kakaoRetrofit.create(KakaoAddressApi::class.java)
 }
