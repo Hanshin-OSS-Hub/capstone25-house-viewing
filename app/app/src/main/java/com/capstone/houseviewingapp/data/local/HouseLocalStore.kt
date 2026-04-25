@@ -11,7 +11,7 @@ import org.json.JSONObject
 object HouseLocalStore {
 
     // NOTE : SharedPreferences 파일 이름
-    private const val PREF_NAME = "house_local_pref"
+    private const val PREF_NAME_PREFIX = "house_local_pref"
 
     // NOTE : 신형(상세 저장) 키
     private const val KEY_HOUSE_DETAILS_JSON = "house_details_json"
@@ -20,7 +20,14 @@ object HouseLocalStore {
     private const val KEY_HOUSES_JSON = "houses_json"
 
     private fun prefs(context: Context): SharedPreferences =
-        context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        context.getSharedPreferences(resolvePrefName(context), Context.MODE_PRIVATE)
+
+    private fun resolvePrefName(context: Context): String {
+        val loginId = AuthTokenLocalStore.getLoginId(context).orEmpty()
+            .ifBlank { "guest" }
+        val safeLoginId = loginId.replace(Regex("[^A-Za-z0-9_.-]"), "_")
+        return "${PREF_NAME_PREFIX}_$safeLoginId"
+    }
 
     // NOTE : 홈 카드 목록 조회 함수 (외부 공개 API)
     // NOTE : 내부적으로 상세 목록을 읽어서 카드 요약으로 변환함
