@@ -1,5 +1,6 @@
 package com.capstone.houseviewingapp.analysis
 
+import android.content.Context
 import com.capstone.houseviewingapp.analysis.model.AnalysisResponse
 import com.capstone.houseviewingapp.analysis.model.PdfDownloadResponse
 import com.capstone.houseviewingapp.analysis.model.PreContractDiagnosisRequest
@@ -10,7 +11,8 @@ class MockAnalysisRepository : AnalysisRepository {
     private val pdfIdGen = AtomicLong(1L)
     private val records = mutableListOf<AnalysisResponse>()
 
-    override fun preContractDiagnoses(
+    override suspend fun preContractDiagnoses(
+        context: Context,
         accessToken: String,
         fileUri: String,
         request: PreContractDiagnosisRequest
@@ -29,7 +31,8 @@ class MockAnalysisRepository : AnalysisRepository {
         )
     }
 
-    override fun postContractDiagnoses(
+    override suspend fun postContractDiagnoses(
+        context: Context,
         accessToken: String,
         houseId: Long,
         fileUri: String
@@ -47,7 +50,7 @@ class MockAnalysisRepository : AnalysisRepository {
         )
     }
 
-    override fun changeDiagnoses(accessToken: String, houseId: Long): Result<PdfDownloadResponse> {
+    override suspend fun changeDiagnoses(accessToken: String, houseId: Long): Result<PdfDownloadResponse> {
         if (accessToken.isBlank()) return Result.failure(IllegalStateException("UNAUTHORIZED"))
         if (houseId <= 0L) return Result.failure(IllegalArgumentException("HOUSE_ID_INVALID"))
 
@@ -60,12 +63,12 @@ class MockAnalysisRepository : AnalysisRepository {
         )
     }
 
-    override fun getAnalyses(accessToken: String): Result<List<AnalysisResponse>> {
+    override suspend fun getAnalyses(accessToken: String): Result<List<AnalysisResponse>> {
         if (accessToken.isBlank()) return Result.failure(IllegalStateException("UNAUTHORIZED"))
         return Result.success(records.toList())
     }
 
-    override fun getDiffAnalyses(accessToken: String): Result<List<AnalysisResponse>> {
+    override suspend fun getDiffAnalyses(accessToken: String): Result<List<AnalysisResponse>> {
         if (accessToken.isBlank()) return Result.failure(IllegalStateException("UNAUTHORIZED"))
         return Result.success(records.filter { it.riskLevel == ApiRiskLevel.DANGER })
     }
