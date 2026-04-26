@@ -26,7 +26,8 @@ class MockAnalysisRepository : AnalysisRepository {
         return Result.success(
             PdfDownloadResponse(
                 pdfReportId = pdfIdGen.getAndIncrement(),
-                filePath = "https://mock.local/analysis/pre/${System.currentTimeMillis()}.pdf"
+                // 실제 백엔드 PdfDownloadResponse.filePath 와 동일하게, 목 구현은 URL을 만들지 않음(가짜 호스트 저장 방지)
+                filePath = ""
             )
         )
     }
@@ -45,7 +46,7 @@ class MockAnalysisRepository : AnalysisRepository {
         return Result.success(
             PdfDownloadResponse(
                 pdfReportId = pdfIdGen.getAndIncrement(),
-                filePath = "https://mock.local/analysis/post/$houseId/${System.currentTimeMillis()}.pdf"
+                filePath = ""
             )
         )
     }
@@ -58,7 +59,7 @@ class MockAnalysisRepository : AnalysisRepository {
         return Result.success(
             PdfDownloadResponse(
                 pdfReportId = pdfIdGen.getAndIncrement(),
-                filePath = "https://mock.local/analysis/diff/$houseId/${System.currentTimeMillis()}.pdf"
+                filePath = ""
             )
         )
     }
