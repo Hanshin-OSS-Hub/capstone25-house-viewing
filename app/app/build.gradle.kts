@@ -149,7 +149,7 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.fragment.ktx)
-    implementation("com.github.mhiew:android-pdf-viewer:3.2.0-beta.3")
+    implementation("com.davemorrissey.labs:subsampling-scale-image-view:3.10.0")
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
