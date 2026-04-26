@@ -98,6 +98,16 @@ class GenerateDiffPdfRequest(BaseModel):
     moveDate:        str = Field(..., description="전입일 (YYYY-MM-DD)")
     confirmDate:     str = Field(..., description="확정일자 (YYYY-MM-DD)")
 
+    @field_validator("moveDate", "confirmDate", mode="before")
+    @classmethod
+    def coerce_date_field(cls, value) -> str:
+        """Spring LocalDate 배열([2024,3,1]) → ISO 문자열 변환"""
+        if isinstance(value, (list, tuple)) and len(value) == 3:
+            return f"{value[0]:04d}-{value[1]:02d}-{value[2]:02d}"
+        if value is None:
+            return ""
+        return str(value)
+
 
 class GenerateCombinedPdfRequest(BaseModel):
     """통합 시나리오 PDF 요청 DTO — DIFF + RECOVERY + OCR 텍스트 (Java 서버 → FastAPI)
