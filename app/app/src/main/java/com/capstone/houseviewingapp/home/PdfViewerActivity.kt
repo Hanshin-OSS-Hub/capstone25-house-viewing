@@ -1,10 +1,13 @@
 package com.capstone.houseviewingapp.home
 
+import android.graphics.Bitmap
+import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import android.os.Bundle
+import android.os.ParcelFileDescriptor
+import android.util.Log
 import android.view.View
 import android.widget.Toast
-import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toFile
@@ -15,8 +18,8 @@ import com.capstone.houseviewingapp.BuildConfig
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.data.local.AuthTokenLocalStore
 import com.capstone.houseviewingapp.databinding.ActivityPdfViewerBinding
-import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener
-import com.github.barteksc.pdfviewer.listener.OnPageChangeListener
+import com.davemorrissey.labs.subscaleview.ImageSource
+import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -25,10 +28,17 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
 
+/**
+ * Android [PdfRenderer]로 페이지 비트맵 생성 + [SubsamplingScaleImageView](핀치/더블탭 줌, 팬).
+ * PhotoView(io.github.chrisbanes)는 일부 환경에서 Gradle classpath에 안 붙는 경우가 있어 대체.
+ */
 class PdfViewerActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPdfViewerBinding
 
-    private var pageCount: Int = 0
+    private var fileDescriptor: ParcelFileDescriptor? = null
+    private var pdfRenderer: PdfRenderer? = null
+    private var currentPage: PdfRenderer.Page? = null
+    private var currentPageIndex = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,21 +46,17 @@ class PdfViewerActivity : AppCompatActivity() {
         binding = ActivityPdfViewerBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
+        ViewCompat.setOnApplyWindowInsetsListener(binding.main) { v, insets ->
             val bars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(bars.left, bars.top, bars.right, bars.bottom)
+            v.setPadding(0, bars.top, 0, bars.bottom)
             insets
         }
 
         binding.backButton.setOnClickListener { finish() }
-        binding.prevButton.setOnClickListener {
-            val p = binding.pdfView.currentPage
-            if (p > 0) binding.pdfView.jumpTo(p - 1)
-        }
-        binding.nextButton.setOnClickListener {
-            val p = binding.pdfView.currentPage
-            if (pageCount > 0 && p < pageCount - 1) binding.pdfView.jumpTo(p + 1)
-        }
+        binding.prevButton.setOnClickListener { showPage(currentPageIndex - 1) }
+        binding.nextButton.setOnClickListener { showPage(currentPageIndex + 1) }
+
+        setupPdfScaleView()
 
         binding.titleTextView.text = intent.getStringExtra(EXTRA_TITLE).orEmpty().ifBlank { "PDF 보기" }
         val showReportButton = intent.getBooleanExtra(EXTRA_SHOW_REPORT_BUTTON, false)
@@ -79,8 +85,15 @@ class PdfViewerActivity : AppCompatActivity() {
         }
     }
 
+    private fun setupPdfScaleView() {
+        binding.pdfImageView.apply {
+            maxScale = 4f
+            setMinimumScaleType(SubsamplingScaleImageView.SCALE_TYPE_CENTER_INSIDE)
+        }
+    }
+
     private fun loadPdfFromUri(uri: Uri) {
-        binding.pdfView.visibility = View.INVISIBLE
+        binding.pdfImageView.visibility = View.INVISIBLE
         lifecycleScope.launch {
             val file = withContext(Dispatchers.IO) { uriToTempFile(uri) }
             if (file == null || !file.exists() || file.length() == 0L) {
@@ -88,8 +101,14 @@ class PdfViewerActivity : AppCompatActivity() {
                 finish()
                 return@launch
             }
-            binding.pdfView.visibility = View.VISIBLE
-            displayPdfFromFile(file)
+            val opened = openPdf(Uri.fromFile(file))
+            if (!opened) {
+                Toast.makeText(this@PdfViewerActivity, "PDF를 열 수 없습니다.", Toast.LENGTH_SHORT).show()
+                finish()
+                return@launch
+            }
+            binding.pdfImageView.visibility = View.VISIBLE
+            binding.pdfImageView.post { showPage(0) }
         }
     }
 
@@ -108,35 +127,65 @@ class PdfViewerActivity : AppCompatActivity() {
         }.getOrNull()
     }
 
-    private fun displayPdfFromFile(file: File) {
-        binding.pdfView.fromFile(file)
-            .enableSwipe(true)
-            .swipeHorizontal(false)
-            .enableDoubletap(true)
-            .enableAntialiasing(true)
-            .spacing(8)
-            .defaultPage(0)
-            .onLoad(object : OnLoadCompleteListener {
-                override fun loadComplete(nbPages: Int) {
-                    pageCount = nbPages
-                    binding.pageTextView.text = if (nbPages > 0) "1 / $nbPages" else "0 / 0"
-                    binding.prevButton.isEnabled = false
-                    binding.nextButton.isEnabled = nbPages > 1
-                }
-            })
-            .onPageChange(object : OnPageChangeListener {
-                override fun onPageChanged(page: Int, total: Int) {
-                    pageCount = total
-                    binding.pageTextView.text = "${page + 1} / $total"
-                    binding.prevButton.isEnabled = page > 0
-                    binding.nextButton.isEnabled = total > 0 && page < total - 1
-                }
-            })
-            .load()
+    private fun openPdf(uri: Uri): Boolean {
+        return runCatching {
+            closePdf()
+            fileDescriptor = when (uri.scheme?.lowercase()) {
+                "file" -> ParcelFileDescriptor.open(uri.toFile(), ParcelFileDescriptor.MODE_READ_ONLY)
+                else -> contentResolver.openFileDescriptor(uri, "r")
+            }
+            val fd = fileDescriptor ?: return false
+            pdfRenderer = PdfRenderer(fd)
+            true
+        }.getOrDefault(false)
+    }
+
+    private fun closePdf() {
+        currentPage?.close()
+        currentPage = null
+        pdfRenderer?.close()
+        pdfRenderer = null
+        fileDescriptor?.close()
+        fileDescriptor = null
+    }
+
+    private fun showPage(index: Int) {
+        val renderer = pdfRenderer ?: return
+        if (index < 0 || index >= renderer.pageCount) return
+
+        currentPage?.close()
+        currentPage = renderer.openPage(index)
+        currentPageIndex = index
+
+        val page = currentPage ?: return
+        // 화면 너비에 맞춰 스케일 업 (한 페이지가 가로로 꽉 차게)
+        val targetW = binding.pdfImageView.width.takeIf { it > 0 }
+            ?: resources.displayMetrics.widthPixels
+        val scale = (targetW.toFloat() / page.width).coerceIn(1f, 4f)
+        var bw = (page.width * scale).toInt().coerceAtLeast(page.width)
+        var bh = (page.height * scale).toInt().coerceAtLeast(page.height)
+        val maxSide = 4096
+        val longSide = maxOf(bw, bh)
+        if (longSide > maxSide) {
+            val r = maxSide.toFloat() / longSide
+            bw = (bw * r).toInt().coerceAtLeast(1)
+            bh = (bh * r).toInt().coerceAtLeast(1)
+        }
+
+        val bitmap = Bitmap.createBitmap(bw, bh, Bitmap.Config.ARGB_8888)
+        bitmap.eraseColor(android.graphics.Color.WHITE)
+        page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+
+        binding.pdfImageView.setImage(ImageSource.bitmap(bitmap))
+        binding.pdfImageView.post { binding.pdfImageView.resetScaleAndCenter() }
+
+        binding.pageTextView.text = "${index + 1} / ${renderer.pageCount}"
+        binding.prevButton.isEnabled = index > 0
+        binding.nextButton.isEnabled = index < renderer.pageCount - 1
     }
 
     private fun openRemotePdf(url: String) {
-        binding.pdfView.visibility = View.INVISIBLE
+        binding.pdfImageView.visibility = View.INVISIBLE
         lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
                 runCatching {
@@ -152,14 +201,14 @@ class PdfViewerActivity : AppCompatActivity() {
                 finish()
                 return@launch
             }
-            val file = localUri.toFile()
-            if (!file.exists()) {
+            val opened = openPdf(localUri)
+            if (!opened) {
                 Toast.makeText(this@PdfViewerActivity, "PDF를 열 수 없습니다.", Toast.LENGTH_SHORT).show()
                 finish()
                 return@launch
             }
-            binding.pdfView.visibility = View.VISIBLE
-            displayPdfFromFile(file)
+            binding.pdfImageView.visibility = View.VISIBLE
+            binding.pdfImageView.post { showPage(0) }
         }
     }
 
@@ -218,10 +267,6 @@ class PdfViewerActivity : AppCompatActivity() {
         return alignPdfUrlHostWithApiBase(resolved)
     }
 
-    /**
-     * 백엔드가 PDF 주소에 127.0.0.1 / localhost 를 주는데, 앱은 API_BASE_URL 을 10.0.2.2 로 둔 경우(에뮬레이터) 등
-     * 호스트만 달라서 PDF GET 이 실패하는 것을 맞춤. S3 등 외부 호스트 URL 은 그대로 둠.
-     */
     private fun alignPdfUrlHostWithApiBase(url: String): String {
         val target = url.toHttpUrlOrNull() ?: return url
         val base = BuildConfig.API_BASE_URL.toHttpUrlOrNull() ?: return url
@@ -229,7 +274,6 @@ class PdfViewerActivity : AppCompatActivity() {
         val targetHost = target.host.lowercase()
         if (targetHost !in loopbackHosts) return url
         val baseHost = base.host.lowercase()
-        // API 도 루프백이면 그대로 (adb reverse + 127.0.0.1 유지 시)
         if (baseHost in loopbackHosts) return url
         return target.newBuilder()
             .scheme(base.scheme)
@@ -240,7 +284,8 @@ class PdfViewerActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        binding.pdfView.recycle()
+        binding.pdfImageView.recycle()
+        closePdf()
         super.onDestroy()
     }
 
@@ -253,7 +298,6 @@ class PdfViewerActivity : AppCompatActivity() {
     private fun shouldAttachAuthHeader(url: String, accessToken: String): Boolean {
         if (accessToken.isBlank()) return false
         val target = url.toHttpUrlOrNull() ?: return false
-        // presigned URL은 Authorization 헤더를 같이 보내면 400/403이 날 수 있음
         if (target.queryParameterNames.any { it.startsWith("X-Amz-", ignoreCase = true) }) return false
 
         val base = BuildConfig.API_BASE_URL.toHttpUrlOrNull() ?: return false
