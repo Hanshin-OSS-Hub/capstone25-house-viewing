@@ -102,10 +102,12 @@ class AnalysisRecordAdapter(
             binding.riskIconView.setImageResource(iconRes)
             binding.riskIconView.setColorFilter(c)
 
-            binding.scoreTextView.text = when {
-                normalizedScore != null -> "${normalizedScore}점"
-                item.ltv != null && item.ltv <= 0.0 -> "—"
-                else -> "--점"
+            // /analyses 등 API 의 ltvScore(앱 저장 키 ltv). 양수만 실제 값으로 표시.
+            // null·0·0.0 은 "내려온 유효 점수 없음"과 동일하게 취급(엔진/mock이 0만 주는 경우 포함).
+            binding.scoreTextView.text = if (normalizedScore != null) {
+                "${normalizedScore}점"
+            } else {
+                "미제공"
             }
             binding.detailButton.text = "상세 리포트 확인"
             binding.detailButton.setOnClickListener { onDetailClick(item) }
