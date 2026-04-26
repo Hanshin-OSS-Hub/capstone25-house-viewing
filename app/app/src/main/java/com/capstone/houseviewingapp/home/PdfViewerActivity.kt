@@ -1,10 +1,7 @@
 package com.capstone.houseviewingapp.home
 
-import android.graphics.Bitmap
-import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import android.os.Bundle
-import android.os.ParcelFileDescriptor
 import android.view.View
 import android.widget.Toast
 import android.util.Log
@@ -18,6 +15,8 @@ import com.capstone.houseviewingapp.BuildConfig
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.data.local.AuthTokenLocalStore
 import com.capstone.houseviewingapp.databinding.ActivityPdfViewerBinding
+import com.github.barteksc.pdfviewer.listener.OnLoadCompleteListener
+import com.github.barteksc.pdfviewer.listener.OnPageChangeListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -29,10 +28,7 @@ import java.io.File
 class PdfViewerActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPdfViewerBinding
 
-    private var fileDescriptor: ParcelFileDescriptor? = null
-    private var pdfRenderer: PdfRenderer? = null
-    private var currentPage: PdfRenderer.Page? = null
-    private var currentPageIndex = 0
+    private var pageCount: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -47,18 +43,24 @@ class PdfViewerActivity : AppCompatActivity() {
         }
 
         binding.backButton.setOnClickListener { finish() }
-        binding.prevButton.setOnClickListener { showPage(currentPageIndex - 1) }
-        binding.nextButton.setOnClickListener { showPage(currentPageIndex + 1) }
+        binding.prevButton.setOnClickListener {
+            val p = binding.pdfView.currentPage
+            if (p > 0) binding.pdfView.jumpTo(p - 1)
+        }
+        binding.nextButton.setOnClickListener {
+            val p = binding.pdfView.currentPage
+            if (pageCount > 0 && p < pageCount - 1) binding.pdfView.jumpTo(p + 1)
+        }
 
         binding.titleTextView.text = intent.getStringExtra(EXTRA_TITLE).orEmpty().ifBlank { "PDF 보기" }
         val showReportButton = intent.getBooleanExtra(EXTRA_SHOW_REPORT_BUTTON, false)
         if (showReportButton) {
-            binding.reportIssueTopButton.visibility = android.view.View.VISIBLE
+            binding.reportIssueTopButton.visibility = View.VISIBLE
             binding.reportIssueTopButton.setOnClickListener {
                 ReportReceivedDialogFragment().show(supportFragmentManager, "ReportReceivedDialog")
             }
         } else {
-            binding.reportIssueTopButton.visibility = android.view.View.GONE
+            binding.reportIssueTopButton.visibility = View.GONE
         }
 
         val uriRaw = intent.getStringExtra(EXTRA_URI).orEmpty()
@@ -72,55 +74,69 @@ class PdfViewerActivity : AppCompatActivity() {
         val scheme = uri.scheme?.lowercase().orEmpty()
         when (scheme) {
             "http", "https" -> openRemotePdf(uriRaw)
-            "content", "file" -> {
-                val opened = openPdf(uri)
-                if (!opened) {
-                    Toast.makeText(this, "PDF를 열 수 없습니다.", Toast.LENGTH_SHORT).show()
-                    finish()
-                    return
-                }
-                showPage(0)
-            }
-            else -> {
-                // 스킴 없는 상대경로/절대경로는 서버 PDF 경로로 간주
-                openRemotePdf(uriRaw)
-            }
+            "content", "file" -> loadPdfFromUri(uri)
+            else -> openRemotePdf(uriRaw)
         }
     }
 
-    private fun openPdf(uri: Uri): Boolean {
-        return runCatching {
-            fileDescriptor = when (uri.scheme?.lowercase()) {
-                "file" -> ParcelFileDescriptor.open(uri.toFile(), ParcelFileDescriptor.MODE_READ_ONLY)
-                else -> contentResolver.openFileDescriptor(uri, "r")
+    private fun loadPdfFromUri(uri: Uri) {
+        binding.pdfView.visibility = View.INVISIBLE
+        lifecycleScope.launch {
+            val file = withContext(Dispatchers.IO) { uriToTempFile(uri) }
+            if (file == null || !file.exists() || file.length() == 0L) {
+                Toast.makeText(this@PdfViewerActivity, "PDF를 열 수 없습니다.", Toast.LENGTH_SHORT).show()
+                finish()
+                return@launch
             }
-            val fd = fileDescriptor ?: return false
-            pdfRenderer = PdfRenderer(fd)
-            true
-        }.getOrDefault(false)
+            binding.pdfView.visibility = View.VISIBLE
+            displayPdfFromFile(file)
+        }
     }
 
-    private fun showPage(index: Int) {
-        val renderer = pdfRenderer ?: return
-        if (index < 0 || index >= renderer.pageCount) return
+    private fun uriToTempFile(uri: Uri): File? {
+        return runCatching {
+            when (uri.scheme?.lowercase()) {
+                "file" -> uri.toFile().takeIf { it.exists() && it.length() > 0L }
+                else -> {
+                    val out = File(cacheDir, "pdf_viewer_${uri.hashCode()}.pdf")
+                    contentResolver.openInputStream(uri)?.use { input ->
+                        out.outputStream().use { output -> input.copyTo(output) }
+                    }
+                    out.takeIf { it.exists() && it.length() > 0L }
+                }
+            }
+        }.getOrNull()
+    }
 
-        currentPage?.close()
-        currentPage = renderer.openPage(index)
-        currentPageIndex = index
-
-        val page = currentPage ?: return
-        val bitmap = Bitmap.createBitmap(page.width, page.height, Bitmap.Config.ARGB_8888)
-        bitmap.eraseColor(android.graphics.Color.WHITE)
-        page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-        binding.pdfImageView.setImageBitmap(bitmap)
-
-        binding.pageTextView.text = "${index + 1} / ${renderer.pageCount}"
-        binding.prevButton.isEnabled = index > 0
-        binding.nextButton.isEnabled = index < renderer.pageCount - 1
+    private fun displayPdfFromFile(file: File) {
+        binding.pdfView.fromFile(file)
+            .enableSwipe(true)
+            .swipeHorizontal(false)
+            .enableDoubletap(true)
+            .enableAntialiasing(true)
+            .spacing(8)
+            .defaultPage(0)
+            .onLoad(object : OnLoadCompleteListener {
+                override fun loadComplete(nbPages: Int) {
+                    pageCount = nbPages
+                    binding.pageTextView.text = if (nbPages > 0) "1 / $nbPages" else "0 / 0"
+                    binding.prevButton.isEnabled = false
+                    binding.nextButton.isEnabled = nbPages > 1
+                }
+            })
+            .onPageChange(object : OnPageChangeListener {
+                override fun onPageChanged(page: Int, total: Int) {
+                    pageCount = total
+                    binding.pageTextView.text = "${page + 1} / $total"
+                    binding.prevButton.isEnabled = page > 0
+                    binding.nextButton.isEnabled = total > 0 && page < total - 1
+                }
+            })
+            .load()
     }
 
     private fun openRemotePdf(url: String) {
-        binding.pdfImageView.visibility = View.INVISIBLE
+        binding.pdfView.visibility = View.INVISIBLE
         lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
                 runCatching {
@@ -136,14 +152,14 @@ class PdfViewerActivity : AppCompatActivity() {
                 finish()
                 return@launch
             }
-            val opened = openPdf(localUri)
-            if (!opened) {
+            val file = localUri.toFile()
+            if (!file.exists()) {
                 Toast.makeText(this@PdfViewerActivity, "PDF를 열 수 없습니다.", Toast.LENGTH_SHORT).show()
                 finish()
                 return@launch
             }
-            binding.pdfImageView.visibility = View.VISIBLE
-            showPage(0)
+            binding.pdfView.visibility = View.VISIBLE
+            displayPdfFromFile(file)
         }
     }
 
@@ -224,9 +240,7 @@ class PdfViewerActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        currentPage?.close()
-        pdfRenderer?.close()
-        fileDescriptor?.close()
+        binding.pdfView.recycle()
         super.onDestroy()
     }
 
@@ -251,4 +265,3 @@ class PdfViewerActivity : AppCompatActivity() {
         data class Failure(val reason: String) : PdfLoadResult()
     }
 }
-
