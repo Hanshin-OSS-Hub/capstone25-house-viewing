@@ -62,10 +62,11 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/backButton">
 
-        <com.github.barteksc.pdfviewer.PDFView
-            android:id="@+id/pdfView"
+        <com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+            android:id="@+id/pdfImageView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:contentDescription="PDF preview" />
     </FrameLayout>
 
     <LinearLayout
