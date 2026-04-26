@@ -2,8 +2,10 @@ package com.capstone.houseviewingapp.analysis
 
 import android.app.AlertDialog
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
@@ -62,16 +64,22 @@ class AnalysisFragment : Fragment(R.layout.fragment_analysis) {
                     .show()
             },
             onDetailClick = { item ->
-                val uriRaw = item.sourcePdfUri
-                    ?.takeIf { it.isNotBlank() }
-                    ?: ReportPdfDummyFactory.createOrGet(requireContext(), item).toString()
-                startActivity(
-                    Intent(requireContext(), PdfViewerActivity::class.java).apply {
-                        putExtra(PdfViewerActivity.EXTRA_URI, uriRaw)
-                        putExtra(PdfViewerActivity.EXTRA_TITLE, "${item.title} 상세 대응 리포트")
-                        putExtra(PdfViewerActivity.EXTRA_SHOW_REPORT_BUTTON, true)
-                    }
-                )
+                val uriRaw = item.sourcePdfUri?.trim()?.takeIf { it.isNotBlank() }
+                if (uriRaw == null || isLegacyMockPdfUrl(uriRaw)) {
+                    Toast.makeText(
+                        requireContext(),
+                        "서버에서 받은 PDF 주소가 없습니다. 분석을 다시 진행해 주세요.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    startActivity(
+                        Intent(requireContext(), PdfViewerActivity::class.java).apply {
+                            putExtra(PdfViewerActivity.EXTRA_URI, uriRaw)
+                            putExtra(PdfViewerActivity.EXTRA_TITLE, "${item.title} 상세 대응 리포트")
+                            putExtra(PdfViewerActivity.EXTRA_SHOW_REPORT_BUTTON, true)
+                        }
+                    )
+                }
             }
         )
         binding.recordRecyclerView.layoutManager = LinearLayoutManager(requireContext())
@@ -158,5 +166,11 @@ class AnalysisFragment : Fragment(R.layout.fragment_analysis) {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    /** 예전 목 데이터에 남아 있을 수 있는 mock.local — 실제 PDF가 없으므로 열지 않음 */
+    private fun isLegacyMockPdfUrl(url: String): Boolean {
+        val host = Uri.parse(url).host?.lowercase() ?: return false
+        return host == "mock.local" || host.endsWith(".mock.local")
     }
 }
