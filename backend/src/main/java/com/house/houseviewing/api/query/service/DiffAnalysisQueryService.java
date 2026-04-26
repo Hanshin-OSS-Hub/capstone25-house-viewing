@@ -27,7 +27,7 @@ public class DiffAnalysisQueryService {
 
     @Transactional
     public PdfDownloadResponse executeDiffDiagnosis(Long houseId){
-        long count = postAnalysisRepository.countByHouse_Id(houseId) - 1;
+        long count = postAnalysisRepository.countByHouse_Id(houseId);
         String snapshot = readMockJson(count);
 
         PostAnalysisEntity diffAnalysis = postAnalysisService.diffRegister(houseId, snapshot);
