@@ -17,7 +17,6 @@ from schemas.dto import (
 )
 from generators.risk_html_generator import generate_html_report
 from generators.recovery_html_generator import generate_recovery_html_report
-from generators.diff_html_generator import generate_diff_html_report
 from generators.verification_html_generator import build_snapshot_page
 from generators.combined_html_generator import generate_combined_html_report
 
@@ -314,7 +313,7 @@ async def generate_diff_pdf(request: GenerateDiffPdfRequest) -> Response:
     snapshot_name = _resolve_snapshot_name(new_raw, request.snapshotName, fallback="diff-analysis")
 
     try:
-        html_content = generate_diff_html_report(
+        html_content = generate_combined_html_report(
             snapshot_name=snapshot_name,
             origin_raw=origin_raw,
             new_raw=new_raw,

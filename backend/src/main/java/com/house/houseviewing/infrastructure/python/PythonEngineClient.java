@@ -60,7 +60,7 @@ public class PythonEngineClient {
     }
 
     public Mono<byte[]> diffSendDataAndReceivePdf(PdfDiffReportRequest request){
-        return sendPdfRequest("/engine/generate-pdf/combined", request);
+        return sendPdfRequest("/engine/generate-pdf/diff", request);
     }
 
     private Mono<byte[]> sendPdfRequest(String uri, Object request) {
