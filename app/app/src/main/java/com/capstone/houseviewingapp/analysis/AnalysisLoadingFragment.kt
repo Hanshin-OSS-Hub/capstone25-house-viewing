@@ -290,11 +290,25 @@ class AnalysisLoadingFragment : Fragment() {
 
     private fun mapAnalysisErrorMessage(throwable: Throwable, source: RecordSource): String {
         val remote = throwable as? RemoteApiException
+        // HTTP 404 라도 서버 code 로 원인이 올 수 있음 — 먼저 처리 (알림 캐치 → change-diagnoses → NF008 등)
+        when (remote?.code) {
+            "NF008" ->
+                return "등기부 변경 분석용 서버 파일(mock JSON)이 없습니다. 백엔드 resources 에 SAFE/WARNING/DANGER-registry.json 을 두어야 합니다."
+            "NF003" ->
+                return "서버에 해당 집이 없습니다. 집 등록·houseId 를 확인해 주세요."
+        }
         if (remote?.statusCode == 500 && (remote.code.isNullOrBlank() || remote.code == "UNKNOWN")) {
             return "분석 엔진(PDF 생성) 처리 중 오류가 발생했습니다. 더미 PDF가 아닌 실제 등기부등본으로 다시 시도해 주세요."
         }
         if (remote?.statusCode == 404) {
-            return "분석 API 경로를 찾지 못했습니다(HTTP 404). 서버 재시작 후에도 계속 발생하면 서버 라우트 버전 불일치입니다."
+            // Retrofit 경로는 백엔드 Controller 와 이미 일치함( analyses, analysis/.../change-diagnoses 등).
+            // 404 는 NF008·NF003 등 서버 비즈니스/리소스 이슈인 경우가 많고, "앱 URL 오타" 가설과는 무관.
+            val detail = remote.message?.takeIf { it.isNotBlank() }
+            return if (detail != null) {
+                "분석 요청이 거절되었습니다(HTTP 404). $detail"
+            } else {
+                "분석 요청이 거절되었습니다(HTTP 404). 앱 분석 API 경로는 서버와 맞습니다. 서버·Docker(mock 리소스)·DB 상태를 확인해 주세요."
+            }
         }
         return when (remote?.code) {
             "AU001", "AU002", "AU003", "AU005", "AU006" ->
