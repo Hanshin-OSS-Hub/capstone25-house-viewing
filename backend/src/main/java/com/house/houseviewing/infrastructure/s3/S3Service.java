@@ -14,7 +14,6 @@ import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.time.Duration;
 import java.util.UUID;
 
@@ -48,7 +47,7 @@ public class S3Service {
                     .pdfSizeBytes((long) pdf.length)
                     .pdfName("안전_진단_리포트.pdf")
                     .build();
-        } catch (IOException e){
+        } catch (Exception e){
             throw new AppException(ExceptionCode.S3_UPLOAD_FAILED);
         }
     }

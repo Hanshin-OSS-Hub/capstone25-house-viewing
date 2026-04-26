@@ -28,7 +28,7 @@ public class PostReportEntity extends BaseTimeEntity {
     @Column(nullable = false)
     private String pdfName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String pdfPath;
 
     @Column(nullable = false)
