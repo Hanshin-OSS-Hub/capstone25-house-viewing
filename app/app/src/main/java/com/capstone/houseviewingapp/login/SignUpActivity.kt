@@ -14,6 +14,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.capstone.houseviewingapp.auth.AuthRepositoryProvider
 import com.capstone.houseviewingapp.auth.model.RegisterRequest
 import com.capstone.houseviewingapp.data.local.UserProfileLocalStore
+import com.capstone.houseviewingapp.data.remote.RemoteApiException
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.databinding.ActivitySignUpBinding
 import kotlinx.coroutines.launch
@@ -319,12 +320,17 @@ class SignUpActivity : AppCompatActivity() {
                     startActivity(Intent(this@SignUpActivity, LoginActivity::class.java))
                     finish()
                 }.onFailure { e ->
-                    val msg = when (e.message) {
-                        "DUPLICATE_LOGIN_ID" -> "이미 사용 중인 아이디입니다."
-                        "DUPLICATE_EMAIL" -> "이미 사용 중인 이메일입니다."
-                        else -> "회원가입에 실패했습니다. 잠시 후 다시 시도해 주세요."
+                    val generic =
+                        "회원가입에 실패했습니다. 백엔드(8080) 실행·에뮬레이터 네트워크를 확인해 주세요."
+                    val msg = when {
+                        e.message == "DUPLICATE_LOGIN_ID" -> "이미 사용 중인 아이디입니다."
+                        e.message == "DUPLICATE_EMAIL" -> "이미 사용 중인 이메일입니다."
+                        e.message == "DUPLICATE_RESOURCE" ->
+                            "이미 가입된 정보입니다. 아이디·이메일 중복을 확인해 주세요."
+                        e is RemoteApiException -> e.message?.takeIf { it.isNotBlank() } ?: generic
+                        else -> generic
                     }
-                    Toast.makeText(this@SignUpActivity, msg, Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@SignUpActivity, msg, Toast.LENGTH_LONG).show()
                 }
             }
         }
