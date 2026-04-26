@@ -55,8 +55,10 @@ def create_app(include_ocr: bool = True) -> FastAPI:
 
     if include_ocr:
         from routers.ocr import router as ocr_router
-
         app.include_router(ocr_router)
+
+    from core.mock import router as mock_router
+    app.include_router(mock_router)
 
     @app.get("/health", summary="헬스체크", tags=["Infra"])
     async def health_check() -> dict:

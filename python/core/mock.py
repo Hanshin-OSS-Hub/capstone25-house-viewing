@@ -3,16 +3,19 @@ import json
 import traceback
 from typing import Optional, Dict, Any
 
-from fastapi import FastAPI, HTTPException
+import pdfkit
+from fastapi import APIRouter, HTTPException
+from fastapi.responses import Response
 from pydantic import BaseModel
 
 from engines.diff_engine import diff_snapshots
 from engines.risk_engine import compute_ltv_info, compute_risk
 from engines.recovery_engine import compute_recovery
+from generators.combined_html_generator import generate_combined_html_report
 
-app = FastAPI(title="Mock Registry Analyze API")
+router = APIRouter(prefix="/mock", tags=["Mock"])
 
-BASE_DIR = "../mock_storage"
+BASE_DIR = "mock_storage"
 os.makedirs(BASE_DIR, exist_ok=True)
 
 
@@ -120,7 +123,7 @@ def extract_ltv_score(ltv_result: Dict[str, Any]) -> int:
 # -----------------------------
 # 1) 기준 snapshot 저장
 # -----------------------------
-@app.post("/baseline/save")
+@router.post("/baseline/save")
 def save_baseline(req: SaveBaselineRequest):
     snapshot_dict = parse_snapshot_string(req.snapshot)
     save_json(baseline_file_path(req.doc_id), snapshot_dict)
@@ -137,7 +140,7 @@ def save_baseline(req: SaveBaselineRequest):
 # -----------------------------
 # 2) 기준 데이터 조회
 # -----------------------------
-@app.get("/baseline/{doc_id}")
+@router.get("/baseline/{doc_id}")
 def get_baseline(doc_id: str):
     path = baseline_file_path(doc_id)
     if not os.path.exists(path):
@@ -152,7 +155,7 @@ def get_baseline(doc_id: str):
 # -----------------------------
 # 3) snapshot 분석
 # -----------------------------
-@app.post("/engine/analyze")
+@router.post("/engine/analyze")
 def analyze_registry(req: AnalyzeRequest):
     try:
         current_snapshot = parse_snapshot_string(req.snapshot)
@@ -236,7 +239,7 @@ def analyze_registry(req: AnalyzeRequest):
 # -----------------------------
 # 4) 최신 분석 결과 조회
 # -----------------------------
-@app.get("/result/{doc_id}")
+@router.get("/result/{doc_id}")
 def get_latest_result(doc_id: str):
     path = result_file_path(doc_id)
     if not os.path.exists(path):
@@ -246,3 +249,115 @@ def get_latest_result(doc_id: str):
         data = json.load(f)
 
     return data
+
+
+# --------------------------------------------------
+# PDF 설정 (engine.py 와 동일)
+# --------------------------------------------------
+_WKHTMLTOPDF_PATH = os.getenv(
+    "WKHTMLTOPDF_PATH",
+    r"C:\Program Files\wkhtmltopdf\bin\wkhtmltopdf.exe",
+)
+_PDFKIT_CONFIG = (
+    pdfkit.configuration(wkhtmltopdf=_WKHTMLTOPDF_PATH)
+    if os.path.exists(_WKHTMLTOPDF_PATH)
+    else None
+)
+_PDFKIT_OPTIONS: dict = {
+    "encoding": "UTF-8",
+    "page-size": "A4",
+    "margin-top": "12mm",
+    "margin-right": "12mm",
+    "margin-bottom": "14mm",
+    "margin-left": "12mm",
+    "enable-local-file-access": "",
+    "no-outline": "",
+    "quiet": "",
+    "javascript-delay": "1000",
+}
+
+
+class CombinedPdfFromStorageRequest(BaseModel):
+    """저장된 분석 결과 2개를 조합해 통합 PDF 생성"""
+    origin_doc_id:  str
+    new_doc_id:     str
+    contract_type:  str = "JEONSE"
+    deposit:        int = 0
+    monthly_amount: int = 0
+    maintenance_fee: int = 0
+    move_date:      str = ""
+    confirm_date:   str = ""
+
+
+# -----------------------------
+# 5) 저장된 mock 결과로 통합 PDF 생성
+# -----------------------------
+@router.post(
+    "/generate-pdf/combined",
+    summary="저장된 mock 분석 결과 2개로 통합 PDF 생성 (DIFF+RECOVERY+OCR)",
+)
+def generate_combined_from_storage(req: CombinedPdfFromStorageRequest):
+    """mock_storage에 저장된 origin/new 분석 결과를 읽어 combined PDF를 반환한다.
+
+    시나리오별로 다른 위험도가 나오는 doc_id 쌍을 사용하면
+    SAFE / WARNING / DANGER 3가지 PDF를 생성할 수 있다.
+    """
+    # origin 로드
+    origin_path = result_file_path(req.origin_doc_id)
+    if not os.path.exists(origin_path):
+        raise HTTPException(status_code=404, detail=f"origin_doc_id '{req.origin_doc_id}' 분석 결과 없음")
+    with open(origin_path, "r", encoding="utf-8") as f:
+        origin_raw: dict = json.load(f)
+
+    # new 로드
+    new_path = result_file_path(req.new_doc_id)
+    if not os.path.exists(new_path):
+        raise HTTPException(status_code=404, detail=f"new_doc_id '{req.new_doc_id}' 분석 결과 없음")
+    with open(new_path, "r", encoding="utf-8") as f:
+        new_raw: dict = json.load(f)
+
+    # snapshot_name 추출
+    new_snapshot  = new_raw.get("snapshot", {})
+    snapshot_name = new_snapshot.get("address", {}).get("address", req.new_doc_id)
+
+    try:
+        html_content = generate_combined_html_report(
+            snapshot_name=snapshot_name,
+            origin_raw=origin_raw,
+            new_raw=new_raw,
+            contract_type=req.contract_type,
+            deposit=req.deposit,
+            monthly_amount=req.monthly_amount,
+            maintenance_fee=req.maintenance_fee,
+            move_date=req.move_date,
+            confirm_date=req.confirm_date,
+        )
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"HTML 생성 오류: {e}")
+
+    try:
+        pdf_bytes = pdfkit.from_string(
+            html_content, False,
+            options=_PDFKIT_OPTIONS,
+            configuration=_PDFKIT_CONFIG,
+        )
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"PDF 변환 오류: {e}")
+
+    risk_level = new_raw.get("riskLevel", "unknown").lower()
+    from urllib.parse import quote
+    encoded_name = quote(f"combined_{risk_level}_{req.new_doc_id}.pdf", safe="")
+
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": (
+                f'attachment; filename="combined_report.pdf"; '
+                f"filename*=UTF-8''{encoded_name}"
+            ),
+            "Content-Length": str(len(pdf_bytes)),
+        },
+    )

@@ -11,13 +11,14 @@ from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
 
 from schemas.dto import (
-    GeneratePdfRequest, GenerateDiffPdfRequest,
+    GeneratePdfRequest, GenerateDiffPdfRequest, GenerateCombinedPdfRequest,
     RiskAnalysisRequest, RecoveryRenderData,
 )
 from generators.risk_html_generator import generate_html_report
 from generators.recovery_html_generator import generate_recovery_html_report
 from generators.diff_html_generator import generate_diff_html_report
 from generators.verification_html_generator import build_snapshot_page
+from generators.combined_html_generator import generate_combined_html_report
 
 router = APIRouter(prefix="/engine", tags=["Engine"])
 
@@ -258,6 +259,58 @@ async def generate_diff_pdf(request: GenerateDiffPdfRequest) -> Response:
         media_type="application/pdf",
         headers={
             "Content-Disposition": f"attachment; filename=\"diff_report.pdf\"; filename*=UTF-8''{encoded_name}",
+            "Content-Length": str(len(pdf_bytes)),
+        },
+    )
+
+
+@router.post(
+    "/generate-pdf/combined",
+    summary="통합 시나리오 PDF 생성 (DIFF + RECOVERY + OCR 텍스트)",
+    description=(
+        "위험도 시나리오(SAFE / WARNING / DANGER)별로 호출하여 1장씩 생성합니다.\n\n"
+        "- **Page 1** : 등기부 변동 내역 (DIFF)\n"
+        "- **Page 2** : 보증금 회수 분석 (RECOVERY)\n"
+        "- **Page 3** : 등기부 OCR 파싱 텍스트 (VERIFICATION)"
+    ),
+    responses={
+        200: {"content": {"application/pdf": {}}, "description": "통합 시나리오 PDF 반환"},
+        422: {"description": "요청 데이터 유효성 오류"},
+        500: {"description": "PDF 변환 실패"},
+    },
+)
+async def generate_combined_pdf(request: GenerateCombinedPdfRequest) -> Response:
+    try:
+        origin_raw: dict = json_lib.loads(request.originData)
+        new_raw: dict    = json_lib.loads(request.newData)
+    except ValueError:
+        raise HTTPException(status_code=422, detail="originData 또는 newData가 유효한 JSON이 아닙니다.")
+
+    snapshot_name = _resolve_snapshot_name(new_raw, request.snapshotName, fallback="combined-report")
+
+    try:
+        html_content = generate_combined_html_report(
+            snapshot_name=snapshot_name,
+            origin_raw=origin_raw,
+            new_raw=new_raw,
+            contract_type=request.contractType,
+            deposit=request.deposit,
+            monthly_amount=request.monthlyAmount,
+            maintenance_fee=request.maintenanceFee,
+            move_date=request.moveDate,
+            confirm_date=request.confirmDate,
+        )
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"통합 보고서 HTML 생성 실패: {e}")
+
+    pdf_bytes    = _pdf_bytes(html_content)
+    risk_level   = new_raw.get("risk", {}).get("risk_level", "UNKNOWN").lower()
+    encoded_name = quote(f"combined_{risk_level}_{snapshot_name}.pdf", safe="")
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={
+            "Content-Disposition": f"attachment; filename=\"combined_report.pdf\"; filename*=UTF-8''{encoded_name}",
             "Content-Length": str(len(pdf_bytes)),
         },
     )

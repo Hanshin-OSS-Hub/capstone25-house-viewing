@@ -98,6 +98,37 @@ class GenerateDiffPdfRequest(BaseModel):
     moveDate:        str = Field(..., description="전입일 (YYYY-MM-DD)")
     confirmDate:     str = Field(..., description="확정일자 (YYYY-MM-DD)")
 
+
+class GenerateCombinedPdfRequest(BaseModel):
+    """통합 시나리오 PDF 요청 DTO — DIFF + RECOVERY + OCR 텍스트 (Java 서버 → FastAPI)
+
+    위험도 시나리오(SAFE/WARNING/DANGER)별로 호출하여 각 1장씩 총 3장 생성.
+    """
+    snapshotName:    Optional[str] = Field(None,  description="등기부 제목")
+    originData:      str           = Field(...,   description="직전 분석 JSON 문자열", min_length=1)
+    newData:         str           = Field(...,   description="변동 후 분석 JSON 문자열", min_length=1)
+    contractType:    str           = Field(...,   description="계약 유형 (JEONSE / MONTHLY)")
+    deposit:         int           = Field(...,   description="보증금 (원)", ge=0)
+    monthlyAmount:   int           = Field(0,     description="월세 (원)", ge=0)
+    maintenanceFee:  int           = Field(0,     description="관리비 (원)", ge=0)
+    moveDate:        str           = Field("",    description="전입일 (YYYY-MM-DD)")
+    confirmDate:     str           = Field("",    description="확정일자 (YYYY-MM-DD)")
+
+    @field_validator("snapshotName", mode="before")
+    @classmethod
+    def normalize_combined_snapshot_name(cls, value: str | None) -> str | None:
+        if value is None:
+            return None
+        value = value.strip()
+        return value or None
+
+    @field_validator("originData", "newData", "contractType")
+    @classmethod
+    def validate_combined_non_blank(cls, value: str, info) -> str:
+        if value is None or not value.strip():
+            raise ValueError(f"{info.field_name} 필드는 비어 있을 수 없습니다.")
+        return value
+
     @field_validator("snapshotName", mode="before")
     @classmethod
     def normalize_diff_snapshot_name(cls, value: str | None) -> str | None:
