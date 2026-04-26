@@ -56,7 +56,9 @@ class AnalysisRecordAdapter(
             binding.addressTextView.text = item.address
             binding.riskTextView.text = summarizeRisk(item.riskSummary)
 
-            val normalizedScore = item.ltv?.toInt()?.coerceIn(0, 100)
+            // 백엔드가 LTV 산출 실패 시 ltvScore=0 으로 올 수 있음. 0 을 "60 이하 안전"으로 취급하면
+            // 실제 위험도(WARNING)와 배지(안전)가 엇갈리므로, 0 이하·null 은 서버가 준 level 을 그대로 씀.
+            val normalizedScore = item.ltv?.takeIf { it > 0 }?.toInt()?.coerceIn(0, 100)
             val displayLevel = normalizedScore?.let { score ->
                 when {
                     score <= 60 -> RiskLevel.BLUE
@@ -100,7 +102,11 @@ class AnalysisRecordAdapter(
             binding.riskIconView.setImageResource(iconRes)
             binding.riskIconView.setColorFilter(c)
 
-            binding.scoreTextView.text = normalizedScore?.let { "${it}점" } ?: "--점"
+            binding.scoreTextView.text = when {
+                normalizedScore != null -> "${normalizedScore}점"
+                item.ltv != null && item.ltv <= 0.0 -> "—"
+                else -> "--점"
+            }
             binding.detailButton.text = "상세 리포트 확인"
             binding.detailButton.setOnClickListener { onDetailClick(item) }
         }
