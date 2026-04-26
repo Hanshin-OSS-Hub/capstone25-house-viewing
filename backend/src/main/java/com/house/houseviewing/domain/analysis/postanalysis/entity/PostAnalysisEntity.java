@@ -23,11 +23,11 @@ public class PostAnalysisEntity extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "house_id", unique = true)
+    @JoinColumn(name = "house_id")
     private HouseEntity house;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "contract_id", unique = true)
+    @JoinColumn(name = "contract_id")
     private ContractEntity contract;
 
     @OneToOne(mappedBy = "analysis", cascade = CascadeType.ALL, orphanRemoval = true)

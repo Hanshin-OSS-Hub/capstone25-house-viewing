@@ -4,11 +4,12 @@ from __future__ import annotations
 import json as json_lib
 import os
 import time
+import traceback
 from urllib.parse import quote
 
 import pdfkit
-from fastapi import APIRouter, HTTPException
-from fastapi.responses import Response
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import Response, JSONResponse
 
 from schemas.dto import (
     GeneratePdfRequest, GenerateDiffPdfRequest, GenerateCombinedPdfRequest,
@@ -147,6 +148,81 @@ def _build_recovery_render_data(request: GeneratePdfRequest) -> RecoveryRenderDa
     )
 
 
+@router.post(
+    "/analyze/mock",
+    summary="Mock 등기부 JSON 분석 (change-diagnoses 전용)",
+    tags=["Engine"],
+)
+async def analyze_mock(request: Request) -> JSONResponse:
+    """백엔드가 보낸 mock 등기부 JSON을 분석해 DiffAnalysisResult 형태로 반환한다.
+
+    요청 body: {"snapshot": {...}} 또는 snapshot 자체 dict
+    응답: {"riskLevel": "SAFE|WARNING|DANGER", "rawData": "...", "mainReason": "...", "ltvScore": 0}
+    """
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=422, detail="요청 body가 유효한 JSON이 아닙니다.")
+
+    # Spring WebClient가 String을 JSON 문자열 리터럴로 보낼 경우 재파싱
+    if isinstance(body, str):
+        try:
+            body = json_lib.loads(body)
+        except Exception:
+            raise HTTPException(status_code=422, detail="snapshot JSON 파싱 실패")
+
+    # snapshot 추출
+    if isinstance(body, dict) and "snapshot" in body and isinstance(body["snapshot"], dict):
+        snapshot = body["snapshot"]
+    elif isinstance(body, dict) and ("gabu" in body or "eulgu" in body):
+        snapshot = body
+    else:
+        raise HTTPException(status_code=422, detail="snapshot 데이터를 찾을 수 없습니다.")
+
+    try:
+        from engines.risk_engine import compute_ltv_info, compute_risk
+        from engines.recovery_engine import compute_recovery
+
+        valuation: dict = {}
+        ltv_result   = compute_ltv_info(snapshot, valuation)
+        risk_result  = compute_risk(snapshot, {}, valuation, ltv_result)
+        recovery_result = compute_recovery(snapshot, valuation, ltv_result, {}, risk_result)
+
+        raw_full = {
+            "snapshot":  snapshot,
+            "valuation": valuation,
+            "ltv":       ltv_result,
+            "risk":      risk_result,
+            "recovery":  recovery_result,
+        }
+
+        # riskLevel 변환 (HIGH→DANGER, MEDIUM→WARNING, LOW→SAFE)
+        level_raw = str(risk_result.get("risk_level", "LOW")).upper()
+        risk_level_map = {"HIGH": "DANGER", "MEDIUM": "WARNING", "LOW": "SAFE"}
+        risk_level = risk_level_map.get(level_raw, "WARNING")
+
+        # mainReason
+        signals = risk_result.get("signals", [])
+        if signals:
+            main_reason = str(signals[0].get("explain") or signals[0].get("code") or "위험 감지")
+        else:
+            main_reason = "위험 시그널 없음"
+
+        # ltvScore
+        ltv_score = int(float(ltv_result.get("ltv", 0)))
+
+        return JSONResponse({
+            "riskLevel":  risk_level,
+            "rawData":    json_lib.dumps(raw_full, ensure_ascii=False),
+            "mainReason": main_reason,
+            "ltvScore":   ltv_score,
+        })
+
+    except Exception as e:
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"mock 분석 실패: {e}")
+
+
 def _pdf_bytes(html: str) -> bytes:
     """HTML → PDF 바이너리 변환"""
     try:
@@ -280,6 +356,8 @@ async def generate_diff_pdf(request: GenerateDiffPdfRequest) -> Response:
     },
 )
 async def generate_combined_pdf(request: GenerateCombinedPdfRequest) -> Response:
+    import sys
+    print(f"[DEBUG combined] contractType={request.contractType!r} deposit={request.deposit!r} moveDate={request.moveDate!r}", file=sys.stderr, flush=True)
     try:
         origin_raw: dict = json_lib.loads(request.originData)
         new_raw: dict    = json_lib.loads(request.newData)

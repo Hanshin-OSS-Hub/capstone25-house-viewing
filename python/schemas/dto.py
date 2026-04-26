@@ -129,6 +129,16 @@ class GenerateCombinedPdfRequest(BaseModel):
             raise ValueError(f"{info.field_name} 필드는 비어 있을 수 없습니다.")
         return value
 
+    @field_validator("moveDate", "confirmDate", mode="before")
+    @classmethod
+    def coerce_date_field(cls, value) -> str:
+        """Spring LocalDate 배열([2024,3,1]) → ISO 문자열 변환"""
+        if isinstance(value, (list, tuple)) and len(value) == 3:
+            return f"{value[0]:04d}-{value[1]:02d}-{value[2]:02d}"
+        if value is None:
+            return ""
+        return str(value)
+
     @field_validator("snapshotName", mode="before")
     @classmethod
     def normalize_diff_snapshot_name(cls, value: str | None) -> str | None:
@@ -136,6 +146,16 @@ class GenerateCombinedPdfRequest(BaseModel):
             return None
         value = value.strip()
         return value or None
+
+    @field_validator("moveDate", "confirmDate", mode="before")
+    @classmethod
+    def coerce_diff_date_field(cls, value) -> str:
+        """Spring LocalDate 배열([2024,3,1]) → ISO 문자열 변환"""
+        if isinstance(value, (list, tuple)) and len(value) == 3:
+            return f"{value[0]:04d}-{value[1]:02d}-{value[2]:02d}"
+        if value is None:
+            return ""
+        return str(value)
 
     @field_validator("originData", "newData", "contractType", "moveDate", "confirmDate")
     @classmethod
