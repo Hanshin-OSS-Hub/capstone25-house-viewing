@@ -10,6 +10,7 @@ import android.widget.Toast
 import android.util.Log
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toFile
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.lifecycleScope
@@ -89,7 +90,10 @@ class PdfViewerActivity : AppCompatActivity() {
 
     private fun openPdf(uri: Uri): Boolean {
         return runCatching {
-            fileDescriptor = contentResolver.openFileDescriptor(uri, "r")
+            fileDescriptor = when (uri.scheme?.lowercase()) {
+                "file" -> ParcelFileDescriptor.open(uri.toFile(), ParcelFileDescriptor.MODE_READ_ONLY)
+                else -> contentResolver.openFileDescriptor(uri, "r")
+            }
             val fd = fileDescriptor ?: return false
             pdfRenderer = PdfRenderer(fd)
             true
@@ -188,12 +192,35 @@ class PdfViewerActivity : AppCompatActivity() {
 
     private fun resolvePdfUrl(raw: String): String {
         val trimmed = raw.trim()
-        if (trimmed.startsWith("http://", ignoreCase = true) || trimmed.startsWith("https://", ignoreCase = true)) {
-            return trimmed
+        val resolved = if (trimmed.startsWith("http://", ignoreCase = true) || trimmed.startsWith("https://", ignoreCase = true)) {
+            trimmed
+        } else {
+            val base = BuildConfig.API_BASE_URL.trimEnd('/')
+            val path = trimmed.trimStart('/')
+            "$base/$path"
         }
-        val base = BuildConfig.API_BASE_URL.trimEnd('/')
-        val path = trimmed.trimStart('/')
-        return "$base/$path"
+        return alignPdfUrlHostWithApiBase(resolved)
+    }
+
+    /**
+     * 백엔드가 PDF 주소에 127.0.0.1 / localhost 를 주는데, 앱은 API_BASE_URL 을 10.0.2.2 로 둔 경우(에뮬레이터) 등
+     * 호스트만 달라서 PDF GET 이 실패하는 것을 맞춤. S3 등 외부 호스트 URL 은 그대로 둠.
+     */
+    private fun alignPdfUrlHostWithApiBase(url: String): String {
+        val target = url.toHttpUrlOrNull() ?: return url
+        val base = BuildConfig.API_BASE_URL.toHttpUrlOrNull() ?: return url
+        val loopbackHosts = setOf("127.0.0.1", "localhost")
+        val targetHost = target.host.lowercase()
+        if (targetHost !in loopbackHosts) return url
+        val baseHost = base.host.lowercase()
+        // API 도 루프백이면 그대로 (adb reverse + 127.0.0.1 유지 시)
+        if (baseHost in loopbackHosts) return url
+        return target.newBuilder()
+            .scheme(base.scheme)
+            .host(base.host)
+            .port(base.port)
+            .build()
+            .toString()
     }
 
     override fun onDestroy() {
