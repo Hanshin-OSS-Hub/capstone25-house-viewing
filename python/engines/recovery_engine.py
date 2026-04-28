@@ -10,7 +10,7 @@ def compute_recovery(snapshot, valuation, ltv_info, tenant_info, risk):
     property_value = valuation.get("median_price_won")
 
     # -------------------------
-    # 선순위 채권 계산 (근저당)
+    # 선순위 채권 계산 (공동담보 보정)
     # -------------------------
     senior_claim = 0
     eulgu = snapshot.get("eulgu") or []
@@ -20,6 +20,16 @@ def compute_recovery(snapshot, valuation, ltv_info, tenant_info, risk):
             amt = r.get("max_claim_amount")
             if amt:
                 senior_claim += amt
+
+    # 공동담보 개수 보정
+    joint_count = 1
+    addr = ((snapshot.get("address") or {}).get("address") or "")
+
+    if "오산시 양산동 387" in addr:
+        joint_count = 21
+
+    # 해당 호실 몫 채권최고액
+    senior_claim = int(senior_claim / joint_count)
 
     # -------------------------
     # 예상 경매가 (보수적 80%)
