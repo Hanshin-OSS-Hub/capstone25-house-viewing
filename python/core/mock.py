@@ -3,19 +3,16 @@ import json
 import traceback
 from typing import Optional, Dict, Any
 
-import pdfkit
-from fastapi import APIRouter, HTTPException
-from fastapi.responses import Response
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-from engines.diff_engine import diff_snapshots
-from engines.risk_engine import compute_ltv_info, compute_risk
-from engines.recovery_engine import compute_recovery
-from generators.combined_html_generator import generate_combined_html_report
+from engine.diff_engine import diff_snapshots
+from engine.risk_engine import compute_ltv_info, compute_risk
+from engine.recovery_engine import compute_recovery
 
-router = APIRouter(prefix="/mock", tags=["Mock"])
+app = FastAPI(title="Mock Registry Analyze API")
 
-BASE_DIR = "mock_storage"
+BASE_DIR = "../mock_storage"
 os.makedirs(BASE_DIR, exist_ok=True)
 
 
@@ -101,15 +98,15 @@ def convert_risk_level(risk_result: Dict[str, Any]) -> str:
     return level if level in {"SAFE", "WARNING", "DANGER"} else "WARNING"
 
 
-def pick_main_reason(risk_result: Dict[str, Any]) -> str:
-    signals = risk_result.get("signals", [])
-    if isinstance(signals, list) and signals:
-        first = signals[0]
-        if first.get("explain"):
-            return str(first["explain"])
-        if first.get("code"):
-            return str(first["code"])
-    return "주요 위험 사유를 찾지 못했습니다."
+def pick_main_reason(snapshot: Dict[str, Any]) -> str:
+    eulgu = snapshot.get("eulgu", [])
+
+    if eulgu and len(eulgu) > 0:
+        purpose = eulgu[0].get("purpose")
+        if purpose:
+            return str(purpose)
+
+    return "특이 위험 없음"
 
 
 def extract_ltv_score(ltv_result: Dict[str, Any]) -> int:
@@ -123,7 +120,7 @@ def extract_ltv_score(ltv_result: Dict[str, Any]) -> int:
 # -----------------------------
 # 1) 기준 snapshot 저장
 # -----------------------------
-@router.post("/baseline/save")
+@app.post("/baseline/save")
 def save_baseline(req: SaveBaselineRequest):
     snapshot_dict = parse_snapshot_string(req.snapshot)
     save_json(baseline_file_path(req.doc_id), snapshot_dict)
@@ -140,7 +137,7 @@ def save_baseline(req: SaveBaselineRequest):
 # -----------------------------
 # 2) 기준 데이터 조회
 # -----------------------------
-@router.get("/baseline/{doc_id}")
+@app.get("/baseline/{doc_id}")
 def get_baseline(doc_id: str):
     path = baseline_file_path(doc_id)
     if not os.path.exists(path):
@@ -155,7 +152,7 @@ def get_baseline(doc_id: str):
 # -----------------------------
 # 3) snapshot 분석
 # -----------------------------
-@router.post("/engine/analyze")
+@app.post("/engine/analyze")
 def analyze_registry(req: AnalyzeRequest):
     try:
         current_snapshot = parse_snapshot_string(req.snapshot)
@@ -215,7 +212,7 @@ def analyze_registry(req: AnalyzeRequest):
         final_result = {
             "riskLevel": convert_risk_level(risk_result),
             "rawData": json.dumps(current_snapshot, ensure_ascii=False),
-            "mainReason": pick_main_reason(risk_result),
+            "mainReason": pick_main_reason(current_snapshot),
             "ltvScore": extract_ltv_score(ltv_result),
 
             "snapshot": current_snapshot,
@@ -239,7 +236,7 @@ def analyze_registry(req: AnalyzeRequest):
 # -----------------------------
 # 4) 최신 분석 결과 조회
 # -----------------------------
-@router.get("/result/{doc_id}")
+@app.get("/result/{doc_id}")
 def get_latest_result(doc_id: str):
     path = result_file_path(doc_id)
     if not os.path.exists(path):
