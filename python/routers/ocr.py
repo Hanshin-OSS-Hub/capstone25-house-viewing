@@ -27,20 +27,13 @@ def _convert_risk_level(result: dict) -> str:
 
 
 def _extract_main_reason(result: dict) -> str:
-    recovery = result.get("recovery", {})
-    warning_message = recovery.get("warning_message")
-    action = recovery.get("action")
+    eulgu = result.get("snapshot", {}).get("eulgu", [])
 
-    if warning_message and action:
-        return f"{warning_message} / {action}"
-    if warning_message:
-        return str(warning_message)
-    if action:
-        return str(action)
+    if eulgu:
+        purpose = eulgu[0].get("purpose")
+        if purpose:
+            return str(purpose)
 
-    signals = result.get("risk", {}).get("signals", [])
-    if signals:
-        return str(signals[0].get("explain", "특이 위험 없음"))
     return "특이 위험 없음"
 
 
