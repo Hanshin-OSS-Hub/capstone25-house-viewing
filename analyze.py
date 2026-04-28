@@ -9,7 +9,7 @@ from OCR import run
 
 app = FastAPI(title="Analysis API")
 
-UPLOAD_DIR = "uploads"
+UPLOAD_DIR = "../uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
@@ -48,21 +48,12 @@ def convert_risk_level(result: dict) -> str:
 # 3) 기본 문구
 # =========================
 def extract_main_reason(result: dict) -> str:
-    recovery = result.get("recovery", {})
+    eulgu = result.get("snapshot", {}).get("eulgu", [])
 
-    warning_message = recovery.get("warning_message")
-    action = recovery.get("action")
-
-    if warning_message and action:
-        return f"{warning_message} / {action}"
-    if warning_message:
-        return str(warning_message)
-    if action:
-        return str(action)
-
-    signals = result.get("risk", {}).get("signals", [])
-    if signals and len(signals) > 0:
-        return str(signals[0].get("explain", "특이 위험 없음"))
+    if eulgu and len(eulgu) > 0:
+        purpose = eulgu[0].get("purpose")
+        if purpose:
+            return str(purpose)
 
     return "특이 위험 없음"
 
@@ -90,6 +81,7 @@ async def analyze_registry(
     move_in_date: str = Form(...),
     fixed_date: str = Form(...)
 ):
+
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(status_code=400, detail="PDF 파일만 업로드 가능")
 
@@ -119,5 +111,7 @@ async def analyze_registry(
             "ltvScore": extract_ltv_score(result)
         }
 
+
     except Exception as e:
+
         raise HTTPException(status_code=500, detail=f"분석 실패: {str(e)}")
