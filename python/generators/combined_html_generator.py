@@ -308,6 +308,13 @@ def generate_combined_html_report(
     }}
     .page {{ width: 100%; max-width: 680px; margin: 0 auto; padding: 28px 32px 44px; }}
     .page-break {{ page-break-before: always; }}
+    /* PAGE 1 전용 — 가이드라인 오버플로 방지 */
+    .page-1 {{ padding: 18px 32px 16px; }}
+    .page-1 .section {{ margin-bottom: 8px; }}
+    .page-1 .top-bar {{ margin-bottom: 12px; }}
+    .page-1 .header {{ margin-bottom: 10px; padding-bottom: 8px; }}
+    .page-1 .risk-cmp {{ margin-bottom: 6px; }}
+    .page-1 .info-tbl td {{ padding: 5px 10px; }}
     .top-bar {{
       background: #1c2333; color: #fff; padding: 6px 14px;
       font-size: 8pt; letter-spacing: 1.5px; margin-bottom: 24px;
@@ -433,7 +440,7 @@ def generate_combined_html_report(
 <!-- ════════════════════════════════════════
      PAGE 1 : 등기부 변동 내역 (DIFF)
      ════════════════════════════════════════ -->
-<div class="page">
+<div class="page page-1">
   <div class="top-bar">
     <div class="top-bar-l">등기부 변동 보고서 &nbsp;·&nbsp; REGISTRY CHANGE ANALYSIS REPORT</div>
     <div class="top-bar-r">CONFIDENTIAL</div>
@@ -504,7 +511,7 @@ def generate_combined_html_report(
     <div class="check-list">{signals_html}</div>
   </div>
 
-  <div style="margin-bottom:18px;page-break-inside:auto;">
+  <div style="margin-bottom:8px;page-break-inside:auto;">
     <div class="sec-title">대응 가이드라인</div>
     {guidelines}
   </div>

@@ -98,32 +98,32 @@ def build_guidelines_html(risk_level: str, context: str = "risk") -> str:
     banner = _BANNER.get((context, risk_level), "")
 
     html = (
-        f'<div style="background:{_C};color:#ffffff;padding:10px 16px;border-radius:4px;'
-        f'margin-bottom:14px;font-size:9.5pt;font-weight:700;">{banner}</div>'
+        f'<div style="background:{_C};color:#ffffff;padding:7px 14px;border-radius:4px;'
+        f'margin-bottom:10px;font-size:9.5pt;font-weight:700;">{banner}</div>'
     )
     for i, (title, desc) in enumerate(steps, 1):
         html += (
-            f'<div style="border:1px solid #e5e7eb;border-radius:6px;margin-bottom:10px;page-break-inside:avoid;">'
-            f'<div style="display:table;width:100%;background:#1c2333;padding:9px 14px;border-radius:5px 5px 0 0;">'
+            f'<div style="border:1px solid #e5e7eb;border-radius:6px;margin-bottom:6px;page-break-inside:avoid;">'
+            f'<div style="display:table;width:100%;background:#1c2333;padding:6px 12px;border-radius:5px 5px 0 0;">'
             f'<div style="display:table-cell;width:64px;vertical-align:middle;">'
             f'<span style="display:inline-block;background:{_C};color:#ffffff;font-size:8pt;font-weight:700;padding:3px 8px;border-radius:3px;">STEP {i}</span>'
             f'</div>'
             f'<div style="display:table-cell;font-size:10pt;font-weight:700;color:#ffffff;vertical-align:middle;">{title}</div>'
             f'</div>'
-            f'<div style="padding:12px 14px;font-size:9pt;color:#374151;line-height:1.8;">{desc}</div>'
+            f'<div style="padding:5px 10px;font-size:9pt;color:#374151;line-height:1.45;">{desc}</div>'
             f'</div>'
         )
     html += (
         f'<div style="background:#f0f4ff;border:1px solid #c7d2fe;border-radius:6px;'
-        f'padding:12px 16px;margin-top:6px;page-break-inside:avoid;">'
-        f'<div style="font-size:8.5pt;font-weight:700;color:#3730a3;margin-bottom:8px;">&#9654; 주요 연락처 &amp; 참고 사이트</div>'
+        f'padding:8px 12px;margin-top:4px;page-break-inside:avoid;">'
+        f'<div style="font-size:8.5pt;font-weight:700;color:#3730a3;margin-bottom:5px;">&#9654; 주요 연락처 &amp; 참고 사이트</div>'
         f'<div style="display:table;width:100%;">'
-        f'<div style="display:table-cell;font-size:8.5pt;color:#374151;line-height:2.0;width:50%;">'
+        f'<div style="display:table-cell;font-size:8.5pt;color:#374151;line-height:1.7;width:50%;">'
         f'주택도시보증공사(HUG): <strong>1566-9009</strong><br/>'
         f'법무사협회 무료상담: <strong>1544-6272</strong><br/>'
         f'대한법률구조공단: <strong>132</strong>'
         f'</div>'
-        f'<div style="display:table-cell;font-size:8.5pt;color:#374151;line-height:2.0;">'
+        f'<div style="display:table-cell;font-size:8.5pt;color:#374151;line-height:1.7;">'
         f'대법원 인터넷등기소: www.iros.go.kr<br/>'
         f'정부24 전입신고·확정일자: www.gov.kr<br/>'
         f'HUG 전세보증보험: www.khug.or.kr'
