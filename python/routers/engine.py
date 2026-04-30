@@ -187,20 +187,6 @@ async def analyze_mock(request: Request) -> JSONResponse:
         risk_result     = compute_risk(snapshot, {}, valuation, ltv_result)
         recovery_result = compute_recovery(snapshot, valuation, ltv_result, {}, risk_result)
 
-        # ── ltv_grade 기반 위험도 오버라이드 ─────────────────────────
-        # mock JSON에 ltv_grade(SAFE/WARNING/DANGER)가 있으면 엔진 결과 대신 사용
-        ltv_grade = str(snapshot.get("ltv_grade", "")).upper()
-        grade_to_engine = {"SAFE": "LOW", "WARNING": "MEDIUM", "DANGER": "HIGH"}
-        grade_to_score  = {"SAFE": 15,    "WARNING": 55,        "DANGER": 88}
-        grade_to_signal = {
-            "SAFE":    [],
-            "WARNING": [{"severity": "MEDIUM", "explain": "선순위 채권 비율이 보증금 대비 주의 수준입니다."}],
-            "DANGER":  [{"severity": "HIGH",   "explain": "LTV 초과 — 보증금 전액 회수 불가 위험이 있습니다."}],
-        }
-        if ltv_grade in grade_to_engine:
-            risk_result["risk_level"] = grade_to_engine[ltv_grade]
-            risk_result["risk_score"] = grade_to_score[ltv_grade]
-            risk_result["signals"]    = grade_to_signal[ltv_grade]
 
         raw_full = {
             "snapshot":  snapshot,
