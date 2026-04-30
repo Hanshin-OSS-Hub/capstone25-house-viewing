@@ -57,7 +57,7 @@ class DiffAnalysisQueryServiceTest {
         }
 
         @Test
-        @DisplayName("count가 0일 때 DANGER 레지스트리 사용")
+        @DisplayName("count가 0일 때 SAFE 레지스트리 사용")
         void count_0(){
             PostAnalysisEntity analysis = mock(PostAnalysisEntity.class);
             when(analysis.getId()).thenReturn(1L);
@@ -71,7 +71,7 @@ class DiffAnalysisQueryServiceTest {
 
             diffAnalysisQueryService.executeDiffDiagnosis(1L);
 
-            verify(postAnalysisService).diffRegister(eq(1L), contains("DANGER"));
+            verify(postAnalysisService).diffRegister(eq(1L), contains("\"status\": \"말소\""));
         }
     }
 
@@ -83,21 +83,27 @@ class DiffAnalysisQueryServiceTest {
         @DisplayName("count 0: SAFE 파일")
         void count_0(){
             String result = diffAnalysisQueryService.readMockJson(0);
-            assertThat(result).contains("SAFE");
+            assertThat(result)
+                    .contains("\"status\": \"말소\"")
+                    .contains("\"name\": \"유인근\"");
         }
 
         @Test
         @DisplayName("count 1: WARNING 파일")
         void count_1(){
             String result = diffAnalysisQueryService.readMockJson(1);
-            assertThat(result).contains("WARNING");
+            assertThat(result)
+                    .contains("\"date\": \"2025-12-15\"")
+                    .contains("\"max_claim_amount\": 120000000");
         }
 
         @Test
         @DisplayName("count 2 이상: DANGER 파일")
         void count_2(){
             String result = diffAnalysisQueryService.readMockJson(2);
-            assertThat(result).contains("DANGER");
+            assertThat(result)
+                    .contains("\"purpose\": \"가압류\"")
+                    .contains("\"description\": \"채권자 국민건강보험공단\"");
         }
     }
 }
