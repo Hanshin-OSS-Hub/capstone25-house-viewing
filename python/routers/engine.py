@@ -208,8 +208,9 @@ async def analyze_mock(request: Request) -> JSONResponse:
         else:
             main_reason = "위험 시그널 없음"
 
-        # ltvScore
-        ltv_score = int(float(ltv_result.get("ltv", 0)))
+        # ltvScore: null 처리 + 비율값(0.14) → 퍼센트(14) 변환
+        _ltv_raw = ltv_result.get("ltv") or 0
+        ltv_score = int(float(_ltv_raw) * 100) if float(_ltv_raw or 0) < 1.5 else int(float(_ltv_raw))
 
         return JSONResponse({
             "riskLevel":  risk_level,
