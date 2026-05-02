@@ -40,7 +40,7 @@ def extract_signals_from_snapshot(snapshot: dict):
 
 
 def compute_ltv_info(snapshot, valuation):
-    house_price = valuation.get("median_price_won")
+    house_price = valuation.get("median_price_won") or 65000000
 
     active_rows = [
         x for x in snapshot.get("eulgu", [])
