@@ -222,13 +222,6 @@ def generate_combined_html_report(
         prop_val      = int((new_raw.get("valuation") or {}).get("median_price_won") or 0)
     recovery_calc     = (new_raw.get("recovery") or {}).get("calculation") or {}
     expected_recovery = int(recovery_calc.get("recoverable_amount") or 0)
-    # recoverable_amount가 None이고 deposit이 있으면 auction_estimate로 직접 계산
-    if expected_recovery == 0 and deposit > 0:
-        auction_estimate = int(recovery_calc.get("auction_estimate") or 0)
-        senior_claim     = int(recovery_calc.get("senior_claim_total") or 0)
-        if auction_estimate > 0:
-            remain            = max(0, auction_estimate - senior_claim)
-            expected_recovery = min(remain, deposit)
     recovery_rate     = round(expected_recovery / deposit * 100, 1) if deposit > 0 else 0.0
 
     has_residency     = bool(move_date)

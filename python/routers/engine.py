@@ -224,6 +224,25 @@ async def analyze_mock(request: Request) -> JSONResponse:
         raise HTTPException(status_code=500, detail=f"mock 분석 실패: {e}")
 
 
+def _recompute_recovery(new_raw: dict, deposit: int, move_date: str, confirm_date: str) -> dict:
+    """PDF 생성 시점에 deposit으로 recovery 재계산 후 new_raw에 덮어씌우기"""
+    try:
+        from engines.recovery_engine import compute_recovery
+        snapshot   = new_raw.get("snapshot") or {}
+        valuation  = new_raw.get("valuation") or {}
+        ltv_info   = new_raw.get("ltv") or {}
+        risk       = new_raw.get("risk") or {}
+        tenant_info = {
+            "deposit":      deposit,
+            "move_in_date": move_date or "",
+            "fixed_date":   confirm_date or "",
+        }
+        new_raw["recovery"] = compute_recovery(snapshot, valuation, ltv_info, tenant_info, risk)
+    except Exception:
+        pass  # 재계산 실패 시 기존 rawData 값 유지
+    return new_raw
+
+
 def _pdf_bytes(html: str) -> bytes:
     """HTML → PDF 바이너리 변환"""
     try:
@@ -313,6 +332,7 @@ async def generate_diff_pdf(request: GenerateDiffPdfRequest) -> Response:
         raise HTTPException(status_code=422, detail="originData 또는 newData가 유효한 JSON이 아닙니다.")
 
     snapshot_name = _resolve_snapshot_name(new_raw, request.snapshotName, fallback="diff-analysis")
+    new_raw = _recompute_recovery(new_raw, request.deposit, request.moveDate, request.confirmDate)
 
     try:
         html_content = generate_combined_html_report(
@@ -366,6 +386,7 @@ async def generate_combined_pdf(request: GenerateCombinedPdfRequest) -> Response
         raise HTTPException(status_code=422, detail="originData 또는 newData가 유효한 JSON이 아닙니다.")
 
     snapshot_name = _resolve_snapshot_name(new_raw, request.snapshotName, fallback="combined-report")
+    new_raw = _recompute_recovery(new_raw, request.deposit, request.moveDate, request.confirmDate)
 
     try:
         html_content = generate_combined_html_report(
