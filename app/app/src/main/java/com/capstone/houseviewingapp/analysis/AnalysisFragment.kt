@@ -9,12 +9,17 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.capstone.houseviewingapp.MainActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.capstone.houseviewingapp.R
+import com.capstone.houseviewingapp.analysis.model.AnalysisResponse
+import com.capstone.houseviewingapp.analysis.model.ApiRiskLevel
+import com.capstone.houseviewingapp.data.local.AuthTokenLocalStore
 import com.capstone.houseviewingapp.data.local.AnalysisLocalStore
 import com.capstone.houseviewingapp.databinding.FragmentAnalysisBinding
 import com.capstone.houseviewingapp.home.PdfViewerActivity
+import kotlinx.coroutines.launch
 
 class AnalysisFragment : Fragment(R.layout.fragment_analysis) {
 
@@ -37,8 +42,7 @@ class AnalysisFragment : Fragment(R.layout.fragment_analysis) {
         ) { _, result ->
             val targetId = result.getInt(MainActivity.RESULT_KEY_TARGET_ID, -1)
             if (targetId == R.id.nav_analysis) {
-                allRecords = AnalysisLocalStore.getRecords(requireContext())
-                applyFilters()
+                refreshFromServerAndRender()
             }
         }
 
@@ -46,8 +50,7 @@ class AnalysisFragment : Fragment(R.layout.fragment_analysis) {
         setupTabs()
         setupFilterEvents()
 
-        allRecords = AnalysisLocalStore.getRecords(requireContext())
-        applyFilters()
+        refreshFromServerAndRender()
     }
     private fun setupRecycler() {
         recordAdapter = AnalysisRecordAdapter(
@@ -159,8 +162,7 @@ class AnalysisFragment : Fragment(R.layout.fragment_analysis) {
 
     override fun onResume() {
         super.onResume()
-        allRecords = com.capstone.houseviewingapp.data.local.AnalysisLocalStore.getRecords(requireContext())
-        applyFilters()
+        refreshFromServerAndRender()
     }
 
     override fun onDestroyView() {
@@ -172,6 +174,120 @@ class AnalysisFragment : Fragment(R.layout.fragment_analysis) {
     private fun isLegacyMockPdfUrl(url: String): Boolean {
         val host = Uri.parse(url).host?.lowercase() ?: return false
         return host == "mock.local" || host.endsWith(".mock.local")
+    }
+
+    private fun refreshFromServerAndRender() {
+        val context = requireContext()
+        val localRecords = AnalysisLocalStore.getRecords(context)
+        val accessToken = AuthTokenLocalStore.getAccessToken(context).orEmpty()
+        if (accessToken.isBlank() || localRecords.isEmpty()) {
+            allRecords = localRecords
+            applyFilters()
+            return
+        }
+        viewLifecycleOwner.lifecycleScope.launch {
+            val manualAnalyses = AnalysisRepositoryProvider.repository
+                .getAnalyses(accessToken)
+                .getOrNull()
+                .orEmpty()
+            val autoAnalyses = AnalysisRepositoryProvider.repository
+                .getDiffAnalyses(accessToken)
+                .getOrNull()
+                .orEmpty()
+
+            val merged = localRecords.map { record ->
+                mergeWithServerMeta(record, manualAnalyses, autoAnalyses)
+            }
+            if (merged != localRecords) {
+                AnalysisLocalStore.setRecords(context, merged)
+            }
+            allRecords = merged
+            applyFilters()
+        }
+    }
+
+    private fun mergeWithServerMeta(
+        record: AnalysisRecordItem,
+        manualAnalyses: List<AnalysisResponse>,
+        autoAnalyses: List<AnalysisResponse>
+    ): AnalysisRecordItem {
+        // AUTO는 카드 메타와 PDF URL을 같은 분석 결과로 유지해야 한다.
+        // 그런데 /analyses/diff 응답에는 PDF URL이 없어서, 서버 메타를 임의 매칭하면
+        // "카드는 SAFE, PDF는 WARNING" 같은 불일치가 생길 수 있다.
+        // 이미 PDF가 있는 AUTO 레코드는 저장 당시 값을 우선 신뢰한다.
+        if (record.source == RecordSource.AUTO && !record.sourcePdfUri.isNullOrBlank()) {
+            return record
+        }
+        val candidates = if (record.source == RecordSource.AUTO) autoAnalyses else manualAnalyses
+        val best = selectBestServerMeta(candidates, record.title, record.address, record.source) ?: return record
+        return record.copy(
+            riskSummary = best.mainReason?.takeIf { it.isNotBlank() } ?: record.riskSummary,
+            level = best.riskLevel?.toUiRiskLevel() ?: record.level,
+            ltv = best.ltvScore?.toDouble() ?: record.ltv
+        )
+    }
+
+    private fun selectBestServerMeta(
+        candidates: List<AnalysisResponse>,
+        nickname: String,
+        address: String,
+        source: RecordSource
+    ): AnalysisResponse? {
+        if (candidates.isEmpty()) return null
+        if (source == RecordSource.AUTO) {
+            // 자동 감지 기록은 가장 최신 DIFF 결과(첫 원소)를 화면 기준값으로 사용한다.
+            return candidates.firstOrNull()
+        }
+        val normalizedNickname = normalizeKey(nickname)
+        val ordered = if (source == RecordSource.MANUAL) candidates.asReversed() else candidates
+
+        ordered.firstOrNull { item ->
+            normalizeKey(item.nickname) == normalizedNickname &&
+                normalizeAddress(item.address) == normalizeAddress(address)
+        }?.let { return it }
+
+        ordered.firstOrNull { item ->
+            normalizeKey(item.nickname) == normalizedNickname &&
+                matchAddressScore(item.address, address) >= 2
+        }?.let { return it }
+
+        return if (source == RecordSource.AUTO) {
+            ordered.firstOrNull { matchAddressScore(it.address, address) >= 2 }
+        } else {
+            null
+        }
+    }
+
+    private fun normalizeKey(value: String): String {
+        return value
+            .trim()
+            .lowercase()
+            .replace(Regex("\\s+"), "")
+    }
+
+    private fun matchAddressScore(serverAddress: String, localAddress: String): Int {
+        val a = normalizeAddress(serverAddress)
+        val b = normalizeAddress(localAddress)
+        if (a.isBlank() || b.isBlank()) return 0
+        return when {
+            a == b -> 3
+            a.contains(b) || b.contains(a) -> 2
+            else -> 0
+        }
+    }
+
+    private fun normalizeAddress(value: String): String {
+        return value
+            .lowercase()
+            .replace(Regex("\\s+"), "")
+            .replace("대한민국", "")
+            .replace("경기도", "경기")
+    }
+
+    private fun ApiRiskLevel.toUiRiskLevel(): RiskLevel = when (this) {
+        ApiRiskLevel.DANGER -> RiskLevel.RED
+        ApiRiskLevel.WARNING -> RiskLevel.AMBER
+        ApiRiskLevel.SAFE -> RiskLevel.BLUE
     }
 
 }
