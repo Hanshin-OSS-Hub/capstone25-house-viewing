@@ -50,7 +50,7 @@ class MyFragment : Fragment(R.layout.fragment_my) {
         }
 
         binding.feeCardView.setOnClickListener {
-            Toast.makeText(requireContext(), "결제 정보 화면은 준비 중입니다.", Toast.LENGTH_SHORT).show()
+            toggleFeeState()
         }
     }
 
@@ -69,6 +69,19 @@ class MyFragment : Fragment(R.layout.fragment_my) {
         } else {
             "SafeHome Free"
         }
+    }
+
+    private fun toggleFeeState() {
+        val context = requireContext()
+        val nextIsPremium = !BillingLocalStore.isPremium(context)
+        BillingLocalStore.setPremium(context, nextIsPremium)
+        renderFeeState()
+        val message = if (nextIsPremium) {
+            "요금제가 Premium으로 변경되었습니다."
+        } else {
+            "요금제가 Free로 변경되었습니다."
+        }
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
     private fun renderProfileState() {
