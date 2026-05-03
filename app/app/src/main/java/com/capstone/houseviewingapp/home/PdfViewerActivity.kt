@@ -1,25 +1,29 @@
 package com.capstone.houseviewingapp.home
 
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
 import android.net.Uri
 import android.os.Bundle
 import android.os.ParcelFileDescriptor
+import android.provider.MediaStore
 import android.util.Log
 import android.view.View
+import android.widget.FrameLayout
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toFile
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.capstone.houseviewingapp.BuildConfig
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.data.local.AuthTokenLocalStore
 import com.capstone.houseviewingapp.databinding.ActivityPdfViewerBinding
-import com.davemorrissey.labs.subscaleview.ImageSource
-import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -27,18 +31,18 @@ import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+import kotlin.math.max
+import kotlin.math.min
 
-/**
- * Android [PdfRenderer]로 페이지 비트맵 생성 + [SubsamplingScaleImageView](핀치/더블탭 줌, 팬).
- * PhotoView(io.github.chrisbanes)는 일부 환경에서 Gradle classpath에 안 붙는 경우가 있어 대체.
- */
 class PdfViewerActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPdfViewerBinding
 
     private var fileDescriptor: ParcelFileDescriptor? = null
     private var pdfRenderer: PdfRenderer? = null
-    private var currentPage: PdfRenderer.Page? = null
-    private var currentPageIndex = 0
+    private var openedPdfUri: Uri? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,20 +57,18 @@ class PdfViewerActivity : AppCompatActivity() {
         }
 
         binding.backButton.setOnClickListener { finish() }
-        binding.prevButton.setOnClickListener { showPage(currentPageIndex - 1) }
-        binding.nextButton.setOnClickListener { showPage(currentPageIndex + 1) }
-
-        setupPdfScaleView()
+        binding.downloadButton.setOnClickListener { downloadCurrentPdf() }
 
         binding.titleTextView.text = intent.getStringExtra(EXTRA_TITLE).orEmpty().ifBlank { "PDF 보기" }
         val showReportButton = intent.getBooleanExtra(EXTRA_SHOW_REPORT_BUTTON, false)
+        binding.reportIssueTopButton.visibility = View.GONE
         if (showReportButton) {
-            binding.reportIssueTopButton.visibility = View.VISIBLE
-            binding.reportIssueTopButton.setOnClickListener {
+            binding.reportIssueBottomButton.visibility = View.VISIBLE
+            binding.reportIssueBottomButton.setOnClickListener {
                 ReportReceivedDialogFragment().show(supportFragmentManager, "ReportReceivedDialog")
             }
         } else {
-            binding.reportIssueTopButton.visibility = View.GONE
+            binding.reportIssueBottomButton.visibility = View.GONE
         }
 
         val uriRaw = intent.getStringExtra(EXTRA_URI).orEmpty()
@@ -85,30 +87,26 @@ class PdfViewerActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupPdfScaleView() {
-        binding.pdfImageView.apply {
-            maxScale = 4f
-            setMinimumScaleType(SubsamplingScaleImageView.SCALE_TYPE_CENTER_INSIDE)
-        }
-    }
-
     private fun loadPdfFromUri(uri: Uri) {
-        binding.pdfImageView.visibility = View.INVISIBLE
+        binding.pdfScrollView.isVisible = false
         lifecycleScope.launch {
-            val file = withContext(Dispatchers.IO) { uriToTempFile(uri) }
-            if (file == null || !file.exists() || file.length() == 0L) {
-                Toast.makeText(this@PdfViewerActivity, "PDF를 열 수 없습니다.", Toast.LENGTH_SHORT).show()
+            val localUri = withContext(Dispatchers.IO) {
+                uriToTempFile(uri)?.let { Uri.fromFile(it) }
+            }
+            if (localUri == null) {
+                Toast.makeText(this@PdfViewerActivity, "PDF 파일을 읽을 수 없습니다.", Toast.LENGTH_SHORT).show()
                 finish()
                 return@launch
             }
-            val opened = openPdf(Uri.fromFile(file))
+            val opened = openPdf(localUri)
             if (!opened) {
                 Toast.makeText(this@PdfViewerActivity, "PDF를 열 수 없습니다.", Toast.LENGTH_SHORT).show()
                 finish()
                 return@launch
             }
-            binding.pdfImageView.visibility = View.VISIBLE
-            binding.pdfImageView.post { showPage(0) }
+            openedPdfUri = localUri
+            binding.pdfScrollView.isVisible = true
+            binding.pdfScrollView.post { renderAllPages() }
         }
     }
 
@@ -141,51 +139,81 @@ class PdfViewerActivity : AppCompatActivity() {
     }
 
     private fun closePdf() {
-        currentPage?.close()
-        currentPage = null
         pdfRenderer?.close()
         pdfRenderer = null
         fileDescriptor?.close()
         fileDescriptor = null
     }
 
-    private fun showPage(index: Int) {
+    private fun renderAllPages() {
         val renderer = pdfRenderer ?: return
-        if (index < 0 || index >= renderer.pageCount) return
+        val container = binding.pdfPagesContainer
+        container.removeAllViews()
+        val baseWidth = (binding.pdfFrame.width.takeIf { it > 0 }
+            ?: resources.displayMetrics.widthPixels) - dpToPx(8)
+        val targetWidth = baseWidth.coerceAtLeast(dpToPx(180))
 
-        currentPage?.close()
-        currentPage = renderer.openPage(index)
-        currentPageIndex = index
+        for (index in 0 until renderer.pageCount) {
+            val page = renderer.openPage(index)
+            val bitmap = renderPageBitmap(page, targetWidth)
+            page.close()
+            container.addView(
+                buildPageBlock(
+                    bitmap = bitmap,
+                    pageIndex = index,
+                    pageCount = renderer.pageCount
+                )
+            )
+        }
+        binding.pdfScrollView.post { binding.pdfScrollView.scrollTo(0, 0) }
+    }
 
-        val page = currentPage ?: return
-        // 화면 너비에 맞춰 스케일 업 (한 페이지가 가로로 꽉 차게)
-        val targetW = binding.pdfImageView.width.takeIf { it > 0 }
-            ?: resources.displayMetrics.widthPixels
-        val scale = (targetW.toFloat() / page.width).coerceIn(1f, 4f)
-        var bw = (page.width * scale).toInt().coerceAtLeast(page.width)
-        var bh = (page.height * scale).toInt().coerceAtLeast(page.height)
-        val maxSide = 4096
-        val longSide = maxOf(bw, bh)
-        if (longSide > maxSide) {
-            val r = maxSide.toFloat() / longSide
-            bw = (bw * r).toInt().coerceAtLeast(1)
-            bh = (bh * r).toInt().coerceAtLeast(1)
+    private fun buildPageBlock(bitmap: Bitmap, pageIndex: Int, pageCount: Int): View {
+        val pageContainer = FrameLayout(this).apply {
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).also { lp ->
+                lp.leftMargin = dpToPx(8)
+                lp.rightMargin = dpToPx(8)
+                lp.topMargin = if (pageIndex == 0) dpToPx(8) else dpToPx(16)
+                lp.bottomMargin = if (pageIndex == pageCount - 1) dpToPx(16) else 0
+            }
+            setBackgroundColor(Color.WHITE)
+            elevation = dpToPx(1).toFloat()
+            setPadding(dpToPx(1), dpToPx(1), dpToPx(1), dpToPx(1))
         }
 
+        val pageView = ImageView(this).apply {
+            layoutParams = FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT
+            )
+            setBackgroundColor(Color.WHITE)
+            adjustViewBounds = true
+            scaleType = ImageView.ScaleType.FIT_CENTER
+            setImageBitmap(bitmap)
+        }
+
+        pageContainer.addView(pageView)
+        return pageContainer
+    }
+
+    private fun renderPageBitmap(page: PdfRenderer.Page, targetWidth: Int): Bitmap {
+        val renderScale = (targetWidth.toFloat() / page.width.toFloat()).coerceAtLeast(1f)
+        val bw = (page.width * renderScale).toInt().coerceAtLeast(1)
+        val bh = (page.height * renderScale).toInt().coerceAtLeast(1)
         val bitmap = Bitmap.createBitmap(bw, bh, Bitmap.Config.ARGB_8888)
         bitmap.eraseColor(android.graphics.Color.WHITE)
-        page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
-
-        binding.pdfImageView.setImage(ImageSource.bitmap(bitmap))
-        binding.pdfImageView.post { binding.pdfImageView.resetScaleAndCenter() }
-
-        binding.pageTextView.text = "${index + 1} / ${renderer.pageCount}"
-        binding.prevButton.isEnabled = index > 0
-        binding.nextButton.isEnabled = index < renderer.pageCount - 1
+        val matrix = android.graphics.Matrix().apply {
+            setScale(bw.toFloat() / page.width.toFloat(), bh.toFloat() / page.height.toFloat())
+        }
+        page.render(bitmap, null, matrix, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
+        return cropOuterWhiteMargins(bitmap)
     }
 
     private fun openRemotePdf(url: String) {
-        binding.pdfImageView.visibility = View.INVISIBLE
+        binding.pdfScrollView.isVisible = false
         lifecycleScope.launch {
             val result = withContext(Dispatchers.IO) {
                 runCatching {
@@ -207,9 +235,53 @@ class PdfViewerActivity : AppCompatActivity() {
                 finish()
                 return@launch
             }
-            binding.pdfImageView.visibility = View.VISIBLE
-            binding.pdfImageView.post { showPage(0) }
+            openedPdfUri = localUri
+            binding.pdfScrollView.isVisible = true
+            binding.pdfScrollView.post { renderAllPages() }
         }
+    }
+
+    private fun downloadCurrentPdf() {
+        val sourceUri = openedPdfUri
+        if (sourceUri == null) {
+            Toast.makeText(this, "다운로드할 PDF가 아직 준비되지 않았습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        lifecycleScope.launch {
+            val savedName = withContext(Dispatchers.IO) {
+                savePdfToDownloads(sourceUri)
+            }
+            if (savedName != null) {
+                Toast.makeText(this@PdfViewerActivity, "다운로드 완료: $savedName", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this@PdfViewerActivity, "다운로드에 실패했습니다.", Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
+    private fun savePdfToDownloads(sourceUri: Uri): String? {
+        return runCatching {
+            val displayTitle = intent.getStringExtra(EXTRA_TITLE).orEmpty().ifBlank { "analysis_report" }
+            val safeTitle = displayTitle.replace(Regex("[^A-Za-z0-9가-힣 _.-]"), "_")
+            val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.KOREA).format(Date())
+            val fileName = "${safeTitle}_$timestamp.pdf"
+            val values = android.content.ContentValues().apply {
+                put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+                put(MediaStore.Downloads.MIME_TYPE, "application/pdf")
+                put(MediaStore.Downloads.RELATIVE_PATH, "Download")
+            }
+            val targetUri = contentResolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values)
+                ?: return null
+
+            contentResolver.openInputStream(sourceUri).use { input ->
+                if (input == null) return null
+                contentResolver.openOutputStream(targetUri, "w").use { output ->
+                    if (output == null) return null
+                    input.copyTo(output)
+                }
+            }
+            fileName
+        }.getOrNull()
     }
 
     private fun downloadPdfToCache(url: String, accessToken: String): PdfLoadResult {
@@ -233,7 +305,12 @@ class PdfViewerActivity : AppCompatActivity() {
     }
 
     private fun executePdfRequest(url: String, accessToken: String): PdfLoadResult {
-        val requestBuilder = Request.Builder().url(url).get()
+        val requestBuilder = Request.Builder()
+            .url(url)
+            .get()
+            // 프록시/중간 캐시가 오래된 PDF를 내려주는 경우를 줄인다.
+            .header("Cache-Control", "no-cache")
+            .header("Pragma", "no-cache")
         if (accessToken.isNotBlank()) {
             requestBuilder.header("Authorization", "Bearer $accessToken")
         }
@@ -284,9 +361,75 @@ class PdfViewerActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        binding.pdfImageView.recycle()
         closePdf()
         super.onDestroy()
+    }
+
+    private fun dpToPx(dp: Int): Int =
+        (dp * resources.displayMetrics.density).toInt()
+
+    private fun cropOuterWhiteMargins(source: Bitmap): Bitmap {
+        val w = source.width
+        val h = source.height
+        if (w < 10 || h < 10) return source
+
+        val left = scanEdge(source, horizontal = false, fromStart = true)
+        val right = scanEdge(source, horizontal = false, fromStart = false)
+        val top = scanEdge(source, horizontal = true, fromStart = true)
+        val bottom = scanEdge(source, horizontal = true, fromStart = false)
+        if (left >= right || top >= bottom) return source
+
+        // 안전 장치: 과도한 크롭 방지(페이지 12% 이상은 자르지 않음)
+        val maxCropX = (w * 0.12f).toInt()
+        val maxCropY = (h * 0.12f).toInt()
+        val safeLeft = min(left, maxCropX)
+        val safeRight = max(right, w - 1 - maxCropX)
+        val safeTop = min(top, maxCropY)
+        val safeBottom = max(bottom, h - 1 - maxCropY)
+
+        if (safeLeft >= safeRight || safeTop >= safeBottom) return source
+        val cropW = safeRight - safeLeft + 1
+        val cropH = safeBottom - safeTop + 1
+        if (cropW <= 0 || cropH <= 0 || (cropW == w && cropH == h)) return source
+        return Bitmap.createBitmap(source, safeLeft, safeTop, cropW, cropH)
+    }
+
+    private fun scanEdge(
+        bitmap: Bitmap,
+        horizontal: Boolean,
+        fromStart: Boolean
+    ): Int {
+        val width = bitmap.width
+        val height = bitmap.height
+        val primaryLimit = if (horizontal) height else width
+        val secondaryLimit = if (horizontal) width else height
+        val start = if (fromStart) 0 else primaryLimit - 1
+        val end = if (fromStart) primaryLimit else -1
+        val step = if (fromStart) 1 else -1
+        val sampleStep = 2
+
+        var p = start
+        while (p != end) {
+            var contentCount = 0
+            var s = 0
+            while (s < secondaryLimit) {
+                val x = if (horizontal) s else p
+                val y = if (horizontal) p else s
+                if (!isNearWhite(bitmap.getPixel(x, y))) contentCount++
+                s += sampleStep
+            }
+            // 얇은 선/노이즈가 아니라 실제 컨텐츠가 있는 줄로 판단
+            if (contentCount >= 8) return p
+            p += step
+        }
+        return if (fromStart) 0 else primaryLimit - 1
+    }
+
+    private fun isNearWhite(pixel: Int): Boolean {
+        val r = android.graphics.Color.red(pixel)
+        val g = android.graphics.Color.green(pixel)
+        val b = android.graphics.Color.blue(pixel)
+        return r >= 246 && g >= 246 && b >= 246
     }
 
     companion object {
