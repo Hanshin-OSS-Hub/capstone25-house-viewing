@@ -17,7 +17,7 @@ object BillingLocalStore {
     }
 
     fun isPremium(context: Context): Boolean =
-        prefs(context).getBoolean(KEY_IS_PREMIUM, false)
+        prefs(context).getBoolean(KEY_IS_PREMIUM, true)
 
     fun setPremium(context: Context, isPremium: Boolean) {
         prefs(context).edit().putBoolean(KEY_IS_PREMIUM, isPremium).apply()
