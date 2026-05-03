@@ -56,22 +56,7 @@ object AnalysisLocalStore {
                 normalizeKey(existing.address) == normalizedAddress
         }
         list.add(0, item)
-
-        val arr = JSONArray()
-        list.forEach { r ->
-            arr.put(
-                JSONObject().apply {
-                    put("title", r.title)
-                    put("address", r.address)
-                    put("riskSummary", r.riskSummary)
-                    put("level", r.level.name)
-                    put("source", r.source.name)
-                    if (r.ltv != null) put("ltv", r.ltv)
-                    if (!r.sourcePdfUri.isNullOrBlank()) put("sourcePdfUri", r.sourcePdfUri)
-                }
-            )
-        }
-        prefs(context).edit().putString(KEY_JSON, arr.toString()).apply()
+        saveRecords(context, list)
     }
 
     private fun normalizeKey(value: String): String {
@@ -85,9 +70,16 @@ object AnalysisLocalStore {
         val idx = list.indexOfFirst { it == target }
         if (idx == -1) return
         list.removeAt(idx)
+        saveRecords(context, list)
+    }
 
+    fun setRecords(context: Context, items: List<AnalysisRecordItem>) {
+        saveRecords(context, items)
+    }
+
+    private fun saveRecords(context: Context, items: List<AnalysisRecordItem>) {
         val arr = JSONArray()
-        list.forEach { r ->
+        items.forEach { r ->
             arr.put(
                 JSONObject().apply {
                     put("title", r.title)
