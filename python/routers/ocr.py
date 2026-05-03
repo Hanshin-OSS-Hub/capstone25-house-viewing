@@ -74,7 +74,7 @@ async def analyze_registry(
             "riskLevel": _convert_risk_level(result),
             "rawData": json.dumps(result, ensure_ascii=False),
             "mainReason": _extract_main_reason(result),
-            "ltvScore": _extract_ltv_score(result),
+            "ltvScore": extract_ltv_score(result),
         }
 
     except Exception as e:
