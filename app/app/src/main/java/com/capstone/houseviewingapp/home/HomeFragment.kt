@@ -14,12 +14,13 @@ import androidx.navigation.fragment.findNavController
 import com.capstone.houseviewingapp.MainActivity
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.analysis.AnalysisRepositoryProvider
-import com.capstone.houseviewingapp.analysis.model.AnalysisResponse
 import com.capstone.houseviewingapp.data.local.AuthTokenLocalStore
 import com.capstone.houseviewingapp.data.local.BillingLocalStore
 import com.capstone.houseviewingapp.data.local.HouseLocalStore
 import com.capstone.houseviewingapp.data.local.QuickDiagnosisLocalStore
 import com.capstone.houseviewingapp.data.remote.ApiErrorFormatter
+import com.capstone.houseviewingapp.data.remote.NetworkModule
+import com.capstone.houseviewingapp.data.remote.executeApi
 import com.capstone.houseviewingapp.databinding.FragmentHomeBinding
 import com.capstone.houseviewingapp.registration.HouseRegistrationActivity
 import com.capstone.houseviewingapp.subscription.SubscriptionRepositoryProvider
@@ -239,28 +240,20 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
         val accessToken = AuthTokenLocalStore.getAccessToken(requireContext()).orEmpty()
         if (accessToken.isBlank()) return
         viewLifecycleOwner.lifecycleScope.launch {
-            val analyses = AnalysisRepositoryProvider.repository
-                .getAnalyses(accessToken)
+            val remoteHouses = NetworkModule.houseApi
+                .getHouses("Bearer $accessToken")
+                .executeApi()
                 .getOrNull()
                 .orEmpty()
-            if (analyses.isEmpty()) return@launch
+            if (remoteHouses.isEmpty()) return@launch
+
+            val remoteLtvByHouseId = remoteHouses.associate { it.houseId to it.ltvScore }
 
             val houses = HouseLocalStore.getHouses(requireContext())
             houses.forEach { card ->
                 val houseId = card.houseId ?: return@forEach
                 val detail = HouseLocalStore.getHouseDetail(requireContext(), houseId) ?: return@forEach
-                val best = analyses
-                    .asSequence()
-                    .filter { it.ltvScore != null }
-                    .filter { it.nickname == detail.homeName }
-                    .sortedWith(
-                        compareByDescending<AnalysisResponse> { matchAddressScore(it.address, detail.originAddress) }
-                            .thenByDescending { it.ltvScore ?: -1 }
-                    )
-                    .firstOrNull()
-                    ?: return@forEach
-
-                val latestLtv = best.ltvScore
+                val latestLtv = remoteLtvByHouseId[houseId]
                 if (latestLtv != null && detail.ltv != latestLtv) {
                     HouseLocalStore.updateHouseDetailById(
                         requireContext(),
