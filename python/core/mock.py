@@ -111,8 +111,9 @@ def pick_main_reason(snapshot: Dict[str, Any]) -> str:
 
 def extract_ltv_score(ltv_result: Dict[str, Any]) -> int:
     raw = ltv_result.get("ltv", 0)
+
     try:
-        return int(float(raw))
+        return int(round(float(raw) * 100))
     except Exception:
         return 0
 
