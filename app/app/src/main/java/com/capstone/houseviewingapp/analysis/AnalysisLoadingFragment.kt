@@ -186,15 +186,24 @@ class AnalysisLoadingFragment : Fragment() {
                 "latestMeta resolved: source=$source title=$resolvedTitle address=$resolvedAddress " +
                     "risk=${latestMeta?.riskLevel} ltvScore=${latestMeta?.ltvScore}"
             )
+            val resolvedRiskLevel = latestMeta?.riskLevel
+            val resolvedLtvScore = latestMeta?.ltvScore
+            if (resolvedRiskLevel == null || resolvedLtvScore == null) {
+                Toast.makeText(
+                    requireContext(),
+                    "서버에서 분석 점수 수신에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+                    Toast.LENGTH_LONG
+                ).show()
+                findNavController().popBackStack()
+                return@launch
+            }
             completionPayload = CompletionPayload(
                 source = source,
                 title = resolvedTitle,
                 address = resolvedAddress,
-                riskSummary = latestMeta?.mainReason?.takeIf { it.isNotBlank() }
-                    ?: "상세 리포트에서 주요 원인을 확인해 주세요.",
-                level = latestMeta?.riskLevel?.toUiRiskLevel()
-                    ?: RiskLevel.AMBER,
-                ltvScore = latestMeta?.ltvScore?.toDouble(),
+                riskSummary = latestMeta.mainReason.orEmpty(),
+                level = resolvedRiskLevel.toUiRiskLevel(),
+                ltvScore = resolvedLtvScore.toDouble(),
                 // 분석 결과 카드의 상세 리포트는 생성된 결과 PDF를 우선 사용
                 sourcePdfUri = pdf.filePath.takeIf { it.isNotBlank() }
                     ?: arguments?.getString(AnalysisFlow.ARG_SELECTED_FILE_URI)?.trim()?.ifBlank { null }
