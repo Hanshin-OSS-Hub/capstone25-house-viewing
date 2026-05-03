@@ -4,6 +4,7 @@ from __future__ import annotations
 import json
 import os
 import shutil
+import traceback
 import uuid
 
 from fastapi import APIRouter, File, Form, HTTPException, UploadFile
@@ -78,4 +79,5 @@ async def analyze_registry(
         }
 
     except Exception as e:
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"분석 실패: {str(e)}")
