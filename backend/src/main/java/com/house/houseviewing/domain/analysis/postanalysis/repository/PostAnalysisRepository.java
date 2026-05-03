@@ -42,4 +42,5 @@ public interface PostAnalysisRepository extends JpaRepository<PostAnalysisEntity
     );
 
     long countByHouse_Id(Long houseId);
+    long countByHouse_IdAndAnalysisType(Long houseId, AnalysisType analysisType);
 }
