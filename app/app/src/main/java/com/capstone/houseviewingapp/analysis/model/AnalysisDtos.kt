@@ -1,5 +1,7 @@
 package com.capstone.houseviewingapp.analysis.model
 
+import com.google.gson.annotations.SerializedName
+
 /** 백엔드 RiskLevel — UI용 [com.capstone.houseviewingapp.analysis.AnalysisRecordItem.RiskLevel] 과 구분 */
 enum class ApiRiskLevel {
     SAFE,
@@ -24,5 +26,6 @@ data class AnalysisResponse(
     val address: String,
     val mainReason: String?,
     val riskLevel: ApiRiskLevel?,
+    @SerializedName(value = "ltvScore", alternate = ["ltv_score"])
     val ltvScore: Int?
 )
