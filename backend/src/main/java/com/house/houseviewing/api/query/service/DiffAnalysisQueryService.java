@@ -1,6 +1,7 @@
 package com.house.houseviewing.api.query.service;
 
 import com.house.houseviewing.domain.analysis.postanalysis.entity.PostAnalysisEntity;
+import com.house.houseviewing.domain.analysis.postanalysis.enums.AnalysisType;
 import com.house.houseviewing.domain.analysis.postanalysis.repository.PostAnalysisRepository;
 import com.house.houseviewing.domain.analysis.postanalysis.service.PostAnalysisService;
 import com.house.houseviewing.domain.report.postreport.entity.PostReportEntity;
@@ -27,7 +28,9 @@ public class DiffAnalysisQueryService {
 
     @Transactional
     public PdfDownloadResponse executeDiffDiagnosis(Long houseId){
-        long count = postAnalysisRepository.countByHouse_Id(houseId);
+        // 단계별 mock 시나리오는 "변동(DIFF) 분석 횟수" 기준으로 진행해야 한다.
+        // BASIC 분석까지 같이 세면 첫 알림 캐치에서도 WARNING/DANGER가 나오는 문제가 생긴다.
+        long count = postAnalysisRepository.countByHouse_IdAndAnalysisType(houseId, AnalysisType.DIFF);
         String snapshot = readMockJson(count);
 
         PostAnalysisEntity diffAnalysis = postAnalysisService.diffRegister(houseId, snapshot);
