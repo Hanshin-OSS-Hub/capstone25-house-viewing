@@ -48,6 +48,13 @@ object AnalysisLocalStore {
     }
     fun addRecord(context: Context, item: AnalysisRecordItem) {
         val list = getRecords(context).toMutableList()
+        val normalizedTitle = normalizeKey(item.title)
+        val normalizedAddress = normalizeKey(item.address)
+        list.removeAll { existing ->
+            existing.source == item.source &&
+                normalizeKey(existing.title) == normalizedTitle &&
+                normalizeKey(existing.address) == normalizedAddress
+        }
         list.add(0, item)
 
         val arr = JSONArray()
@@ -65,6 +72,13 @@ object AnalysisLocalStore {
             )
         }
         prefs(context).edit().putString(KEY_JSON, arr.toString()).apply()
+    }
+
+    private fun normalizeKey(value: String): String {
+        return value
+            .trim()
+            .lowercase()
+            .replace(Regex("\\s+"), "")
     }
     fun removeRecord(context: Context, target: AnalysisRecordItem) {
         val list = getRecords(context).toMutableList()
