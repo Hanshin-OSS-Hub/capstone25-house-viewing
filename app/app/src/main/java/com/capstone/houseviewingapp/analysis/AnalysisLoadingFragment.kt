@@ -5,6 +5,7 @@ import android.animation.ObjectAnimator
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.widget.Toast
 import android.view.LayoutInflater
 import android.view.View
@@ -41,6 +42,7 @@ class AnalysisLoadingFragment : Fragment() {
     private val stepPulseAnimators = mutableMapOf<Int, AnimatorSet>()
 
     companion object {
+        private const val TAG = "AnalysisLoading"
         private const val STATUS_PENDING = "Pending"
         private const val STATUS_PROCESSING = "Processing..."
         private const val STATUS_COMPLETED = "Completed"
@@ -195,6 +197,11 @@ class AnalysisLoadingFragment : Fragment() {
                 address = resolvedAddress,
                 source = source
             )
+            Log.i(
+                TAG,
+                "latestMeta resolved: source=$source title=$resolvedTitle address=$resolvedAddress " +
+                    "risk=${latestMeta?.riskLevel} ltvScore=${latestMeta?.ltvScore}"
+            )
             completionPayload = CompletionPayload(
                 source = source,
                 title = resolvedTitle,
@@ -202,7 +209,7 @@ class AnalysisLoadingFragment : Fragment() {
                 riskSummary = latestMeta?.mainReason?.takeIf { it.isNotBlank() }
                     ?: "상세 리포트에서 주요 원인을 확인해 주세요.",
                 level = latestMeta?.riskLevel?.toUiRiskLevel()
-                    ?: RiskLevel.AMBER,
+                    ?: if (source == RecordSource.AUTO) RiskLevel.BLUE else RiskLevel.AMBER,
                 ltvScore = latestMeta?.ltvScore?.toDouble(),
                 // 분석 결과 카드의 상세 리포트는 생성된 결과 PDF를 우선 사용
                 sourcePdfUri = pdf.filePath.takeIf { it.isNotBlank() }
@@ -235,6 +242,11 @@ class AnalysisLoadingFragment : Fragment() {
                 source = payload.source,
                 ltv = payload.ltvScore,
                 sourcePdfUri = payload.sourcePdfUri
+            )
+            Log.i(
+                TAG,
+                "saveRecord: source=${record.source} title=${record.title} " +
+                    "level=${record.level} ltv=${record.ltv}"
             )
             com.capstone.houseviewingapp.data.local.AnalysisLocalStore.addRecord(requireContext(), record)
             val navController = findNavController()
@@ -335,7 +347,8 @@ class AnalysisLoadingFragment : Fragment() {
         address: String,
         source: RecordSource
     ): com.capstone.houseviewingapp.analysis.model.AnalysisResponse? {
-        repeat(4) { attempt ->
+        var lastMatched: com.capstone.houseviewingapp.analysis.model.AnalysisResponse? = null
+        repeat(8) { attempt ->
             val analyses = AnalysisRepositoryProvider.repository
                 .getAnalyses(accessToken)
                 .getOrNull()
@@ -345,33 +358,43 @@ class AnalysisLoadingFragment : Fragment() {
                 .getOrNull()
                 .orEmpty()
             val candidates = when (source) {
-                RecordSource.AUTO -> diffAnalyses + analyses
-                RecordSource.MANUAL -> analyses + diffAnalyses
+                // 자동 감지는 change-diagnoses(DIFF) 결과와 맞춰야 PDF/카드 등급 불일치가 줄어든다.
+                RecordSource.AUTO -> diffAnalyses
+                // 수동(사전) 진단은 /analyses 만 본다.
+                // /analyses/diff(자동 감지 계열)까지 섞으면 동일 닉네임/주소에서 점수가 뒤바뀔 수 있다.
+                RecordSource.MANUAL -> analyses
             }
 
-            val best = candidates
-                .asSequence()
-                .sortedWith(
-                    compareByDescending<com.capstone.houseviewingapp.analysis.model.AnalysisResponse> {
-                        it.nickname == nickname
-                    }.thenByDescending {
-                        matchAddressScore(it.address, address)
-                    }.thenByDescending {
-                        // 주요 원인을 우선 확보하도록 가중치 부여
-                        it.mainReason?.isNotBlank() == true
-                    }.thenByDescending {
-                        it.riskLevel != null
-                    }.thenByDescending {
-                        it.ltvScore != null
+            val best = selectBestAnalysisMeta(
+                candidates = candidates,
+                nickname = nickname,
+                address = address,
+                source = source
+            )
+            Log.d(
+                TAG,
+                "meta retry[$attempt]: source=$source candidates=${candidates.size} " +
+                    "bestRisk=${best?.riskLevel} bestLtv=${best?.ltvScore} " +
+                    "bestNick=${best?.nickname} bestAddr=${best?.address}"
+            )
+            if (best != null) {
+                lastMatched = best
+                if (source == RecordSource.AUTO) {
+                    // 자동 감지는 ltvScore가 비동기로 늦게 반영될 수 있어, null이면 조금 더 재시도한다.
+                    if (best.ltvScore != null) {
+                        return best
                     }
-                )
-                .firstOrNull()
-            if (best != null && (best.ltvScore != null || !best.mainReason.isNullOrBlank() || best.riskLevel != null)) {
-                return best
+                } else if (hasUsableMeta(best)) {
+                    return best
+                }
             }
-            if (attempt < 3) delay(700L)
+            if (attempt < 7) delay(900L)
         }
-        return null
+        return if (source == RecordSource.AUTO) {
+            lastMatched
+        } else {
+            null
+        }
     }
 
     private fun matchAddressScore(serverAddress: String, localAddress: String): Int {
@@ -399,23 +422,16 @@ class AnalysisLoadingFragment : Fragment() {
     ): CompletionPayload? {
         val houseName = primaryHouse?.homeName.orEmpty()
         val houseAddress = primaryHouse?.address.orEmpty()
-        val latest = AnalysisRepositoryProvider.repository
+        val latestCandidates = AnalysisRepositoryProvider.repository
             .getDiffAnalyses(accessToken)
             .getOrNull()
             .orEmpty()
-            .asSequence()
-            .sortedWith(
-                compareByDescending<com.capstone.houseviewingapp.analysis.model.AnalysisResponse> {
-                    it.nickname == houseName
-                }.thenByDescending {
-                    matchAddressScore(it.address, houseAddress)
-                }.thenByDescending {
-                    it.mainReason?.isNotBlank() == true
-                }.thenByDescending {
-                    it.ltvScore != null
-                }
-            )
-            .firstOrNull()
+        val latest = selectBestAnalysisMeta(
+            candidates = latestCandidates,
+            nickname = houseName,
+            address = houseAddress,
+            source = RecordSource.AUTO
+        )
             ?: return null
 
         return CompletionPayload(
@@ -428,6 +444,45 @@ class AnalysisLoadingFragment : Fragment() {
             ltvScore = latest.ltvScore?.toDouble(),
             sourcePdfUri = null
         )
+    }
+
+    private fun selectBestAnalysisMeta(
+        candidates: List<com.capstone.houseviewingapp.analysis.model.AnalysisResponse>,
+        nickname: String,
+        address: String,
+        source: RecordSource
+    ): com.capstone.houseviewingapp.analysis.model.AnalysisResponse? {
+        if (candidates.isEmpty()) return null
+        val ranked = candidates
+            .asSequence()
+            .mapIndexed { index, candidate -> index to candidate }
+            .sortedWith(
+                compareByDescending<Pair<Int, com.capstone.houseviewingapp.analysis.model.AnalysisResponse>> { (_, item) ->
+                    item.nickname == nickname
+                }.thenByDescending { (_, item) ->
+                    matchAddressScore(item.address, address)
+                }.thenByDescending { (_, item) ->
+                    item.ltvScore != null
+                }.thenByDescending { (_, item) ->
+                    hasUsableMeta(item)
+                }.thenByDescending { (_, item) ->
+                    item.ltvScore ?: -1
+                }.thenByDescending { (index, _) ->
+                    // /analyses 는 사후 -> 사전 순으로 합쳐 내려오므로,
+                    // 수동(사전) 진단 매칭은 뒤쪽(사전 영역)을 우선한다.
+                    if (source == RecordSource.MANUAL) index else -index
+                }
+            )
+            .map { it.second }
+            .toList()
+
+        return ranked.firstOrNull()
+    }
+
+    private fun hasUsableMeta(
+        item: com.capstone.houseviewingapp.analysis.model.AnalysisResponse
+    ): Boolean {
+        return item.ltvScore != null || !item.mainReason.isNullOrBlank() || item.riskLevel != null
     }
 
     private fun ApiRiskLevel.toUiRiskLevel(): RiskLevel = when (this) {
