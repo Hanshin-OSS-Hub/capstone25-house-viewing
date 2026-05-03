@@ -141,7 +141,7 @@ def _build_recovery_render_data(request: GeneratePdfRequest) -> RecoveryRenderDa
         property_value=prop_val,
         expected_recovery=expected_recovery,
         recovery_rate=recovery_rate,
-        ltv_percent=info["risk_score"],
+        ltv_percent=float((ltv_info.get("ltv") or 0)) * 100,
         risk_score=info["risk_level"],
         signals=info["signals"],
     )
@@ -182,7 +182,7 @@ async def analyze_mock(request: Request) -> JSONResponse:
         from engines.risk_engine import compute_ltv_info, compute_risk
         from engines.recovery_engine import compute_recovery
 
-        valuation: dict = {}
+        valuation: dict = {"median_price_won": 400_000_000}  # mock용 임시 집값 (4억)
         ltv_result      = compute_ltv_info(snapshot, valuation)
         risk_result     = compute_risk(snapshot, {}, valuation, ltv_result)
         recovery_result = compute_recovery(snapshot, valuation, ltv_result, {}, risk_result)
