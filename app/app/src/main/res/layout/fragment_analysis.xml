@@ -151,11 +151,11 @@
                     app:checkedIconVisible="false" />
 
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/chipRed"
+                    android:id="@+id/chipBlue"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:text="고위험"
+                    android:text="안전"
                     android:fontFamily="@font/pretendard_bold"
                     android:textColor="@color/black"
                     app:chipBackgroundColor="@color/chip_bg_selector"
@@ -164,7 +164,7 @@
                     app:chipStrokeWidth="0.8dp"
                     app:chipIconVisible="true"
                     app:chipIcon="@drawable/ic_chip_dot"
-                    app:chipIconTint="@color/red"
+                    app:chipIconTint="@color/blue2"
                     app:chipIconSize="8dp"
                     app:checkedIconVisible="false" />
 
@@ -187,11 +187,11 @@
                     app:checkedIconVisible="false" />
 
                 <com.google.android.material.chip.Chip
-                    android:id="@+id/chipBlue"
+                    android:id="@+id/chipRed"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     style="@style/Widget.MaterialComponents.Chip.Choice"
-                    android:text="안전"
+                    android:text="고위험"
                     android:fontFamily="@font/pretendard_bold"
                     android:textColor="@color/black"
                     app:chipBackgroundColor="@color/chip_bg_selector"
@@ -200,7 +200,7 @@
                     app:chipStrokeWidth="0.8dp"
                     app:chipIconVisible="true"
                     app:chipIcon="@drawable/ic_chip_dot"
-                    app:chipIconTint="@color/blue2"
+                    app:chipIconTint="@color/red"
                     app:chipIconSize="8dp"
                     app:checkedIconVisible="false" />
 
