@@ -37,10 +37,11 @@ def _extract_main_reason(result: dict) -> str:
     return "특이 위험 없음"
 
 
-def _extract_ltv_score(result: dict) -> int:
+def extract_ltv_score(result: dict) -> int:
     try:
-        return int(round(float(result.get("ltv", {}).get("ltv", 0))))
-    except Exception:
+        ltv = float(result.get("ltv", {}).get("ltv", 0))
+        return int(round(ltv * 100))
+    except:
         return 0
 
 
