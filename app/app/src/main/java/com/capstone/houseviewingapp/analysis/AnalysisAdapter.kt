@@ -56,16 +56,11 @@ class AnalysisRecordAdapter(
             binding.addressTextView.text = item.address
             binding.riskTextView.text = summarizeRisk(item.riskSummary)
 
-            // 백엔드가 LTV 산출 실패 시 ltvScore=0 으로 올 수 있음. 0 을 "60 이하 안전"으로 취급하면
-            // 실제 위험도(WARNING)와 배지(안전)가 엇갈리므로, 0 이하·null 은 서버가 준 level 을 그대로 씀.
-            val normalizedScore = item.ltv?.takeIf { it > 0 }?.toInt()?.coerceIn(0, 100)
-            val displayLevel = normalizedScore?.let { score ->
-                when {
-                    score <= 60 -> RiskLevel.BLUE
-                    score <= 70 -> RiskLevel.AMBER
-                    else -> RiskLevel.RED
-                }
-            } ?: item.level
+            val rawScore = item.ltv?.toInt()?.coerceIn(0, 100)
+            val normalizedScore = rawScore
+            // 등급은 서버 riskLevel 기준으로 고정한다.
+            // LTV 점수는 보조지표이며 카드 색/뱃지를 덮어쓰지 않는다.
+            val displayLevel = item.level
 
             val (badgeText, badgeBgRes, textColorRes, iconRes) = when (displayLevel) {
                 RiskLevel.RED -> UiSpec(
@@ -97,17 +92,21 @@ class AnalysisRecordAdapter(
             binding.riskBadgeTextView.setBackgroundResource(badgeBgRes)
 
             binding.titleTextView.setTextColor(c)
-            binding.scoreTextView.setTextColor(c)
 
             binding.riskIconView.setImageResource(iconRes)
             binding.riskIconView.setColorFilter(c)
 
-            // /analyses 등 API 의 ltvScore(앱 저장 키 ltv). 양수만 실제 값으로 표시.
-            // null·0·0.0 은 "내려온 유효 점수 없음"과 동일하게 취급(엔진/mock이 0만 주는 경우 포함).
-            binding.scoreTextView.text = if (normalizedScore != null) {
-                "${normalizedScore}점"
+            // /analyses·/analyses/diff 의 ltvScore(로컬 키 ltv). 없으면 오해 소지 있는 "미산출" 대신 중립 표시.
+            binding.scoreDividerView.visibility = android.view.View.VISIBLE
+            binding.scoreContainer.visibility = android.view.View.VISIBLE
+            if (normalizedScore != null) {
+                binding.scoreTextView.text = "${normalizedScore}점"
+                binding.scoreTextView.setTextColor(c)
             } else {
-                "미제공"
+                binding.scoreTextView.text = "—"
+                binding.scoreTextView.setTextColor(
+                    ContextCompat.getColor(binding.root.context, R.color.textgray)
+                )
             }
             binding.detailButton.text = "상세 리포트 확인"
             binding.detailButton.setOnClickListener { onDetailClick(item) }
