@@ -173,4 +173,5 @@ class AnalysisFragment : Fragment(R.layout.fragment_analysis) {
         val host = Uri.parse(url).host?.lowercase() ?: return false
         return host == "mock.local" || host.endsWith(".mock.local")
     }
+
 }
