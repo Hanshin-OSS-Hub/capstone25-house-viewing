@@ -31,7 +31,7 @@ X_GAP_FACTOR = 1.4
 
 BASELINE_SNAPSHOT_PATH = "baseline_snapshot.json"
 FINAL_RESULT_PATH = "json/final_result.json"
-LAWD_XLSX_PATH = "resuorces/법정동코드.xlsx"
+LAWD_XLSX_PATH = "법정동코드.xlsx"
 RTMS_LOOKBACK_MONTHS = 12
 
 
