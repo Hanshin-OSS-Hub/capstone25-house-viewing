@@ -16,6 +16,7 @@ import com.house.houseviewing.fixture.PostAnalysisFixture;
 import com.house.houseviewing.fixture.UserFixture;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
+import com.house.houseviewing.global.file.pdf.dto.PdfDiffReportRequest;
 import com.house.houseviewing.global.file.pdf.dto.PdfUploadResult;
 import com.house.houseviewing.global.file.pdf.service.PdfReportTransferAndReceiveService;
 import org.mockito.ArgumentCaptor;
@@ -122,14 +123,18 @@ class PostReportServiceTest {
 
             given(contractRepository.findById(anyLong())).willReturn(java.util.Optional.of(contract));
             given(postAnalysisRepository.findTop2ByContractHouseIdOrderByCreatedAtDesc(anyLong()))
-                    .willReturn(List.of(existingAnalysis, analysis));
+                    .willReturn(List.of(analysis, existingAnalysis));
             given(pdfReportTransferAndReceiveService.diffTransferAndReceive(any())).willReturn(uploadResult);
             given(postReportRepository.save(any(PostReportEntity.class))).willAnswer(invocation -> invocation.getArgument(0));
 
             PostReportEntity result = postReportService.diffRegister(analysis);
+            ArgumentCaptor<PdfDiffReportRequest> requestCaptor = ArgumentCaptor.forClass(PdfDiffReportRequest.class);
 
             assertThat(result).isNotNull();
             assertThat(result.getPdfKey()).isEqualTo("diff-key");
+            verify(pdfReportTransferAndReceiveService).diffTransferAndReceive(requestCaptor.capture());
+            assertThat(requestCaptor.getValue().getOriginData()).isEqualTo(existingAnalysis.getRawData());
+            assertThat(requestCaptor.getValue().getNewData()).isEqualTo(analysis.getRawData());
             verify(postReportRepository).save(any(PostReportEntity.class));
         }
     }

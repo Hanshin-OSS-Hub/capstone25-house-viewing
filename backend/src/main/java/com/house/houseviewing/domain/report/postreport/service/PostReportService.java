@@ -48,7 +48,7 @@ public class PostReportService {
         ContractEntity contract = contractRepository.findById(contractId)
                 .orElseThrow(() -> new AppException(ExceptionCode.CONTRACT_NOT_FOUND));
         String originData = getOriginData(houseId);
-        PdfDiffReportRequest request = getPdfDiffReportRequest(originData, analyze, contract);
+        PdfDiffReportRequest request = getPdfDiffReportRequest(originData, analyze.getRawData(), contract);
         PdfUploadResult uploadResult = pdfReportTransferAndReceiveService.diffTransferAndReceive(request);
         PostReportEntity pdfReport = getPdfReportEntity(uploadResult);
         pdfReport.addRegistryAnalysis(analyze);
@@ -58,9 +58,10 @@ public class PostReportService {
 
     private String getOriginData(Long houseId) {
         List<PostAnalysisEntity> list = postAnalysisRepository.findTop2ByContractHouseIdOrderByCreatedAtDesc(houseId);
-        PostAnalysisEntity analysisEntity = list.get(0);
-        String originData = analysisEntity.getRawData();
-        return originData;
+        if (list.size() < 2) {
+            throw new AppException(ExceptionCode.ANALYSIS_NOT_FOUND, "비교할 이전 등기부 분석 결과가 없습니다.");
+        }
+        return list.get(1).getRawData();
     }
 
     private static PostReportEntity getPdfReportEntity(PdfUploadResult uploadResult) {
@@ -84,10 +85,10 @@ public class PostReportService {
                 .build();
     }
 
-    private static PdfDiffReportRequest getPdfDiffReportRequest(String originData, PostAnalysisEntity analysis, ContractEntity contract){
+    private static PdfDiffReportRequest getPdfDiffReportRequest(String originData, String newData, ContractEntity contract){
         return PdfDiffReportRequest.builder()
                 .originData(originData)
-                .newData(analysis.getRawData())
+                .newData(newData)
                 .contractType(contract.getContractType())
                 .deposit(contract.getDeposit())
                 .monthlyAmount(contract.getMonthlyAmount())
