@@ -102,12 +102,14 @@
             </LinearLayout>
 
             <View
+                android:id="@+id/scoreDividerView"
                 android:layout_width="1dp"
                 android:layout_height="36dp"
                 android:layout_marginHorizontal="10dp"
                 android:background="@color/analysis_card_stroke" />
 
             <LinearLayout
+                android:id="@+id/scoreContainer"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="end"
@@ -117,7 +119,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:fontFamily="@font/pretendard_medium"
-                    android:text="안전 점수"
+                    android:text="LTV 점수"
                     android:textColor="@color/textgray"
                     android:textSize="12sp" />
 
