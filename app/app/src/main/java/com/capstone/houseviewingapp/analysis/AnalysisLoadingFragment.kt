@@ -151,22 +151,6 @@ class AnalysisLoadingFragment : Fragment() {
             }
 
             val pdf = apiResult.getOrElse { throwable ->
-                if (source == RecordSource.AUTO) {
-                    val fallbackPayload = buildAutoFallbackPayload(
-                        accessToken = accessToken,
-                        primaryHouse = primaryHouse
-                    )
-                    if (fallbackPayload != null) {
-                        completionPayload = fallbackPayload
-                        isAnalysisDone = true
-                        currentStep = 4
-                        updateStepUi()
-                        playCheckAppearAnimation(iconForStep(4))
-                        delay(300L)
-                        if (_binding != null) showCompleteDialog()
-                        return@launch
-                    }
-                }
                 val remote = throwable as? RemoteApiException
                 if (remote?.code == "AU005" && source == RecordSource.MANUAL) {
                     val loginId = AuthTokenLocalStore.getLoginId(requireContext()).orEmpty()
@@ -209,7 +193,7 @@ class AnalysisLoadingFragment : Fragment() {
                 riskSummary = latestMeta?.mainReason?.takeIf { it.isNotBlank() }
                     ?: "상세 리포트에서 주요 원인을 확인해 주세요.",
                 level = latestMeta?.riskLevel?.toUiRiskLevel()
-                    ?: if (source == RecordSource.AUTO) RiskLevel.BLUE else RiskLevel.AMBER,
+                    ?: RiskLevel.AMBER,
                 ltvScore = latestMeta?.ltvScore?.toDouble(),
                 // 분석 결과 카드의 상세 리포트는 생성된 결과 PDF를 우선 사용
                 sourcePdfUri = pdf.filePath.takeIf { it.isNotBlank() }
@@ -416,36 +400,6 @@ class AnalysisLoadingFragment : Fragment() {
             .replace("경기도", "경기")
     }
 
-    private suspend fun buildAutoFallbackPayload(
-        accessToken: String,
-        primaryHouse: com.capstone.houseviewingapp.home.HouseCardItem?
-    ): CompletionPayload? {
-        val houseName = primaryHouse?.homeName.orEmpty()
-        val houseAddress = primaryHouse?.address.orEmpty()
-        val latestCandidates = AnalysisRepositoryProvider.repository
-            .getDiffAnalyses(accessToken)
-            .getOrNull()
-            .orEmpty()
-        val latest = selectBestAnalysisMeta(
-            candidates = latestCandidates,
-            nickname = houseName,
-            address = houseAddress,
-            source = RecordSource.AUTO
-        )
-            ?: return null
-
-        return CompletionPayload(
-            source = RecordSource.AUTO,
-            title = primaryHouse?.homeName ?: latest.nickname,
-            address = primaryHouse?.address ?: latest.address,
-            riskSummary = latest.mainReason?.takeIf { it.isNotBlank() }
-                ?: "최근 자동 감지 분석 결과를 불러왔습니다.",
-            level = latest.riskLevel?.toUiRiskLevel() ?: RiskLevel.AMBER,
-            ltvScore = latest.ltvScore?.toDouble(),
-            sourcePdfUri = null
-        )
-    }
-
     private fun selectBestAnalysisMeta(
         candidates: List<com.capstone.houseviewingapp.analysis.model.AnalysisResponse>,
         nickname: String,
@@ -453,30 +407,43 @@ class AnalysisLoadingFragment : Fragment() {
         source: RecordSource
     ): com.capstone.houseviewingapp.analysis.model.AnalysisResponse? {
         if (candidates.isEmpty()) return null
-        val ranked = candidates
-            .asSequence()
-            .mapIndexed { index, candidate -> index to candidate }
-            .sortedWith(
-                compareByDescending<Pair<Int, com.capstone.houseviewingapp.analysis.model.AnalysisResponse>> { (_, item) ->
-                    item.nickname == nickname
-                }.thenByDescending { (_, item) ->
-                    matchAddressScore(item.address, address)
-                }.thenByDescending { (_, item) ->
-                    item.ltvScore != null
-                }.thenByDescending { (_, item) ->
-                    hasUsableMeta(item)
-                }.thenByDescending { (_, item) ->
-                    item.ltvScore ?: -1
-                }.thenByDescending { (index, _) ->
-                    // /analyses 는 사후 -> 사전 순으로 합쳐 내려오므로,
-                    // 수동(사전) 진단 매칭은 뒤쪽(사전 영역)을 우선한다.
-                    if (source == RecordSource.MANUAL) index else -index
-                }
-            )
-            .map { it.second }
-            .toList()
+        // AUTO(change-diagnoses)는 직전에 생성한 최신 DIFF 결과가 목록 첫 원소이므로
+        // 닉네임/주소 유사도 매칭보다 최신 1건을 우선 신뢰한다.
+        if (source == RecordSource.AUTO) {
+            return candidates.firstOrNull { hasUsableMeta(it) } ?: candidates.firstOrNull()
+        }
+        val normalizedNickname = normalizeKey(nickname)
+        val normalizedAddress = normalizeAddress(address)
+        val ordered = if (source == RecordSource.MANUAL) candidates.asReversed() else candidates
 
-        return ranked.firstOrNull()
+        // 1) 닉네임 + 주소가 정확히 맞는 최신 결과만 우선 채택
+        ordered.firstOrNull { item ->
+            normalizeKey(item.nickname) == normalizedNickname &&
+                normalizeAddress(item.address) == normalizedAddress
+        }?.let { return it }
+
+        // 2) 수동 진단은 오매칭을 막기 위해 느슨한 fallback을 제한
+        if (source == RecordSource.MANUAL) {
+            return ordered.firstOrNull { item ->
+                normalizeKey(item.nickname) == normalizedNickname &&
+                    matchAddressScore(item.address, address) >= 2
+            }
+        }
+
+        // 3) 자동 진단은 동일 집 가능성이 높은 후보만 허용
+        return ordered.firstOrNull { item ->
+            normalizeKey(item.nickname) == normalizedNickname &&
+                matchAddressScore(item.address, address) >= 2
+        } ?: ordered.firstOrNull { item ->
+            matchAddressScore(item.address, address) >= 2
+        }
+    }
+
+    private fun normalizeKey(value: String): String {
+        return value
+            .trim()
+            .lowercase()
+            .replace(Regex("\\s+"), "")
     }
 
     private fun hasUsableMeta(
