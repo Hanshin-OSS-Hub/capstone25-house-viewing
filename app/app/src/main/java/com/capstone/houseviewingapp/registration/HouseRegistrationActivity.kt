@@ -2,6 +2,7 @@ package com.capstone.houseviewingapp.registration
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
@@ -13,7 +14,6 @@ import androidx.lifecycle.lifecycleScope
 import com.capstone.houseviewingapp.MainActivity
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.analysis.AnalysisRepositoryProvider
-import com.capstone.houseviewingapp.analysis.model.AnalysisResponse
 import com.capstone.houseviewingapp.data.local.AuthTokenLocalStore
 import com.capstone.houseviewingapp.data.local.HouseLocalStore
 import com.capstone.houseviewingapp.data.local.model.HouseDetailItem
@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 class HouseRegistrationActivity : AppCompatActivity() {
 
     companion object {
+        private const val TAG = "HouseRegistration"
         const val EXTRA_QUICK_DIAGNOSIS_MODE = "extra_quick_diagnosis_mode"
         const val EXTRA_EDIT_HOUSE_ID = "extra_edit_house_id"
     }
@@ -303,7 +304,7 @@ class HouseRegistrationActivity : AppCompatActivity() {
                 return@launch
             }
 
-            val analysisMeta = runPostContractAnalysisIfPossible(
+            val resolvedLtv = runPostContractAnalysisIfPossible(
                 accessToken = token,
                 houseId = houseResponse.houseId,
                 draft = draft
@@ -320,10 +321,10 @@ class HouseRegistrationActivity : AppCompatActivity() {
                 maintenanceFee = draft.maintenanceFee,
                 moveDate = draft.moveDate,
                 confirmDate = draft.confirmDate,
-                ltv = analysisMeta?.ltvScore
+                ltv = resolvedLtv
             )
             HouseLocalStore.addHouseDetail(this@HouseRegistrationActivity, detailItem)
-            if (analysisMeta?.ltvScore == null && !draft.documentUri.isNullOrBlank()) {
+            if (resolvedLtv == null && !draft.documentUri.isNullOrBlank()) {
                 Toast.makeText(
                     this@HouseRegistrationActivity,
                     "집 등록은 완료되었지만 LTV 계산은 아직 반영되지 않았습니다. 분석 메뉴에서 다시 시도해 주세요.",
@@ -365,7 +366,7 @@ class HouseRegistrationActivity : AppCompatActivity() {
         accessToken: String,
         houseId: Long,
         draft: HouseRegistrationDraft
-    ): AnalysisResponse? {
+    ): Int? {
         val fileUri = draft.documentUri?.trim().orEmpty()
         if (fileUri.isBlank()) return null
 
@@ -375,60 +376,44 @@ class HouseRegistrationActivity : AppCompatActivity() {
             houseId = houseId,
             fileUri = fileUri
         )
-        val matched = findLatestMatchedAnalysisWithRetry(
-            accessToken = accessToken,
-            nickname = draft.nickname,
-            originAddress = draft.originAddress
-        )
-
-        if (analysisResult.isFailure && matched?.ltvScore == null) {
-            return null
+        val analysisError = analysisResult.exceptionOrNull() as? RemoteApiException
+        if (analysisResult.isFailure) {
+            Log.w(
+                TAG,
+                "postContractDiagnoses failed houseId=$houseId code=${analysisError?.code} " +
+                    "http=${analysisError?.statusCode} msg=${analysisError?.message}"
+            )
         }
-        return matched
-    }
 
-    private suspend fun findLatestMatchedAnalysisWithRetry(
-        accessToken: String,
-        nickname: String,
-        originAddress: String
-    ): AnalysisResponse? {
-        repeat(4) { attempt ->
-            val analyses = AnalysisRepositoryProvider.repository
-                .getAnalyses(accessToken)
-                .getOrNull()
-                .orEmpty()
-            val best = analyses
-                .asSequence()
-                .filter { it.nickname == nickname }
-                .sortedWith(
-                    compareByDescending<AnalysisResponse> { matchAddressScore(it.address, originAddress) }
-                        .thenByDescending { it.ltvScore != null }
-                )
-                .firstOrNull()
-            if (best?.ltvScore != null || attempt == 3) return best
-            delay(800L)
+        // 등록 직후 /analyses 문자열 매칭이 아니라, houseId 단건 조회로 LTV를 확정한다.
+        repeat(12) { attempt ->
+            val houseResult = NetworkModule.houseApi
+                .getHouse(bearer(accessToken), houseId)
+                .executeApi()
+            val house = houseResult.getOrNull()
+            val houseError = houseResult.exceptionOrNull() as? RemoteApiException
+            val ltvScore = house?.ltvScore
+            if (ltvScore != null || attempt == 11) return ltvScore
+
+            if (houseError?.code == "NF007") {
+                // 단건 조회는 분석기록이 없으면 NF007로 실패하므로 목록 API에서 houseId를 다시 확인한다.
+                val housesResult = NetworkModule.houseApi
+                    .getHouses(bearer(accessToken))
+                    .executeApi()
+                val listLtv = housesResult.getOrNull()
+                    ?.firstOrNull { it.houseId == houseId }
+                    ?.ltvScore
+                if (listLtv != null) return listLtv
+            }
+            Log.d(
+                TAG,
+                "ltv poll[$attempt] houseId=$houseId ltv=null getHouseCode=${houseError?.code} " +
+                    "getHouseHttp=${houseError?.statusCode}"
+            )
+            delay(1000L)
         }
+        Log.e(TAG, "ltv unresolved after polling houseId=$houseId")
         return null
-    }
-
-    private fun matchAddressScore(serverAddress: String, inputAddress: String): Int {
-        val a = serverAddress.trim()
-        val b = inputAddress.trim()
-        if (a.isBlank() || b.isBlank()) return 0
-        return when {
-            a == b -> 3
-            a.contains(b) || b.contains(a) -> 2
-            normalizeAddress(a) == normalizeAddress(b) -> 1
-            else -> 0
-        }
-    }
-
-    private fun normalizeAddress(value: String): String {
-        return value
-            .lowercase()
-            .replace(Regex("\\s+"), "")
-            .replace("대한민국", "")
-            .replace("경기도", "경기")
     }
 
     private fun dismissParsingDialog() {
