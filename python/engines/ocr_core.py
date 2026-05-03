@@ -6,9 +6,9 @@ import xml.etree.ElementTree as ET
 from dotenv import load_dotenv
 from datetime import datetime, timezone, timedelta
 
-from engine.diff_engine import diff_snapshots
-from engine.risk_engine import compute_ltv_info, compute_risk
-from engine.recovery_engine import compute_recovery
+from engine.diff_engines import diff_snapshots
+from engine.risk_engines import compute_ltv_info, compute_risk
+from engine.recovery_engines import compute_recovery
 
 load_dotenv()
 
