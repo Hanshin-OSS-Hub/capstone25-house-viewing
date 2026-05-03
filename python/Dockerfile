@@ -13,7 +13,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
-RUN mkdir -p uploads pdf_pages
+RUN mkdir -p uploads pdf_pages json json
 
 EXPOSE 8000
 
