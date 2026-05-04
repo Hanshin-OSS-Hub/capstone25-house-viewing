@@ -52,13 +52,13 @@ def compute_ltv_info(snapshot, valuation):
     ltv = effective_claim / house_price if house_price else None
 
     return {
-        "ok": bool(ltv),
+        "ok": ltv is not None,
         "reason": None,
         "house_price_won": house_price,
         "max_claim_total_won": max_claim_total,
         "joint_collateral_count": joint_count,
         "effective_claim_won": int(effective_claim),
-        "ltv": round(ltv, 4) if ltv else None,
+        "ltv": round(ltv, 4) if ltv is not None else None,
         "method": "ltv = (max_claim_total / joint_count) / house_price"
     }
 
