@@ -37,7 +37,8 @@ object AnalysisLocalStore {
                         level = runCatching { RiskLevel.valueOf(o.getString("level")) }.getOrDefault(RiskLevel.AMBER),
                         source = runCatching { RecordSource.valueOf(o.getString("source")) }.getOrDefault(RecordSource.MANUAL),
                         ltv = if (o.has("ltv") && !o.isNull("ltv")) o.optDouble("ltv") else null,
-                        sourcePdfUri = o.optString("sourcePdfUri", "").ifBlank { null }
+                        sourcePdfUri = o.optString("sourcePdfUri", "").ifBlank { null },
+                        pdfReportId = if (o.has("pdfReportId") && !o.isNull("pdfReportId")) o.optLong("pdfReportId") else null
                     )
                 )
             }
@@ -75,6 +76,7 @@ object AnalysisLocalStore {
                     put("source", r.source.name)
                     if (r.ltv != null) put("ltv", r.ltv)
                     if (!r.sourcePdfUri.isNullOrBlank()) put("sourcePdfUri", r.sourcePdfUri)
+                    if (r.pdfReportId != null) put("pdfReportId", r.pdfReportId)
                 }
             )
         }
