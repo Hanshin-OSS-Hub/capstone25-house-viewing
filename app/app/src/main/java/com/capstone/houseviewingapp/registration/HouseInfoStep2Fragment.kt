@@ -12,6 +12,7 @@ import androidx.fragment.app.Fragment
 import com.capstone.houseviewingapp.R
 import com.capstone.houseviewingapp.databinding.FragmentHouseInfoStep2Binding
 import com.google.android.material.datepicker.MaterialDatePicker
+import java.text.DecimalFormat
 
 class HouseInfoStep2Fragment : Fragment(R.layout.fragment_house_info_step2) {
     private var _binding: FragmentHouseInfoStep2Binding? = null
@@ -19,6 +20,8 @@ class HouseInfoStep2Fragment : Fragment(R.layout.fragment_house_info_step2) {
     // [B] setText() 재호출 무한루프 방지 플래그
     private var isFormattingMoveInDate = false
     private var isFormattingConfirmDate = false
+    private val currencyFormattingStates = mutableMapOf<Int, Boolean>()
+    private val currencyFormatter = DecimalFormat("#,###")
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -70,6 +73,7 @@ class HouseInfoStep2Fragment : Fragment(R.layout.fragment_house_info_step2) {
             showConfirmDatePicker()
         }
         setupConfirmDateInputFormat()
+        setupCurrencyInputFormats()
 
         setupRentTypeToggle()
 
@@ -124,20 +128,20 @@ class HouseInfoStep2Fragment : Fragment(R.layout.fragment_house_info_step2) {
             binding.yearDepositEditText.text?.toString() // 전세일 때는 전세 카드의 보증금 입력창
         }
 
-        val deposit = depositText?.toLongOrNull() ?: return null // 보증금은 필수 입력
+        val deposit = parseCurrencyToLong(depositText) ?: return null // 보증금은 필수 입력
 
         val monthlyAmount = if (isMonthly) {
-            binding.monthEditText.text?.toString()?.toLongOrNull() ?: return null // 월세 금액은 월세일 때 필수 입력
+            parseCurrencyToLong(binding.monthEditText.text?.toString()) ?: return null // 월세 금액은 월세일 때 필수 입력
         } else {
             0L // 전세일 때는 월세 금액 0으로 설정
         }
 
         val maintenanceFee = if (isMonthly) {
             if(binding.noManageCheckBox.isChecked) 0L // "관리비 없음" 체크 여부 -> 0원
-            else binding.monthManageEditText.text?.toString()?.toLongOrNull() ?: return null // 체크가 안되어있으면 필수 입력
+            else parseCurrencyToLong(binding.monthManageEditText.text?.toString()) ?: return null // 체크가 안되어있으면 필수 입력
         } else {
             if(binding.yearNoManageCheckBox.isChecked) 0L
-            else binding.yearManageEditText.text?.toString()?.toLongOrNull() ?: return null // 체크가 안되어있으면 필수 입력 -> Long 변환 실패하면 null 반환
+            else parseCurrencyToLong(binding.yearManageEditText.text?.toString()) ?: return null // 체크가 안되어있으면 필수 입력 -> Long 변환 실패하면 null 반환
         }
 
         val moveDate = binding.moveInDateEditText.text?.toString()?.trim().orEmpty() // null 이면 빈 문자열로 처리
@@ -223,7 +227,10 @@ class HouseInfoStep2Fragment : Fragment(R.layout.fragment_house_info_step2) {
         val formatted = buildString {
             digitsOnly.forEachIndexed { index, c ->
                 append(c)
-                if (index == 3 || index == 5) append('-')
+                // 다음 자릿수가 실제로 있을 때만 하이픈 삽입 (예: 2025 입력 시 '-' 미삽입)
+                if ((index == 3 && digitsOnly.length > 4) || (index == 5 && digitsOnly.length > 6)) {
+                    append('-')
+                }
             }
         }
         if (str == formatted) return
@@ -284,5 +291,78 @@ class HouseInfoStep2Fragment : Fragment(R.layout.fragment_house_info_step2) {
                 )
             }
         })
+    }
+
+    private fun setupCurrencyInputFormats() {
+        val targets = listOf(
+            binding.depositEditText,
+            binding.monthEditText,
+            binding.monthManageEditText,
+            binding.yearDepositEditText,
+            binding.yearManageEditText
+        )
+        targets.forEach { editText ->
+            editText.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
+
+                override fun afterTextChanged(s: Editable?) {
+                    applyCurrencyMask(editText, s)
+                }
+            })
+        }
+    }
+
+    private fun applyCurrencyMask(editText: EditText, s: Editable?) {
+        val key = editText.id
+        if (currencyFormattingStates[key] == true) return
+
+        val text = s?.toString().orEmpty()
+        val selection = editText.selectionStart.coerceIn(0, text.length)
+        val digitsBeforeCursor = text.take(selection).count { it.isDigit() }
+        val digits = text.filter { it.isDigit() }
+        if (digits.isEmpty()) {
+            if (text.isNotEmpty()) {
+                currencyFormattingStates[key] = true
+                try {
+                    editText.setText("")
+                } finally {
+                    currencyFormattingStates[key] = false
+                }
+            }
+            return
+        }
+
+        val numeric = digits.toLongOrNull() ?: return
+        val formatted = currencyFormatter.format(numeric)
+        if (formatted == text) return
+
+        currencyFormattingStates[key] = true
+        try {
+            editText.setText(formatted)
+            editText.setSelection(findCursorAfterDigits(formatted, digitsBeforeCursor))
+        } finally {
+            currencyFormattingStates[key] = false
+        }
+    }
+
+    private fun findCursorAfterDigits(formatted: String, digitCountBeforeCursor: Int): Int {
+        if (digitCountBeforeCursor <= 0) return 0
+        var seen = 0
+        for (i in formatted.indices) {
+            if (formatted[i].isDigit()) {
+                seen++
+                if (seen >= digitCountBeforeCursor) {
+                    return i + 1
+                }
+            }
+        }
+        return formatted.length
+    }
+
+    private fun parseCurrencyToLong(raw: String?): Long? {
+        val digits = raw.orEmpty().filter { it.isDigit() }
+        if (digits.isBlank()) return null
+        return digits.toLongOrNull()
     }
 }
