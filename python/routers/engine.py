@@ -275,9 +275,11 @@ async def generate_pdf(request: GeneratePdfRequest) -> Response:
         f"deposit={request.deposit!r} contractType={request.contractType!r}",
         file=sys.stderr, flush=True,
     )
+    print(f"[DEBUG pdf] rawData[:200]={request.rawData[:200]!r}", file=sys.stderr, flush=True)
     try:
         raw: dict = json_lib.loads(request.rawData)
-    except ValueError:
+    except ValueError as e:
+        print(f"[DEBUG pdf] JSON parse error: {e}", file=sys.stderr, flush=True)
         raise HTTPException(status_code=422, detail="rawData가 유효한 JSON 문자열이 아닙니다.")
 
     resolved_snapshot_name = _resolve_snapshot_name(raw, request.snapshotName)
