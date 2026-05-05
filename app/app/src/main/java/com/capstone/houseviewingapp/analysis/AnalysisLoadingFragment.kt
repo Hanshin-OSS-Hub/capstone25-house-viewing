@@ -55,7 +55,8 @@ class AnalysisLoadingFragment : Fragment() {
         val riskSummary: String,
         val level: RiskLevel,
         val ltvScore: Double?,
-        val sourcePdfUri: String?
+        val sourcePdfUri: String?,
+        val pdfReportId: Long?
     )
 
     override fun onCreateView(
@@ -177,6 +178,7 @@ class AnalysisLoadingFragment : Fragment() {
             }
             val latestMeta = fetchLatestAnalysisMetaWithRetry(
                 accessToken = accessToken,
+                targetPdfReportId = pdf.pdfReportId,
                 nickname = resolvedTitle,
                 address = resolvedAddress,
                 source = source
@@ -206,7 +208,8 @@ class AnalysisLoadingFragment : Fragment() {
                 ltvScore = resolvedLtvScore.toDouble(),
                 // 분석 결과 카드의 상세 리포트는 생성된 결과 PDF를 우선 사용
                 sourcePdfUri = pdf.filePath.takeIf { it.isNotBlank() }
-                    ?: arguments?.getString(AnalysisFlow.ARG_SELECTED_FILE_URI)?.trim()?.ifBlank { null }
+                    ?: arguments?.getString(AnalysisFlow.ARG_SELECTED_FILE_URI)?.trim()?.ifBlank { null },
+                pdfReportId = pdf.pdfReportId
             )
 
             isAnalysisDone = true
@@ -234,7 +237,8 @@ class AnalysisLoadingFragment : Fragment() {
                 level = payload.level,
                 source = payload.source,
                 ltv = payload.ltvScore,
-                sourcePdfUri = payload.sourcePdfUri
+                sourcePdfUri = payload.sourcePdfUri,
+                pdfReportId = payload.pdfReportId
             )
             Log.i(
                 TAG,
@@ -336,6 +340,7 @@ class AnalysisLoadingFragment : Fragment() {
 
     private suspend fun fetchLatestAnalysisMetaWithRetry(
         accessToken: String,
+        targetPdfReportId: Long?,
         nickname: String,
         address: String,
         source: RecordSource
@@ -360,6 +365,7 @@ class AnalysisLoadingFragment : Fragment() {
 
             val best = selectBestAnalysisMeta(
                 candidates = candidates,
+                targetPdfReportId = targetPdfReportId,
                 nickname = nickname,
                 address = address,
                 source = source
@@ -411,19 +417,25 @@ class AnalysisLoadingFragment : Fragment() {
 
     private fun selectBestAnalysisMeta(
         candidates: List<com.capstone.houseviewingapp.analysis.model.AnalysisResponse>,
+        targetPdfReportId: Long?,
         nickname: String,
         address: String,
         source: RecordSource
     ): com.capstone.houseviewingapp.analysis.model.AnalysisResponse? {
         if (candidates.isEmpty()) return null
+        val sourceFiltered = filterCandidatesBySource(candidates, source)
+        if (sourceFiltered.isEmpty()) return null
+        targetPdfReportId?.let { reportId ->
+            sourceFiltered.firstOrNull { it.pdfReportId == reportId }?.let { return it }
+        }
         // AUTO(change-diagnoses)는 직전에 생성한 최신 DIFF 결과가 목록 첫 원소이므로
         // 닉네임/주소 유사도 매칭보다 최신 1건을 우선 신뢰한다.
         if (source == RecordSource.AUTO) {
-            return candidates.firstOrNull { hasUsableMeta(it) } ?: candidates.firstOrNull()
+            return sourceFiltered.firstOrNull { hasUsableMeta(it) } ?: sourceFiltered.firstOrNull()
         }
         val normalizedNickname = normalizeKey(nickname)
         val normalizedAddress = normalizeAddress(address)
-        val ordered = if (source == RecordSource.MANUAL) candidates.asReversed() else candidates
+        val ordered = if (source == RecordSource.MANUAL) sourceFiltered.asReversed() else sourceFiltered
 
         // 1) 닉네임 + 주소가 정확히 맞는 최신 결과만 우선 채택
         ordered.firstOrNull { item ->
@@ -446,6 +458,18 @@ class AnalysisLoadingFragment : Fragment() {
         } ?: ordered.firstOrNull { item ->
             matchAddressScore(item.address, address) >= 2
         }
+    }
+
+    private fun filterCandidatesBySource(
+        candidates: List<com.capstone.houseviewingapp.analysis.model.AnalysisResponse>,
+        source: RecordSource
+    ): List<com.capstone.houseviewingapp.analysis.model.AnalysisResponse> {
+        val expectedType = when (source) {
+            RecordSource.MANUAL -> "PRE"
+            RecordSource.AUTO -> "POST"
+        }
+        val typed = candidates.filter { it.analysisType.equals(expectedType, ignoreCase = true) }
+        return if (typed.isNotEmpty()) typed else candidates
     }
 
     private fun normalizeKey(value: String): String {
