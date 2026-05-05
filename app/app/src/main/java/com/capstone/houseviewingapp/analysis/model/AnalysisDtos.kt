@@ -22,6 +22,7 @@ data class PdfDownloadResponse(
 
 /** AnalysisResponse (목록 조회 /analyses) */
 data class AnalysisResponse(
+    val pdfReportId: Long?,
     val nickname: String,
     val address: String,
     val mainReason: String?,

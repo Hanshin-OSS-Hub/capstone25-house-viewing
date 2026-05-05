@@ -140,10 +140,12 @@ class AnalysisQueryServiceTest {
         @DisplayName("성공")
         void 성공(){
             AnalysisResponse postResponse = AnalysisResponse.builder()
+                    .pdfReportId(11L)
                     .nickname("사후")
                     .mainReason("안전")
                     .build();
             AnalysisResponse preResponse = AnalysisResponse.builder()
+                    .pdfReportId(22L)
                     .nickname("사전")
                     .mainReason("주의")
                     .build();
@@ -154,7 +156,9 @@ class AnalysisQueryServiceTest {
             List<AnalysisResponse> result = analysisQueryService.getAnalyses(1L);
 
             assertThat(result).hasSize(2);
+            assertThat(result.get(0).getPdfReportId()).isEqualTo(11L);
             assertThat(result.get(0).getNickname()).isEqualTo("사후");
+            assertThat(result.get(1).getPdfReportId()).isEqualTo(22L);
             assertThat(result.get(1).getNickname()).isEqualTo("사전");
         }
     }
@@ -167,6 +171,7 @@ class AnalysisQueryServiceTest {
         @DisplayName("성공")
         void 성공(){
             AnalysisResponse diffResponse = AnalysisResponse.builder()
+                    .pdfReportId(33L)
                     .nickname("차이")
                     .mainReason("주의")
                     .build();
@@ -176,6 +181,7 @@ class AnalysisQueryServiceTest {
             List<AnalysisResponse> result = analysisQueryService.getDiffAnalyses(1L);
 
             assertThat(result).hasSize(1);
+            assertThat(result.get(0).getPdfReportId()).isEqualTo(33L);
             assertThat(result.get(0).getNickname()).isEqualTo("차이");
         }
     }

@@ -4,12 +4,14 @@ import com.house.houseviewing.domain.analysis.postanalysis.dto.response.Analysis
 import com.house.houseviewing.domain.analysis.preanalysis.dto.request.PreContractDiagnosisRequest;
 import com.house.houseviewing.domain.analysis.preanalysis.entity.PreAnalysisEntity;
 import com.house.houseviewing.domain.analysis.preanalysis.repository.PreAnalysisRepository;
+import com.house.houseviewing.domain.report.prereport.entity.PreReportEntity;
 import com.house.houseviewing.domain.analysis.preanalysis.service.PreAnalysisService;
 import com.house.houseviewing.domain.common.Address;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.domain.user.repository.UserRepository;
 import com.house.houseviewing.fixture.AddressFixture;
 import com.house.houseviewing.fixture.PreAnalysisFixture;
+import com.house.houseviewing.fixture.PreReportFixture;
 import com.house.houseviewing.fixture.UserFixture;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
@@ -96,6 +98,10 @@ class PreAnalysisServiceTest {
         void 성공(){
             UserEntity user = UserFixture.createDefaultWithId(1L);
             PreAnalysisEntity analysis = PreAnalysisFixture.createWithId(user, 1L);
+            PreReportEntity report = PreReportFixture.createDefault()
+                    .id(201L)
+                    .build();
+            report.addAnalysis(analysis);
             List<PreAnalysisEntity> analyses = List.of(analysis);
 
             given(preAnalysisRepository.findAllByUserId(anyLong())).willReturn(analyses);
@@ -103,6 +109,7 @@ class PreAnalysisServiceTest {
             List<AnalysisResponse> result = preAnalysisService.getPreAnalyses(1L);
 
             assertThat(result).hasSize(1);
+            assertThat(result.get(0).getPdfReportId()).isEqualTo(201L);
             assertThat(result.get(0).getNickname()).isEqualTo("테스트분석");
         }
 

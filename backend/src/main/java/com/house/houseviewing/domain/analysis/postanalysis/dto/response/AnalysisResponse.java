@@ -14,6 +14,8 @@ import lombok.NoArgsConstructor;
 @Builder
 public class AnalysisResponse {
 
+    private Long pdfReportId;
+
     private String nickname;
 
     private String address;
@@ -28,6 +30,7 @@ public class AnalysisResponse {
         String nickname = postAnalysis.getHouse().getNickname();
         String address = postAnalysis.getHouse().getAddress().getAddressName();
         return AnalysisResponse.builder()
+                .pdfReportId(postAnalysis.getPdfReport() != null ? postAnalysis.getPdfReport().getId() : null)
                 .nickname(nickname)
                 .address(address)
                 .mainReason(postAnalysis.getMainReason())
@@ -38,6 +41,7 @@ public class AnalysisResponse {
 
     public static AnalysisResponse from(PreAnalysisEntity preAnalysis){
         return AnalysisResponse.builder()
+                .pdfReportId(preAnalysis.getPreReportEntity() != null ? preAnalysis.getPreReportEntity().getId() : null)
                 .nickname(preAnalysis.getNickname())
                 .address(preAnalysis.getAddress().getAddressName())
                 .mainReason(preAnalysis.getMainReason())

@@ -9,10 +9,12 @@ import com.house.houseviewing.domain.contract.entity.ContractEntity;
 import com.house.houseviewing.domain.contract.repository.ContractRepository;
 import com.house.houseviewing.domain.house.entity.HouseEntity;
 import com.house.houseviewing.domain.house.repository.HouseRepository;
+import com.house.houseviewing.domain.report.postreport.entity.PostReportEntity;
 import com.house.houseviewing.domain.user.entity.UserEntity;
 import com.house.houseviewing.fixture.ContractFixture;
 import com.house.houseviewing.fixture.HouseFixture;
 import com.house.houseviewing.fixture.PostAnalysisFixture;
+import com.house.houseviewing.fixture.PostReportFixture;
 import com.house.houseviewing.fixture.UserFixture;
 import com.house.houseviewing.global.exception.AppException;
 import com.house.houseviewing.global.exception.ExceptionCode;
@@ -113,6 +115,10 @@ class PostAnalysisServiceTest {
             UserEntity user = UserFixture.createDefaultWithId(1L);
             HouseEntity house = HouseFixture.createWithUserAndId(user, 1L);
             PostAnalysisEntity analysis = PostAnalysisFixture.createWithId(house, 1L);
+            PostReportEntity report = PostReportFixture.createDefault()
+                    .id(101L)
+                    .build();
+            report.addRegistryAnalysis(analysis);
             List<PostAnalysisEntity> analyses = List.of(analysis);
 
             given(postAnalysisRepository.findAllByUserId(anyLong())).willReturn(analyses);
@@ -120,6 +126,7 @@ class PostAnalysisServiceTest {
             List<AnalysisResponse> result = postAnalysisService.getPostAnalyses(1L);
 
             assertThat(result).hasSize(1);
+            assertThat(result.get(0).getPdfReportId()).isEqualTo(101L);
         }
     }
 
@@ -133,6 +140,10 @@ class PostAnalysisServiceTest {
             UserEntity user = UserFixture.createDefaultWithId(1L);
             HouseEntity house = HouseFixture.createWithUserAndId(user, 1L);
             PostAnalysisEntity analysis = PostAnalysisFixture.createDiffWithId(house, 1L);
+            PostReportEntity report = PostReportFixture.createDefault()
+                    .id(102L)
+                    .build();
+            report.addRegistryAnalysis(analysis);
             List<PostAnalysisEntity> analyses = List.of(analysis);
 
             given(postAnalysisRepository.findAllByUserIdAndAnalysisType(anyLong(), eq(AnalysisType.DIFF)))
@@ -141,6 +152,7 @@ class PostAnalysisServiceTest {
             List<AnalysisResponse> result = postAnalysisService.getDiffAnalyses(1L);
 
             assertThat(result).hasSize(1);
+            assertThat(result.get(0).getPdfReportId()).isEqualTo(102L);
         }
     }
 

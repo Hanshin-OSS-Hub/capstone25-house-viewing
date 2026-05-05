@@ -22,10 +22,11 @@ class MockAnalysisRepository : AnalysisRepository {
         if (request.nickname.isBlank()) return Result.failure(IllegalArgumentException("NICKNAME_REQUIRED"))
         if (request.address.isBlank()) return Result.failure(IllegalArgumentException("ADDRESS_REQUIRED"))
 
-        addRecord(request.nickname, request.address, ApiRiskLevel.WARNING)
+        val reportId = pdfIdGen.getAndIncrement()
+        addRecord(reportId, request.nickname, request.address, ApiRiskLevel.WARNING)
         return Result.success(
             PdfDownloadResponse(
-                pdfReportId = pdfIdGen.getAndIncrement(),
+                pdfReportId = reportId,
                 // 실제 백엔드 PdfDownloadResponse.filePath 와 동일하게, 목 구현은 URL을 만들지 않음(가짜 호스트 저장 방지)
                 filePath = ""
             )
@@ -42,10 +43,11 @@ class MockAnalysisRepository : AnalysisRepository {
         if (houseId <= 0L) return Result.failure(IllegalArgumentException("HOUSE_ID_INVALID"))
         if (fileUri.isBlank()) return Result.failure(IllegalArgumentException("FILE_REQUIRED"))
 
-        addRecord("post-$houseId", "mock address", ApiRiskLevel.SAFE)
+        val reportId = pdfIdGen.getAndIncrement()
+        addRecord(reportId, "post-$houseId", "mock address", ApiRiskLevel.SAFE)
         return Result.success(
             PdfDownloadResponse(
-                pdfReportId = pdfIdGen.getAndIncrement(),
+                pdfReportId = reportId,
                 filePath = ""
             )
         )
@@ -55,10 +57,11 @@ class MockAnalysisRepository : AnalysisRepository {
         if (accessToken.isBlank()) return Result.failure(IllegalStateException("UNAUTHORIZED"))
         if (houseId <= 0L) return Result.failure(IllegalArgumentException("HOUSE_ID_INVALID"))
 
-        addRecord("change-$houseId", "mock address", ApiRiskLevel.DANGER)
+        val reportId = pdfIdGen.getAndIncrement()
+        addRecord(reportId, "change-$houseId", "mock address", ApiRiskLevel.DANGER)
         return Result.success(
             PdfDownloadResponse(
-                pdfReportId = pdfIdGen.getAndIncrement(),
+                pdfReportId = reportId,
                 filePath = ""
             )
         )
@@ -74,10 +77,11 @@ class MockAnalysisRepository : AnalysisRepository {
         return Result.success(records.filter { it.riskLevel == ApiRiskLevel.DANGER })
     }
 
-    private fun addRecord(nickname: String, address: String, risk: ApiRiskLevel) {
+    private fun addRecord(pdfReportId: Long, nickname: String, address: String, risk: ApiRiskLevel) {
         records.add(
             0,
             AnalysisResponse(
+                pdfReportId = pdfReportId,
                 nickname = nickname,
                 address = address,
                 mainReason = "mock",
