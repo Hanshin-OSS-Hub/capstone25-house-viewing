@@ -28,6 +28,5 @@ data class AnalysisResponse(
     val mainReason: String?,
     val riskLevel: ApiRiskLevel?,
     @SerializedName(value = "ltvScore", alternate = ["ltv_score"])
-    val ltvScore: Int?,
-    val analysisType: String?   // "PRE" | "POST" — PRE/POST 테이블 ID 충돌 구분용
+    val ltvScore: Int?
 )
