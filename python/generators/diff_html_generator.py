@@ -93,8 +93,8 @@ def generate_diff_html_report(
     new_risk    = new_raw.get("risk", {})
     origin_level = _LEVEL_MAP.get(origin_risk.get("risk_level", "LOW"), "Low")
     new_level    = _LEVEL_MAP.get(new_risk.get("risk_level", "MEDIUM"), "Medium")
-    origin_score = float(origin_risk.get("risk_score", 0))
-    new_score    = float(new_risk.get("risk_score", 50))
+    origin_ltv   = round(float(origin_raw.get("ltv", {}).get("ltv") or 0) * 100)
+    new_ltv      = round(float(new_raw.get("ltv", {}).get("ltv") or 0) * 100)
     origin_meta  = _RISK_META[origin_level]
     new_meta     = _RISK_META[new_level]
 
@@ -246,13 +246,13 @@ def generate_diff_html_report(
       <div class="risk-cell before">
         <div class="risk-label">이전 위험도</div>
         <div class="risk-value" style="color:{origin_meta["color"]};">{origin_meta["label"]}</div>
-        <div class="risk-score-val" style="color:{origin_meta["color"]};">{origin_score:.0f}점</div>
+        <div class="risk-score-val" style="color:{origin_meta["color"]};">LTV {origin_ltv}%</div>
       </div>
       <div class="risk-arrow">&#8594;</div>
       <div class="risk-cell after">
         <div class="risk-label" style="color:#ffffff;">현재 위험도</div>
         <div class="risk-value" style="color:#ffffff;">{new_meta["label"]}</div>
-        <div class="risk-score-val" style="color:#ffffff;">{new_score:.0f}점</div>
+        <div class="risk-score-val" style="color:#ffffff;">LTV {new_ltv}%</div>
       </div>
     </div>
     <div class="summary-badges">
