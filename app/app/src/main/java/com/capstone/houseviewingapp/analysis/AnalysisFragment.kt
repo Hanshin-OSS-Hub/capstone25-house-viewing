@@ -219,27 +219,40 @@ class AnalysisFragment : Fragment(R.layout.fragment_analysis) {
             return record
         }
         val candidates = if (record.source == RecordSource.AUTO) autoAnalyses else manualAnalyses
-        val best = selectBestServerMeta(candidates, record.title, record.address, record.source) ?: return record
+        val best = selectBestServerMeta(
+            candidates = candidates,
+            targetPdfReportId = record.pdfReportId,
+            nickname = record.title,
+            address = record.address,
+            source = record.source
+        ) ?: return record
         return record.copy(
             riskSummary = best.mainReason?.takeIf { it.isNotBlank() } ?: record.riskSummary,
             level = best.riskLevel?.toUiRiskLevel() ?: record.level,
-            ltv = best.ltvScore?.toDouble() ?: record.ltv
+            ltv = best.ltvScore?.toDouble() ?: record.ltv,
+            pdfReportId = best.pdfReportId ?: record.pdfReportId
         )
     }
 
     private fun selectBestServerMeta(
         candidates: List<AnalysisResponse>,
+        targetPdfReportId: Long?,
         nickname: String,
         address: String,
         source: RecordSource
     ): AnalysisResponse? {
         if (candidates.isEmpty()) return null
+        val sourceFiltered = filterCandidatesBySource(candidates, source)
+        if (sourceFiltered.isEmpty()) return null
+        targetPdfReportId?.let { reportId ->
+            sourceFiltered.firstOrNull { it.pdfReportId == reportId }?.let { return it }
+        }
         if (source == RecordSource.AUTO) {
             // 자동 감지 기록은 가장 최신 DIFF 결과(첫 원소)를 화면 기준값으로 사용한다.
-            return candidates.firstOrNull()
+            return sourceFiltered.firstOrNull()
         }
         val normalizedNickname = normalizeKey(nickname)
-        val ordered = if (source == RecordSource.MANUAL) candidates.asReversed() else candidates
+        val ordered = if (source == RecordSource.MANUAL) sourceFiltered.asReversed() else sourceFiltered
 
         ordered.firstOrNull { item ->
             normalizeKey(item.nickname) == normalizedNickname &&
@@ -256,6 +269,18 @@ class AnalysisFragment : Fragment(R.layout.fragment_analysis) {
         } else {
             null
         }
+    }
+
+    private fun filterCandidatesBySource(
+        candidates: List<AnalysisResponse>,
+        source: RecordSource
+    ): List<AnalysisResponse> {
+        val expectedType = when (source) {
+            RecordSource.MANUAL -> "PRE"
+            RecordSource.AUTO -> "POST"
+        }
+        val typed = candidates.filter { it.analysisType.equals(expectedType, ignoreCase = true) }
+        return if (typed.isNotEmpty()) typed else candidates
     }
 
     private fun normalizeKey(value: String): String {
