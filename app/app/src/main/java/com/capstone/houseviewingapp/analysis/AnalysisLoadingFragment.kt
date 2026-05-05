@@ -421,30 +421,28 @@ class AnalysisLoadingFragment : Fragment() {
         if (source == RecordSource.AUTO) {
             return candidates.firstOrNull { hasUsableMeta(it) } ?: candidates.firstOrNull()
         }
+
+        // MANUAL(1회 진단): analysisType=="PRE" 만 후보로 제한
+        // pre_reports / post_reports 가 각자 ID=1 부터 시작해 pdfReportId 충돌이 있으므로
+        // 타입 필터로 근본 원인을 차단한다. 서버가 analysisType 을 내려주지 않는 구버전
+        // 호환을 위해 null 인 경우도 후보로 포함한다.
+        val preOnly = candidates.filter { it.analysisType == "PRE" || it.analysisType == null }
+        val pool = if (preOnly.isNotEmpty()) preOnly else candidates
+
         val normalizedNickname = normalizeKey(nickname)
         val normalizedAddress = normalizeAddress(address)
-        val ordered = if (source == RecordSource.MANUAL) candidates.asReversed() else candidates
+        val ordered = pool.asReversed()
 
-        // 1) 닉네임 + 주소가 정확히 맞는 최신 결과만 우선 채택
+        // 1) 닉네임 + 주소가 정확히 맞는 최신 결과 우선 채택
         ordered.firstOrNull { item ->
             normalizeKey(item.nickname) == normalizedNickname &&
                 normalizeAddress(item.address) == normalizedAddress
         }?.let { return it }
 
         // 2) 수동 진단은 오매칭을 막기 위해 느슨한 fallback을 제한
-        if (source == RecordSource.MANUAL) {
-            return ordered.firstOrNull { item ->
-                normalizeKey(item.nickname) == normalizedNickname &&
-                    matchAddressScore(item.address, address) >= 2
-            }
-        }
-
-        // 3) 자동 진단은 동일 집 가능성이 높은 후보만 허용
         return ordered.firstOrNull { item ->
             normalizeKey(item.nickname) == normalizedNickname &&
                 matchAddressScore(item.address, address) >= 2
-        } ?: ordered.firstOrNull { item ->
-            matchAddressScore(item.address, address) >= 2
         }
     }
 

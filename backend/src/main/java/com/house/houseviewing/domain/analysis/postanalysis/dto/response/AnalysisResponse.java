@@ -26,6 +26,8 @@ public class AnalysisResponse {
 
     private Integer ltvScore;
 
+    private String analysisType;
+
     public static AnalysisResponse from(PostAnalysisEntity postAnalysis){
         String nickname = postAnalysis.getHouse().getNickname();
         String address = postAnalysis.getHouse().getAddress().getAddressName();
@@ -36,6 +38,7 @@ public class AnalysisResponse {
                 .mainReason(postAnalysis.getMainReason())
                 .riskLevel(postAnalysis.getRiskLevel())
                 .ltvScore(postAnalysis.getLtvScore())
+                .analysisType("POST")
                 .build();
     }
 
@@ -47,6 +50,7 @@ public class AnalysisResponse {
                 .mainReason(preAnalysis.getMainReason())
                 .riskLevel(preAnalysis.getRiskLevel())
                 .ltvScore(preAnalysis.getLtvScore())
+                .analysisType("PRE")
                 .build();
     }
 }
