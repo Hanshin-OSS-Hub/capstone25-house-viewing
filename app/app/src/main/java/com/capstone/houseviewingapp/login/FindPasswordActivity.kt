@@ -34,10 +34,10 @@ class FindPasswordActivity : AppCompatActivity() {
     }
 
     private fun setConfirmEnabled(enabled: Boolean) {
-        binding.confirmButton.isEnabled = enabled
+        binding.confirmButton.isEnabled = true
         val color = androidx.core.content.ContextCompat.getColor(
             this,
-            if (enabled) R.color.blue else R.color.icongray
+            R.color.blue
         )
         binding.confirmButton.backgroundTintList = ColorStateList.valueOf(color)
     }
