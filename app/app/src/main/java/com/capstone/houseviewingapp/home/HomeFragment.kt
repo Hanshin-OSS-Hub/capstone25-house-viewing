@@ -118,14 +118,11 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
         binding.startButton.setOnClickListener {
             val loginId = AuthTokenLocalStore.getLoginId(requireContext()).orEmpty()
             val freeUsed = QuickDiagnosisLocalStore.isFreeUsed(requireContext(), loginId)
-            val isPremium = BillingLocalStore.isPremium(requireContext())
             if (!freeUsed) {
                 openQuickDiagnosisFlow()
-            } else if (!isPremium) {
+            } else {
                 PaidQuickDiagnosisDialogFragment()
                     .show(parentFragmentManager, "PaidQuickDiagnosisDialog")
-            } else {
-                openQuickDiagnosisFlow()
             }
         }
 
@@ -172,16 +169,12 @@ class HomeFragment : Fragment (R.layout.fragment_home) {
     private fun refreshQuickDiagnosisBanner() {
         val loginId = AuthTokenLocalStore.getLoginId(requireContext()).orEmpty()
         val freeUsed = QuickDiagnosisLocalStore.isFreeUsed(requireContext(), loginId)
-        val isPremium = BillingLocalStore.isPremium(requireContext())
         if (!freeUsed) {
             binding.bannerTextView.text = "부동산 무료 안전 진단"
             binding.startButton.text = "무료 진단하기 ->"
-        } else if (isPremium) {
-            binding.bannerTextView.text = "프리미엄 부동산 안전 진단"
-            binding.startButton.text = "진단하기 ->"
         } else {
-            binding.bannerTextView.text = "부동산 안전 진단"
-            binding.startButton.text = "진단하기 ->"
+            binding.bannerTextView.text = "부동산 유료 안전 진단"
+            binding.startButton.text = "유료 진단하기 ->"
         }
     }
 
