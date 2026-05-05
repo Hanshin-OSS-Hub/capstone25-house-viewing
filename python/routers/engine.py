@@ -268,6 +268,13 @@ def _pdf_bytes(html: str) -> bytes:
     },
 )
 async def generate_pdf(request: GeneratePdfRequest) -> Response:
+    import sys
+    print(
+        f"[DEBUG pdf] snapshotName={request.snapshotName!r} "
+        f"rawData_len={len(request.rawData)} "
+        f"deposit={request.deposit!r} contractType={request.contractType!r}",
+        file=sys.stderr, flush=True,
+    )
     try:
         raw: dict = json_lib.loads(request.rawData)
     except ValueError:
