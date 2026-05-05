@@ -244,15 +244,13 @@ def generate_diff_html_report(
     <div class="section-title">위험도 변동</div>
     <div class="risk-compare">
       <div class="risk-cell before">
-        <div class="risk-label">이전 위험도</div>
-        <div class="risk-value" style="color:{origin_meta["color"]};">{origin_meta["label"]}</div>
-        <div class="risk-score-val" style="color:{origin_meta["color"]};">LTV {origin_ltv}%</div>
+        <div class="risk-label">이전 LTV</div>
+        <div class="risk-value" style="color:{origin_meta["color"]};">{origin_ltv}%</div>
       </div>
       <div class="risk-arrow">&#8594;</div>
       <div class="risk-cell after">
-        <div class="risk-label" style="color:#ffffff;">현재 위험도</div>
-        <div class="risk-value" style="color:#ffffff;">{new_meta["label"]}</div>
-        <div class="risk-score-val" style="color:#ffffff;">LTV {new_ltv}%</div>
+        <div class="risk-label" style="color:#ffffff;">현재 LTV</div>
+        <div class="risk-value" style="color:#ffffff;">{new_ltv}%</div>
       </div>
     </div>
     <div class="summary-badges">

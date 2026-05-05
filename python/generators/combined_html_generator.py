@@ -194,8 +194,8 @@ def generate_combined_html_report(
     new_risk      = new_raw.get("risk", {})
     origin_level  = _LEVEL_MAP.get(origin_risk.get("risk_level", "LOW"), "Low")
     new_level     = _LEVEL_MAP.get(new_risk.get("risk_level", "MEDIUM"), "Medium")
-    origin_score  = float(origin_risk.get("risk_score", 0))
-    new_score     = float(new_risk.get("risk_score", 50))
+    origin_ltv    = round(float(origin_raw.get("ltv", {}).get("ltv") or 0) * 100)
+    new_ltv       = round(float(new_raw.get("ltv", {}).get("ltv") or 0) * 100)
     origin_meta   = _RISK_META[origin_level]
     new_meta      = _RISK_META[new_level]
     risk_color    = new_meta["color"]
@@ -482,15 +482,13 @@ def generate_combined_html_report(
     <div class="sec-title">위험도 변동</div>
     <div class="risk-cmp">
       <div class="risk-cell before">
-        <div class="risk-lbl">이전 위험도</div>
-        <div class="risk-val" style="color:{origin_meta['color']};">{origin_meta["label"]}</div>
-        <div class="risk-score" style="color:{origin_meta['color']};">{origin_score:.0f}점</div>
+        <div class="risk-lbl">이전 LTV</div>
+        <div class="risk-val" style="color:{origin_meta['color']};">{origin_ltv}%</div>
       </div>
       <div class="risk-arrow">&#8594;</div>
       <div class="risk-cell after">
-        <div class="risk-lbl" style="color:#fff;">현재 위험도</div>
-        <div class="risk-val" style="color:#fff;">{new_meta["label"]}</div>
-        <div class="risk-score" style="color:#fff;">{new_score:.0f}점</div>
+        <div class="risk-lbl" style="color:#fff;">현재 LTV</div>
+        <div class="risk-val" style="color:#fff;">{new_ltv}%</div>
       </div>
     </div>
     <div class="sum-badges">
@@ -575,8 +573,8 @@ def generate_combined_html_report(
       <tr>
         <td class="lbl">보증금</td>
         <td style="font-weight:700;">{fmt_krw(deposit)}</td>
-        <td class="lbl" style="border-left:1px solid #e5e7eb;">위험 점수</td>
-        <td style="color:{risk_color};font-weight:700;">{new_score:.0f}점 / 100</td>
+        <td class="lbl" style="border-left:1px solid #e5e7eb;">LTV</td>
+        <td style="color:{risk_color};font-weight:700;">{new_ltv}%</td>
       </tr>
     </table>
   </div>
