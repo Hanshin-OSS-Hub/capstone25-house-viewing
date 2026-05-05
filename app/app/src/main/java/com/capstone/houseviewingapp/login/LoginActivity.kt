@@ -22,6 +22,7 @@ import com.capstone.houseviewingapp.auth.AuthRepositoryProvider
 import com.capstone.houseviewingapp.auth.model.LoginRequest
 import com.capstone.houseviewingapp.data.local.AuthTokenLocalStore
 import com.capstone.houseviewingapp.data.local.UserProfileLocalStore
+import com.capstone.houseviewingapp.data.remote.RemoteApiException
 import com.capstone.houseviewingapp.databinding.ActivityLoginBinding
 import kotlinx.coroutines.launch
 
@@ -35,7 +36,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun validateRequiredInputs(): Boolean {
-        val loginId = binding.idEditText.text?.toString()?.trim().orEmpty()
+        val loginId = normalizeLoginId(binding.idEditText.text?.toString())
         val password = binding.passwordEditText.text?.toString().orEmpty()
 
         if (loginId.isBlank()) {
@@ -49,6 +50,10 @@ class LoginActivity : AppCompatActivity() {
             return false
         }
         return true
+    }
+
+    private fun normalizeLoginId(raw: String?): String {
+        return raw.orEmpty().filterNot { it.isWhitespace() }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,19 +78,32 @@ class LoginActivity : AppCompatActivity() {
         binding.findPWTextView.setOnClickListener {
             startActivity(Intent(this, FindPasswordActivity::class.java))
         }
-        binding.idEditText.addTextChangedListener { }
+        binding.idEditText.addTextChangedListener { editable ->
+            val current = editable?.toString().orEmpty()
+            val normalized = normalizeLoginId(current)
+            if (current != normalized) {
+                binding.idEditText.setText(normalized)
+                binding.idEditText.setSelection(normalized.length)
+            }
+        }
         binding.passwordEditText.addTextChangedListener { }
         binding.loginButton.setOnClickListener {
             if (!validateRequiredInputs()) return@setOnClickListener
 
+            val normalizedLoginId = normalizeLoginId(binding.idEditText.text?.toString())
             val request = LoginRequest(
-                loginId = binding.idEditText.text?.toString()?.trim().orEmpty(),
+                loginId = normalizedLoginId,
                 password = binding.passwordEditText.text?.toString().orEmpty()
             )
             lifecycleScope.launch {
                 val result = AuthRepositoryProvider.repository.login(request)
                 val token = result.getOrElse {
-                    Toast.makeText(this@LoginActivity, "로그인에 실패했습니다.", Toast.LENGTH_SHORT).show()
+                    val remote = it as? RemoteApiException
+                    val msg = when (remote?.code) {
+                        "NF001", "AU004" -> "아이디 또는 비밀번호를 확인해 주세요."
+                        else -> "로그인에 실패했습니다."
+                    }
+                    Toast.makeText(this@LoginActivity, msg, Toast.LENGTH_SHORT).show()
                     return@launch
                 }
                 AuthTokenLocalStore.saveTokens(this@LoginActivity, token.accessToken, token.refreshToken)
