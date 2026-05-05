@@ -182,7 +182,12 @@ async def analyze_mock(request: Request) -> JSONResponse:
         from engines.risk_engine import compute_ltv_info, compute_risk
         from engines.recovery_engine import compute_recovery
 
-        valuation: dict = {"median_price_won": 400_000_000}  # mock용 임시 집값 (4억)
+        # 데모용 주소는 시세 고정 (ocr_core.py 와 동일한 로직)
+        _addr = (snapshot.get("address") or {}).get("address", "")
+        if "오산시 양산동 387" in _addr:
+            valuation: dict = {"median_price_won": 65_000_000}  # 데모 고정값
+        else:
+            valuation: dict = {"median_price_won": 400_000_000}  # mock용 임시 집값 (4억)
         ltv_result      = compute_ltv_info(snapshot, valuation)
         risk_result     = compute_risk(snapshot, {}, valuation, ltv_result)
         recovery_result = compute_recovery(snapshot, valuation, ltv_result, {}, risk_result)
