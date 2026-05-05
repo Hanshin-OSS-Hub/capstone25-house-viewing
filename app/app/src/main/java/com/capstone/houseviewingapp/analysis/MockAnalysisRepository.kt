@@ -78,6 +78,7 @@ class MockAnalysisRepository : AnalysisRepository {
     }
 
     private fun addRecord(pdfReportId: Long, nickname: String, address: String, risk: ApiRiskLevel) {
+        val analysisType = if (nickname.startsWith("change-") || nickname.startsWith("post-")) "POST" else "PRE"
         records.add(
             0,
             AnalysisResponse(
@@ -86,6 +87,7 @@ class MockAnalysisRepository : AnalysisRepository {
                 address = address,
                 mainReason = "mock",
                 riskLevel = risk,
+                analysisType = analysisType,
                 ltvScore = 50
             )
         )
