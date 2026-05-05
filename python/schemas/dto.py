@@ -65,7 +65,8 @@ class GeneratePdfRequest(BaseModel):
     @model_validator(mode="after")
     def validate_post_contract_fields(self) -> "GeneratePdfRequest":
         if self.deposit is None:
-            # snapshotName 없어도 rawData에서 주소 추출 가능(_resolve_snapshot_name)
+            if not self.snapshotName:
+                raise ValueError("계약전 PDF 생성에는 snapshotName 필드가 필요합니다.")
             return self
 
         missing_fields: list[str] = []
