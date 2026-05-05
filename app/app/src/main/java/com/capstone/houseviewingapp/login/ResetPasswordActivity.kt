@@ -28,17 +28,20 @@ class ResetPasswordActivity : AppCompatActivity() {
         val password = binding.passwordEditText.text?.toString().orEmpty()
         val passwordCheck = binding.passwordCheckEditText.text?.toString().orEmpty()
         if (password.isBlank()) return "비밀번호를 입력해 주세요."
-        if (password.length < 8) return "비밀번호는 8자 이상으로 입력해 주세요."
+        if (password.length < 8) return "비밀번호는 영문, 숫자 포함 8자 이상으로 입력해 주세요."
+        if (!password.any { it.isLetter() } || !password.any { it.isDigit() }) {
+            return "비밀번호는 영문, 숫자 포함 8자 이상으로 입력해 주세요."
+        }
         if (passwordCheck.isBlank()) return "비밀번호 확인을 입력해 주세요."
         if (password != passwordCheck) return "비밀번호가 일치하지 않습니다."
         return null
     }
 
-    private fun setConfirmEnabled(enabled: Boolean) {
-        binding.confirmButton.isEnabled = enabled
+    private fun setConfirmButtonStyleAlwaysEnabled() {
+        binding.confirmButton.isEnabled = true
         val color = androidx.core.content.ContextCompat.getColor(
             this,
-            if (enabled) R.color.blue else R.color.icongray
+            R.color.blue
         )
         binding.confirmButton.backgroundTintList = ColorStateList.valueOf(color)
     }
@@ -46,15 +49,42 @@ class ResetPasswordActivity : AppCompatActivity() {
     private fun validateInputs() {
         val password = binding.passwordEditText.text?.toString().orEmpty()
         val passwordCheck = binding.passwordCheckEditText.text?.toString().orEmpty()
-        val passwordOk = password.length >= 8
-        val passwordMatch = password == passwordCheck && passwordCheck.isNotBlank()
+        val validColor = androidx.core.content.ContextCompat.getColor(this, R.color.blue)
+        val invalidColor = androidx.core.content.ContextCompat.getColor(this, R.color.red)
+        val neutralColor = androidx.core.content.ContextCompat.getColor(this, R.color.textgray)
 
-        if (passwordCheck.isNotBlank() && !passwordMatch) {
-            binding.passwordCheckTextInputLayout.error = "비밀번호가 일치하지 않습니다."
+        val hasMinLength = password.length >= 8
+        val hasLetterAndNumber = password.any { it.isLetter() } && password.any { it.isDigit() }
+        val passwordOk = hasMinLength && hasLetterAndNumber
+
+        if (password.isBlank()) {
+            binding.passwordInfoTextView.text = "영문, 숫자 포함 8자 이상"
+            binding.passwordInfoTextView.setTextColor(neutralColor)
+            binding.passwordInfoIcon.imageTintList = ColorStateList.valueOf(neutralColor)
+        } else if (passwordOk) {
+            binding.passwordInfoTextView.text = "사용 가능한 비밀번호입니다."
+            binding.passwordInfoTextView.setTextColor(validColor)
+            binding.passwordInfoIcon.imageTintList = ColorStateList.valueOf(validColor)
         } else {
-            binding.passwordCheckTextInputLayout.error = null
+            binding.passwordInfoTextView.text = "영문, 숫자 포함 8자 이상"
+            binding.passwordInfoTextView.setTextColor(invalidColor)
+            binding.passwordInfoIcon.imageTintList = ColorStateList.valueOf(invalidColor)
         }
-        setConfirmEnabled(passwordOk && passwordMatch)
+
+        if (passwordCheck.isBlank()) {
+            binding.passwordCheckStatusLayout.visibility = android.view.View.GONE
+        } else {
+            val matched = password == passwordCheck && passwordOk
+            binding.passwordCheckStatusLayout.visibility = android.view.View.VISIBLE
+            binding.passwordCheckStatusTextView.text = if (matched) {
+                "비밀번호가 일치합니다."
+            } else {
+                "비밀번호가 일치하지 않습니다."
+            }
+            val statusColor = if (matched) validColor else invalidColor
+            binding.passwordCheckStatusTextView.setTextColor(statusColor)
+            binding.passwordCheckStatusIcon.imageTintList = ColorStateList.valueOf(statusColor)
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -78,6 +108,7 @@ class ResetPasswordActivity : AppCompatActivity() {
         binding.backButton.setOnClickListener { finish() }
         binding.passwordEditText.addTextChangedListener { validateInputs() }
         binding.passwordCheckEditText.addTextChangedListener { validateInputs() }
+        setConfirmButtonStyleAlwaysEnabled()
 
         //NOTE : 비밀번호 변경 완료 버튼
         binding.confirmButton.setOnClickListener {
