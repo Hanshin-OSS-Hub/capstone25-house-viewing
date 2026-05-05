@@ -27,6 +27,7 @@ data class AnalysisResponse(
     val address: String,
     val mainReason: String?,
     val riskLevel: ApiRiskLevel?,
+    val analysisType: String? = null,
     @SerializedName(value = "ltvScore", alternate = ["ltv_score"])
     val ltvScore: Int?
 )
