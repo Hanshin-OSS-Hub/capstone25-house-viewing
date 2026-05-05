@@ -130,10 +130,10 @@ class SignUpActivity : AppCompatActivity() {
     }
 
     private fun setCheckButtonStyle(enabled: Boolean) {
-        binding.checkButton.isEnabled = enabled
+        binding.checkButton.isEnabled = true
         val color = ContextCompat.getColor(
             this,
-            if (enabled) R.color.blue else R.color.icongray
+            R.color.blue
         )
         binding.checkButton.backgroundTintList = ColorStateList.valueOf(color)
     }
@@ -155,10 +155,10 @@ class SignUpActivity : AppCompatActivity() {
         }
 
         fun setConfirmEnabled(enabled: Boolean) {
-            binding.confirmButton.isEnabled = enabled
+            binding.confirmButton.isEnabled = true
             val color = androidx.core.content.ContextCompat.getColor(
                 this,
-                if (enabled) R.color.blue else R.color.icongray
+                R.color.blue
             )
             binding.confirmButton.backgroundTintList = android.content.res.ColorStateList.valueOf(color)
         }
