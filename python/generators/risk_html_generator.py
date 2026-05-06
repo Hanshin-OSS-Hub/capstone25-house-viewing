@@ -59,26 +59,26 @@ _LEGAL_TERMS = [
 
 def _fallback_content(data: RiskAnalysisRequest) -> dict:
     """AI 호출 실패 시 기본 텍스트 콘텐츠."""
-    score = data.risk_score_num
-    if score > 70:
+    score = data.ltv_percent
+    if score >= 80:
         headline = "선순위 채권 과다 — 보증금 손실 위험"
         main = (
-            f"위험 점수 {score:.0f}점으로 고위험 구간(70점 초과)에 해당합니다. "
+            f"LTV {score:.0f}%로 고위험 구간(80% 초과)에 해당합니다. "
             "선순위 근저당 채권액이 임차인의 보증금 회수 가능 금액을 크게 압박하고 있습니다. "
             "경매 진행 시 낙찰가에서 선순위 채권이 먼저 변제되므로, "
             "임차인 보증금의 전액 회수가 어려울 수 있습니다."
         )
-    elif score > 40:
+    elif score >= 60:
         headline = "부분 손실 가능 — 면밀한 검토 필요"
         main = (
-            f"위험 점수 {score:.0f}점으로 주의 구간(40~70점)에 해당합니다. "
+            f"LTV {score:.0f}%로 주의 구간(60~80%)에 해당합니다. "
             "경매 진행 시 임차인 보증금의 일부가 회수되지 않을 수 있습니다. "
             "선순위 채권 내용과 최우선 변제 요건을 반드시 확인하세요."
         )
     else:
         headline = "보증금 회수 가능성 높음"
         main = (
-            f"위험 점수 {score:.0f}점으로 안전 구간(40점 이하)에 해당합니다. "
+            f"LTV {score:.0f}%로 안전 구간(60% 미만)에 해당합니다. "
             "현재 등기부상 위험 요소가 적어 보증금 회수 가능성이 상대적으로 높습니다. "
             "단, 부동산 시장 변동에 따라 상황이 달라질 수 있으니 정기적으로 확인하세요."
         )
@@ -183,7 +183,7 @@ def _build_playbook_html(data: RiskAnalysisRequest, meta: dict) -> str:
 def _render_template(data: RiskAnalysisRequest, content: dict) -> str:
     meta          = _RISK_META[data.risk_score]
     now           = datetime.now().strftime("%Y년 %m월 %d일  %H:%M")
-    risk_num      = data.risk_score_num
+    risk_num      = data.ltv_percent
     risk_bar      = min(risk_num, 100)
     risk_bar_color = meta["bar_color"]
     max_claim_fmt  = f"{data.max_claim_amount:,}"
@@ -369,8 +369,8 @@ def _render_template(data: RiskAnalysisRequest, content: dict) -> str:
   <div class="section">
     <div class="section-title">등기부 위험 점수</div>
     <div class="ltv-row">
-      <div class="ltv-label">위험 점수 (0=안전 / 100=고위험) &nbsp;|&nbsp; 채권최고액 합계: {max_claim_fmt}원</div>
-      <div class="ltv-value">{risk_num:.0f}점</div>
+      <div class="ltv-label">LTV (담보인정비율) &nbsp;|&nbsp; 채권최고액 합계: {max_claim_fmt}원</div>
+      <div class="ltv-value">{risk_num:.0f}%</div>
     </div>
     <div class="ltv-track">
       <div class="ltv-fill"></div>
@@ -378,10 +378,10 @@ def _render_template(data: RiskAnalysisRequest, content: dict) -> str:
       <div class="marker-80"></div>
     </div>
     <div class="ltv-markers">
-      <span class="marker-60-label">40점</span>
-      <span class="marker-80-label">70점</span>
+      <span class="marker-60-label">60%</span>
+      <span class="marker-80-label">80%</span>
     </div>
-    <div class="ltv-legend">&#9632; 안전(~40) &nbsp; &#9632; 주의(40~70) &nbsp; &#9632; 위험(70+)</div>
+    <div class="ltv-legend">&#9632; 안전(~60%) &nbsp; &#9632; 주의(60~80%) &nbsp; &#9632; 위험(80%+)</div>
   </div>
 
   <div class="section">

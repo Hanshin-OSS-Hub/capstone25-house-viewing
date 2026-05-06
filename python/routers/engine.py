@@ -92,12 +92,16 @@ def _build_render_data(snapshot_name: str, raw: dict) -> RiskAnalysisRequest:
     playbook  = raw.get("recovery", {}).get("playbook", [])
     summary   = " / ".join(step["title"] for step in playbook[:2]) if playbook else "분석 결과 없음"
 
+    ltv_raw = float((raw.get("ltv") or {}).get("ltv") or 0)
+    ltv_pct = ltv_raw * 100 if ltv_raw < 1.5 else ltv_raw  # 0.27 → 27, 27 → 27
+
     return RiskAnalysisRequest(
         user_name=info["owner_name"],
         address=info["address"],
         risk_score=info["risk_level"],
         risk_score_num=info["risk_score"],
         max_claim_amount=info["max_claim"],
+        ltv_percent=ltv_pct,
         analysis_summary=summary,
         checklist=checklist,
         signals=signals,
