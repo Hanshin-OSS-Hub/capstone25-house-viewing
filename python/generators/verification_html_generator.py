@@ -81,21 +81,30 @@ def _eulgu_rows(snapshot: dict) -> str:
 
 _PAGE_CSS = """
 .snap-page {
-  page-break-before: always;
   font-family: 'Noto Sans KR', 'Malgun Gothic', sans-serif;
   font-size: 11px;
   color: #1a1a2e;
   padding: 24px 28px;
 }
 .snap-header {
-  background: linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%);
-  color: #fff;
-  border-radius: 10px;
-  padding: 18px 22px;
-  margin-bottom: 20px;
+  background: #1a1a2e;
+  color: #ffffff;
+  border-radius: 8px;
+  border: 2px solid #1a1a2e;
+  padding: 14px 20px;
+  margin-bottom: 16px;
 }
-.snap-header h2 { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-.snap-header p  { font-size: 10px; color: #a8b2c1; }
+.snap-header h2 { font-size: 14px; font-weight: 700; margin-bottom: 8px; color: #ffffff; }
+.snap-header-notice {
+  font-size: 11px;
+  font-weight: 600;
+  color: #1a1a2e;
+  background: #fffde7;
+  border: 1.5px solid #f9a825;
+  border-radius: 5px;
+  padding: 7px 12px;
+  margin-bottom: 16px;
+}
 .snap-section { margin-bottom: 18px; page-break-inside: avoid; }
 .snap-section-title {
   font-size: 11px;
@@ -150,13 +159,13 @@ _PAGE_CSS = """
 # 공개 API
 # ─────────────────────────────────────────────
 
-def build_snapshot_page(snapshot: dict) -> str:
+def build_snapshot_page(snapshot: dict, page_break: bool = True) -> str:
     """등기부 파싱 데이터 요약 <div>를 반환한다.
-
-    기존 보고서 HTML의 </body> 직전에 삽입하여 마지막 페이지로 추가한다.
 
     Args:
         snapshot: ocr_core.run() 또는 rawData JSON의 'snapshot' 키
+        page_break: True면 새 페이지에서 시작 (combined/diff용),
+                    False면 이전 내용에 이어서 출력 (risk 단일 PDF용)
     Returns:
         <style>…</style><div class="snap-page">…</div> 문자열
     """
@@ -167,18 +176,17 @@ def build_snapshot_page(snapshot: dict) -> str:
     gabu_rows  = _gabu_rows(snapshot)
     eulgu_rows = _eulgu_rows(snapshot)
 
+    page_break_css = "page-break-before: always;" if page_break else "page-break-before: auto;"
     return f"""
 <style>{_PAGE_CSS}</style>
-<div class="snap-page">
+<div class="snap-page" style="{page_break_css}">
 
   <div class="snap-header">
     <h2>등기부 OCR 파싱 데이터</h2>
-    <p>아래 내용은 자동 파싱된 등기부 원문 데이터입니다. 원본과 비교하여 정확도를 확인하세요.</p>
   </div>
-
-  <div class="snap-notice">
-    ※ 갑구 {gabu_count}건 · 을구 {eulgu_count}건이 파싱되었습니다.
-    파싱 오류가 있을 경우 원본 등기부등본을 직접 확인하시기 바랍니다.
+  <div class="snap-header-notice">
+    ⚠ 아래 내용은 자동 파싱된 등기부 원문 데이터입니다. 원본과 비교하여 정확도를 확인하세요.
+    &nbsp;|&nbsp; 갑구 {gabu_count}건 · 을구 {eulgu_count}건 파싱 완료
   </div>
 
   <!-- 기본 정보 -->

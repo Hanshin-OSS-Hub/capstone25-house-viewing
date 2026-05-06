@@ -308,11 +308,11 @@ async def generate_pdf(request: GeneratePdfRequest) -> Response:
             if "429" in err or "RESOURCE_EXHAUSTED" in err:
                 raise HTTPException(status_code=429, detail="AI API 호출 한도 초과. 잠시 후 다시 시도하세요.")
             raise HTTPException(status_code=503, detail=f"보고서 HTML 생성 실패: {err}")
-        # 마지막 페이지에 OCR 파싱 데이터 요약 추가
+        # 법적 용어 가이드 바로 뒤에 OCR 파싱 데이터 삽입 (page-break 없이)
         snapshot = raw.get("snapshot") or {}
         if snapshot:
-            snap_page = build_snapshot_page(snapshot)
-            html_content = html_content.replace("</body>", f"{snap_page}</body>")
+            snap_page = build_snapshot_page(snapshot, page_break=False)
+            html_content = html_content.replace("<!-- OCR_SNAPSHOT_HERE -->", snap_page)
         filename = f"report_{render_data.user_name}.pdf"
 
     ai_time   = time.perf_counter() - t0

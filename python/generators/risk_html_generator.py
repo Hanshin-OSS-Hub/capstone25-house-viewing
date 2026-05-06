@@ -411,6 +411,8 @@ def _render_template(data: RiskAnalysisRequest, content: dict) -> str:
     </table>
   </div>
 
+  <!-- OCR_SNAPSHOT_HERE -->
+
   <div class="disclaimer">
     ※ 본 보고서는 AI 기반 자동 분석 시스템에 의해 생성된 참고 자료이며 법적 효력이 없습니다.
     실제 계약 전 반드시 법무사 또는 공인중개사의 전문 자문을 받으시기 바랍니다.
