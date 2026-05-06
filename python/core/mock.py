@@ -85,30 +85,17 @@ def load_baseline_snapshot(doc_id: str) -> Optional[Dict[str, Any]]:
     return None
 
 
-def convert_risk_level(result: dict) -> str:
-    try:
-        # 예: 0.2735 -> 27점
-        ltv_score = int(round(float(result.get("ltv", {}).get("ltv", 0)) * 100))
-    except:
-        ltv_score = 0
+def convert_risk_level(risk_result: Dict[str, Any]) -> str:
+    level = str(risk_result.get("risk_level", "")).upper()
 
-    # 0~35 = LOW
-    # 36~44 = MEDIUM
-    # 45 이상 = HIGH
-    if ltv_score >= 45:
-        level = "HIGH"
-    elif ltv_score >= 36:
-        level = "MEDIUM"
-    else:
-        level = "LOW"
-
-    # DTO용 변환
     if level == "LOW":
         return "SAFE"
-    elif level == "MEDIUM":
+    if level == "MEDIUM":
         return "WARNING"
-    else:
+    if level == "HIGH":
         return "DANGER"
+
+    return level if level in {"SAFE", "WARNING", "DANGER"} else "WARNING"
 
 
 def pick_main_reason(snapshot: Dict[str, Any]) -> str:
